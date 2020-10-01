@@ -195,14 +195,13 @@ set(LBld,'Position', [0.6, 0.1, 0.2, 0.25])
 % Overturning-Moment
 OvrAllSeeds = [Ovr_S1; Ovr_S2; Ovr_S3; Ovr_S4; Ovr_S5; Ovr_S6];
 figOvr = figure('Name', 'Overturning-Moment','Position', [50 100 600 500]);
+title('Overturning-Moment')
+
 hold on
 ms = 50;
 for i = 1 : 6
-    h = scatter(v, OvrAllSeeds(i,:), ms, 'MarkerFaceColor', [0.5 0.5 0.5], ...
+    scatter(v, OvrAllSeeds(i,:), ms, 'MarkerFaceColor', [0.5 0.5 0.5], ...
     'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k')
-    if i > 1 
-        set(h, 'HandleVisibility', 'off')
-    end
 end
 meanOvr = mean(OvrAllSeeds);
 plot(v, meanOvr, '-k', 'linewidth', 2);
@@ -213,7 +212,6 @@ set(h, 'linewidth', 2)
 set(h, 'linestyle', '--')
 xlabel('Wind speed (m/s)', 'FontSize', 10);
 ylabel('Overturning moment (Nm)', 'FontSize', 10);
-fit_string = [num2str(round(fitted_curve.a)) ' * v^2'];
-legend({'Simulation seed', 'Average over seeds', fit_string}, 'location', 'northwest');
-legend box off
+fit_string = num2str(fitted_curve.a)
+legend({'Simulation seed', 'Mean', fitted_curve.a });
 
