@@ -130,3 +130,6 @@ dmypy.json
 
 # vim swap files
 *.swp
+
+# TurbSim .bts wind files
+*.bts
