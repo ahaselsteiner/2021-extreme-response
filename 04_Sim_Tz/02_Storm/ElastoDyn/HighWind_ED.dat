@@ -120,8 +120,10 @@ True          TabDelim    - Use tab delimiters in text tabular output file? (fla
           3   NBlGages    - Number of blade nodes that have strain gages for output [0 to 9] (-)
           5,          9,         13    BldGagNd    - List of blade nodes that have strain gages [1 to BldNodes] (-) [unused if NBlGages=0]
               OutList     - The next line(s) contains a list of output parameters.  See OutListParameters.xlsx for a listing of available output channels, (-)
-"RootMFlp1, RootMFlp2, RootMFlp3"
-"RootMEdg1, RootMEdg2, RootMEdg3"
-"LSSTipVxa" "Azimuth" "NacYaw"
+"RootMFlp1, RootMFlp2, RootMFlp3, RootMEdg1, RootMEdg2, RootMEdg3"
+"PtfmTAxt, PtfmTAyt, PtfmTAzt, PtfmTAxi, PtfmTAyi, PtfmTAzi"
+"YawPzn, NcIMUTAxs, NcIMUTAys, NcIMUTAzs"
+"YawBrTDxp, YawBrTDyp, YawBrTDzp, YawBrTDxt, YawBrTDyt, YawBrTDzt, YawBrTAxp, YawBrTAyp, YawBrTAzp"
+"Azimuth" "NacYaw"
 END of input file (the word "END" must appear in the first 3 columns of this last OutList line)
 ---------------------------------------------------------------------------------------
