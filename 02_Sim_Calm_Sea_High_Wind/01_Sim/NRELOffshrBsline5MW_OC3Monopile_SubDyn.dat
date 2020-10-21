@@ -37,7 +37,7 @@ MemberID   MJointID1   MJointID2   MPropSetID1   MPropSetID2     COSMID
 PropSetID     YoungE          ShearG          MatDens          XsecD           XsecT
   (-)         (N/m2)          (N/m2)          (kg/m3)           (m)             (m)
    1        2.10000e+11     8.08000e+10       8500.00         7.500000        0.060000
-   2		2.10000e+11     8.08000e+10       8500.00         6.500000        0.060000
+   2		2.10000e+11     8.08000e+10       8500.00         7.500000        0.060000
 ------------------ MEMBER X-SECTION PROPERTY data 2/2 [isotropic material for now: use this table if any section other than circular, however provide COSM(i,j) below] ------------------------
              0   NXPropSets  - Number of structurally unique non-circular x-sections (if 0 the following table is ignored)
 PropSetID     YoungE          ShearG          MatDens          XsecA          XsecAsx       XsecAsy       XsecJxx       XsecJyy        XsecJ0
