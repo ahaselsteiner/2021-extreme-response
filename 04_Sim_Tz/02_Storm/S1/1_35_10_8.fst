@@ -24,10 +24,10 @@ False          Echo            - Echo input data to <RootName>.ech (flag)
 "../NRELOffshrBsline5MW_BeamDyn_Blade.dat"      BDBldFile(2)    - Name of file containing BeamDyn input parameters for blade 2 (quoted string)
 "../NRELOffshrBsline5MW_BeamDyn_Blade.dat"      BDBldFile(3)    - Name of file containing BeamDyn input parameters for blade 3 (quoted string)
 "../Wind/S1/1_35_IW.dat"    InflowFile      - Name of file containing inflow wind input parameters (quoted string)
-"../NRELOffshrBsline5MW_OC3Monopile_AeroDyn15.dat"    AeroFile        - Name of file containing aerodynamic input parameters (quoted string)
+"../AeroDyn15_WD30m.dat"    AeroFile        - Name of file containing aerodynamic input parameters (quoted string)
 "../NRELOffshrBsline5MW_OC3Monopile_ServoDyn.dat"    ServoFile       - Name of file containing control and electrical-drive input parameters (quoted string)
 "../HydroDyn/10_8_Hydro.dat"      HydroFile       - Name of file containing hydrodynamic input parameters (quoted string)
-"../NRELOffshrBsline5MW_OC3Monopile_SubDyn.dat"      SubFile         - Name of file containing sub-structural input parameters (quoted string)
+"../SubDyn_Monopile_WaterDepth30m.dat"      SubFile         - Name of file containing sub-structural input parameters (quoted string)
 "unused"      MooringFile     - Name of file containing mooring system input parameters (quoted string)
 "unused"      IceFile         - Name of file containing ice input parameters (quoted string)
 ---------------------- OUTPUT --------------------------------------------------
@@ -48,7 +48,7 @@ False         Linearize       - Linearization analysis (flag)
 False         LinOutJac       - Include full Jacobians in linearization output (for debug) (flag) [unused if Linearize=False; used only if LinInputs=LinOutputs=2]
 False         LinOutMod       - Write module-level linearization output files in addition to output for full system? (flag) [unused if Linearize=False]
 ---------------------- VISUALIZATION ------------------------------------------
-          0   WrVTK           - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation}
+          2   WrVTK           - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation}
           1   VTK_type        - Type of VTK visualization data: (switch) {1=surfaces; 2=basic meshes (lines/points); 3=all meshes (debug)} [unused if WrVTK=0]
 true         VTK_fields      - Write mesh fields to VTK data files? (flag) {true/false} [unused if WrVTK=0]
          15   VTK_fps         - Frame rate for VTK output (frames per second){will use closest integer multiple of DT} [used only if WrVTK=2]

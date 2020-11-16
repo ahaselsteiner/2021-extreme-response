@@ -100,8 +100,8 @@ JointID   Jointxi     Jointyi     Jointzi  JointAxID   JointOvrlp   [JointOvrlp=
              2   NPropSets      - Number of member property sets (-)
 PropSetID    PropD         PropThck
    (-)        (m)            (m)
-    1        7.50000        0.06000
-	2		 7.50000		0.06000
+    1        7.00000        0.06000
+	2		 7.00000		0.06000
 ---------------------- SIMPLE HYDRODYNAMIC COEFFICIENTS (model 1) --------------
      SimplCd    SimplCdMG    SimplCa    SimplCaMG    SimplCp    SimplCpMG   SimplAxCa  SimplAxCaMG  SimplAxCp   SimplAxCpMG
        (-)         (-)         (-)         (-)         (-)         (-)         (-)         (-)         (-)         (-)
