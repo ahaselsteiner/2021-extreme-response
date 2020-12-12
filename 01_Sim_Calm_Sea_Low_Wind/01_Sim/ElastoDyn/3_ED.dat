@@ -32,7 +32,7 @@ True          PtfmYDOF    - Platform yaw rotation DOF (flag)
           0   BlPitch(3)  - Blade 3 initial pitch (degrees) [unused for 2 blades]
           0   TeetDefl    - Initial or fixed teeter angle (degrees) [unused for 3 blades]
           0   Azimuth     - Initial azimuth angle for blade 1 (degrees)
-       7   RotSpeed    - Initial or fixed rotor speed (rpm)
+		  7   RotSpeed    - Initial or fixed rotor speed (rpm)
           0   NacYaw      - Initial or fixed nacelle-yaw angle (degrees)
           0   TTDspFA     - Initial fore-aft tower-top displacement (meters)
           0   TTDspSS     - Initial side-to-side tower-top displacement (meters)
@@ -67,8 +67,8 @@ True          PtfmYDOF    - Platform yaw rotation DOF (flag)
          10   TowerBsHt   - Height of tower base above ground level [onshore] or MSL [offshore] (meters)
           0   PtfmCMxt    - Downwind distance from the ground level [onshore] or MSL [offshore] to the platform CM (meters)
           0   PtfmCMyt    - Lateral distance from the ground level [onshore] or MSL [offshore] to the platform CM (meters)
-         0   PtfmCMzt    - Vertical distance from the ground level [onshore] or MSL [offshore] to the platform CM (meters)
-         0   PtfmRefzt   - Vertical distance from the ground level [onshore] or MSL [offshore] to the platform reference point (meters)
+         10   PtfmCMzt    - Vertical distance from the ground level [onshore] or MSL [offshore] to the platform CM (meters)
+         10   PtfmRefzt   - Vertical distance from the ground level [onshore] or MSL [offshore] to the platform reference point (meters)
 ---------------------- MASS AND INERTIA ----------------------------------------
           0   TipMass(1)  - Tip-brake mass, blade 1 (kg)
           0   TipMass(2)  - Tip-brake mass, blade 2 (kg)
@@ -107,7 +107,7 @@ False         Furling     - Read in additional model properties for furling turb
 "unused"      FurlFile    - Name of file containing furling properties (quoted string) [unused when Furling=False]
 ---------------------- TOWER ---------------------------------------------------
          20   TwrNodes    - Number of tower nodes used for analysis (-)
-"NRELOffshrBsline5MW_OC3Monopile_ElastoDyn_Tower.dat"    TwrFile     - Name of file containing tower properties (quoted string)
+"ElastoDyn_Tower_WD30m.dat"    TwrFile     - Name of file containing tower properties (quoted string)
 ---------------------- OUTPUT --------------------------------------------------
 False          SumPrint    - Print summary data to "<RootName>.sum" (flag)
           1   OutFile     - Switch to determine where output will be placed: {1: in module output file only; 2: in glue code output file only; 3: both} (currently unused)
@@ -120,7 +120,10 @@ True          TabDelim    - Use tab delimiters in text tabular output file? (fla
           3   NBlGages    - Number of blade nodes that have strain gages for output [0 to 9] (-)
           5,          9,         13    BldGagNd    - List of blade nodes that have strain gages [1 to BldNodes] (-) [unused if NBlGages=0]
               OutList     - The next line(s) contains a list of output parameters.  See OutListParameters.xlsx for a listing of available output channels, (-)
-"RootMFlp1, RootMFlp2, RootMFlp3"
-"RootMEdg1, RootMEdg2, RootMEdg3"
+"RootMFlp1, RootMFlp2, RootMFlp3, RootMEdg1, RootMEdg2, RootMEdg3"
+"PtfmTAxt, PtfmTAyt, PtfmTAzt, PtfmTAxi, PtfmTAyi, PtfmTAzi"
+"YawPzn, NcIMUTAxs, NcIMUTAys, NcIMUTAzs"
+"YawBrTDxp, YawBrTDyp, YawBrTDzp, YawBrTDxt, YawBrTDyt, YawBrTDzt, YawBrTAxp, YawBrTAyp, YawBrTAzp"
+"Azimuth" "NacYaw"
 END of input file (the word "END" must appear in the first 3 columns of this last OutList line)
 ---------------------------------------------------------------------------------------
