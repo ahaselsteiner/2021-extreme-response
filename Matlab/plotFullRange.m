@@ -1,5 +1,6 @@
 % This script will plot the response for the calm sea
-load 'Calm_Sea_Complete_Wind.mat';
+addpath('03_Calm_Sea_Complete_Wind')
+load 'CalmSeaComplete.mat';
 seed_line_style =  {'ok', 'ok', 'ok', 'ok', 'ok', 'ok'};
 
 
@@ -204,10 +205,13 @@ for i = 1 : 6
         set(h, 'HandleVisibility', 'off')
     end
 end
+
+v_lim = 60;
+
 meanOvr = mean(OvrAllSeeds);
 plot(v, meanOvr, '-k', 'linewidth', 2);
 FT = fittype('a * x.^2');
-fitted_curve = fit(v(v > 25)', meanOvr(v > 25)', FT);
+fitted_curve = fit(v(v > 25 & v <= v_lim)', meanOvr(v > 25 & v <= v_lim)', FT);
 h = plot(fitted_curve);
 set(h, 'linewidth', 2)
 set(h, 'linestyle', '--')
@@ -217,3 +221,5 @@ fit_string = [num2str(round(fitted_curve.a)) ' * v^2'];
 legend({'Simulation seed', 'Average over seeds', fit_string}, 'location', 'northwest');
 legend box off
 
+xlim([0 v_lim])
+V50AtHub = 28.6 / (10/87.6)^0.14
