@@ -1,5 +1,5 @@
 ------- SERVODYN v1.05.* INPUT FILE --------------------------------------------
-NREL 5.0 MW Baseline Wind Turbine for Use in Offshore Analysis. Properties from Dutch Offshore Wind Energy Converter (DOWEC) 6MW Pre-Design (10046_009.pdf) and REpower 5M 5MW (5m_uk.pdf);
+HIGH WIND NREL 5.0 MW Baseline Wind Turbine for Use in Offshore Analysis. Properties from Dutch Offshore Wind Energy Converter (DOWEC) 6MW Pre-Design (10046_009.pdf) and REpower 5M 5MW (5m_uk.pdf);
 ---------------------- SIMULATION CONTROL --------------------------------------
 False         Echo         - Echo input data to <RootName>.ech (flag)
 "default"     DT           - Communication interval for controllers (s) (or "default")
@@ -20,7 +20,7 @@ False         Echo         - Echo input data to <RootName>.ech (flag)
           2   GenModel     - Generator model {1: simple, 2: Thevenin, 3: user-defined from routine UserGen} (switch) [used only when VSContrl=0]
        94.4   GenEff       - Generator efficiency [ignored by the Thevenin and user-defined generator models] (%)
 True          GenTiStr     - Method to start the generator {T: timed using TimGenOn, F: generator speed using SpdGenOn} (flag)
-True          GenTiStp     - Method to stop the generator {T: timed using TimGenOf, F: when generator power = 0} (flag)
+False          GenTiStp     - Method to stop the generator {T: timed using TimGenOf, F: when generator power = 0} (flag)
      9999.9   SpdGenOn     - Generator speed to turn on the generator for a startup (HSS speed) (rpm) [used only when GenTiStr=False]
      9999.9   TimGenOn     - Time to turn on the generator for a startup (s) [used only when GenTiStr=True]
      9999.9   TimGenOf     - Time to turn off the generator (s) [used only when GenTiStp=True]
@@ -63,7 +63,7 @@ False         CompNTMD     - Compute nacelle tuned mass damper {true/false} (fla
 False         CompTTMD     - Compute tower tuned mass damper {true/false} (flag)
 "unused"      TTMDfile     - Name of the file for tower tuned mass damper (quoted string) [unused when CompTTMD is false]
 ---------------------- BLADED INTERFACE ---------------------------------------- [used only with Bladed Interface]
-"ServoData/DISCON.dll"    DLL_FileName - Name/location of the dynamic library {.dll [Windows] or .so [Linux]} in the Bladed-DLL format (-) [used only with Bladed Interface]
+"/opt/Openfast/openfast/build/reg_tests/glue-codes/openfast/5MW_Baseline/ServoData/DISCON.dll"    DLL_FileName - Name/location of the dynamic library {.dll [Windows] or .so [Linux]} in the Bladed-DLL format (-) [used only with Bladed Interface]
 "DISCON.IN"    DLL_InFile   - Name of input file sent to the DLL (-) [used only with Bladed Interface]
 "DISCON"      DLL_ProcName - Name of procedure in DLL to be called (-) [case sensitive; used only with DLL Interface]
 "default"     DLL_DT       - Communication interval for dynamic library (s) (or "default") [used only with Bladed Interface]

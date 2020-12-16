@@ -1,5 +1,5 @@
 ------- AERODYN v15 for OpenFAST INPUT FILE -----------------------------------------------
-NREL 5.0 MW offshore baseline aerodynamic input properties.
+NREL 5.0 MW offshore baseline aerodynamic input properties. HIGH WIND
 ======  General Options  ============================================================================
 False         Echo               - Echo the input to "<rootname>.AD.ech"?  (flag)
 "default"     DTAero             - Time interval for aerodynamic calculations {or "default"} (s)
