@@ -1,5 +1,5 @@
 ------- OpenFAST INPUT FILE -------------------------------------------
-Simulation: Wind: Seed 1	Velocity: 3mps 	Height of referenz velocity: 90m	AnalysisTime: 3630s;	Wave:
+Simulation: Wind: Seed 1	Velocity: 11mps 	Height of referenz velocity: 90m	AnalysisTime: 3630s;	Wave: Significant wave heigth: 1m            Sepctral peak period: 3.1 s
 ---------------------- SIMULATION CONTROL --------------------------------------
 False          Echo            - Echo input data to <RootName>.ech (flag)
 "FATAL"       AbortLevel      - Error level when simulation should abort (string) {"WARNING", "SEVERE", "FATAL"}
@@ -19,14 +19,14 @@ False          Echo            - Echo input data to <RootName>.ech (flag)
           0   CompMooring     - Compute mooring system (switch) {0=None; 1=MAP++; 2=FEAMooring; 3=MoorDyn; 4=OrcaFlex}
           0   CompIce         - Compute ice loads (switch) {0=None; 1=IceFloe; 2=IceDyn}
 ---------------------- INPUT FILES ---------------------------------------------
-"../../ElastoDyn/3_ED.dat"    EDFile          - Name of file containing ElastoDyn input parameters (quoted string)
+"../../ElastoDyn/11_ED.dat"    EDFile          - Name of file containing ElastoDyn input parameters (quoted string)
 "../../NRELOffshrBsline5MW_BeamDyn_Blade.dat"      BDBldFile(1)    - Name of file containing BeamDyn input parameters for blade 1 (quoted string)
 "../../NRELOffshrBsline5MW_BeamDyn_Blade.dat"      BDBldFile(2)    - Name of file containing BeamDyn input parameters for blade 2 (quoted string)
 "../../NRELOffshrBsline5MW_BeamDyn_Blade.dat"      BDBldFile(3)    - Name of file containing BeamDyn input parameters for blade 3 (quoted string)
-"../../Wind/S_1/1_3_IW.dat"    InflowFile      - Name of file containing inflow wind input parameters (quoted string)
+"../../Wind/S_1/1_11_IW.dat"    InflowFile      - Name of file containing inflow wind input parameters (quoted string)
 "../../AeroDyn15_WD30m.dat"    AeroFile        - Name of file containing aerodynamic input parameters (quoted string)
 "../../NRELOffshrBsline5MW_OC3Monopile_ServoDyn.dat"    ServoFile       - Name of file containing control and electrical-drive input parameters (quoted string)
-"../../HydroDyn/Hydro.dat"      HydroFile       - Name of file containing hydrodynamic input parameters (quoted string)
+"../../HydroDyn/1_3-1_Hydro.dat"      HydroFile       - Name of file containing hydrodynamic input parameters (quoted string)
 "../../SubDyn_Monopile_WaterDepth30m.dat"      SubFile         - Name of file containing sub-structural input parameters (quoted string)
 "unused"      MooringFile     - Name of file containing mooring system input parameters (quoted string)
 "unused"      IceFile         - Name of file containing ice input parameters (quoted string)

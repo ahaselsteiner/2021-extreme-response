@@ -1,5 +1,5 @@
 ------- OpenFAST INPUT FILE -------------------------------------------
-Simulation: Wind: Seed 1	Velocity: 13mps 	Height of referenz velocity: 90m	AnalysisTime: 3630s;	Wave:
+Simulation: Wind: Seed 1	Velocity: 13mps 	Height of referenz velocity: 90m	AnalysisTime: 3630s;	Wave: Significant wave heigth: 1m            Sepctral peak period: 3.1 s
 ---------------------- SIMULATION CONTROL --------------------------------------
 False          Echo            - Echo input data to <RootName>.ech (flag)
 "FATAL"       AbortLevel      - Error level when simulation should abort (string) {"WARNING", "SEVERE", "FATAL"}
@@ -26,7 +26,7 @@ False          Echo            - Echo input data to <RootName>.ech (flag)
 "../../Wind/S_1/1_13_IW.dat"    InflowFile      - Name of file containing inflow wind input parameters (quoted string)
 "../../AeroDyn15_WD30m.dat"    AeroFile        - Name of file containing aerodynamic input parameters (quoted string)
 "../../NRELOffshrBsline5MW_OC3Monopile_ServoDyn.dat"    ServoFile       - Name of file containing control and electrical-drive input parameters (quoted string)
-"../../HydroDyn/Hydro.dat"      HydroFile       - Name of file containing hydrodynamic input parameters (quoted string)
+"../../HydroDyn/1_3-1_Hydro.dat"      HydroFile       - Name of file containing hydrodynamic input parameters (quoted string)
 "../../SubDyn_Monopile_WaterDepth30m.dat"      SubFile         - Name of file containing sub-structural input parameters (quoted string)
 "unused"      MooringFile     - Name of file containing mooring system input parameters (quoted string)
 "unused"      IceFile         - Name of file containing ice input parameters (quoted string)
