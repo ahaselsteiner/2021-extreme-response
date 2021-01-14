@@ -223,3 +223,29 @@ legend box off
 
 xlim([0 v_lim])
 V50AtHub = 28.6 / (10/87.6)^0.14
+
+% For placeholder figure only, can be deleted later.
+dummy_fig = figure();
+a1 = 0.1 * 10^8;
+a2 = 2 * 10^6;
+hold on
+for i = 1 : 6
+    h = scatter(v, OvrAllSeeds(i,:) + a1 +  a2 * v, ms, 'MarkerFaceColor', [0.5 0.5 0.5], ...
+    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k')
+    if i > 1 
+        set(h, 'HandleVisibility', 'off')
+    end
+end
+plot(v, meanOvr + a1 +  a2 * v, '-k', 'linewidth', 2);
+h = plot(fitted_curve);
+set(h, 'linewidth', 2)
+set(h, 'linestyle', '--')
+xlabel('Wind speed (m/s)', 'FontSize', 10);
+ylabel('Overturning moment (Nm)', 'FontSize', 10);
+fit_string = [num2str(round(fitted_curve.a)) ' * v^2'];
+legend({'Simulation seed', 'Average over seeds', fit_string}, 'location', 'northwest');
+legend box off
+
+xlim([0 37])
+
+
