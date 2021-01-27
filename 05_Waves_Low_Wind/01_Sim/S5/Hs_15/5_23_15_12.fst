@@ -1,5 +1,5 @@
 ------- OpenFAST INPUT FILE -------------------------------------------
-Simulation: Wind: Seed 1	Velocity: 23mps 	Height of referenz velocity: 90m	AnalysisTime: 3630s;	Wave:
+Simulation: Wind: Seed 5	Velocity: 23mps 	Height of referenz velocity: 90m	AnalysisTime: 3630s;	Wave: Significant wave heigth: 15m     Sepctral peak period: 12s
 ---------------------- SIMULATION CONTROL --------------------------------------
 False          Echo            - Echo input data to <RootName>.ech (flag)
 "FATAL"       AbortLevel      - Error level when simulation should abort (string) {"WARNING", "SEVERE", "FATAL"}
@@ -23,10 +23,10 @@ False          Echo            - Echo input data to <RootName>.ech (flag)
 "../../NRELOffshrBsline5MW_BeamDyn_Blade.dat"      BDBldFile(1)    - Name of file containing BeamDyn input parameters for blade 1 (quoted string)
 "../../NRELOffshrBsline5MW_BeamDyn_Blade.dat"      BDBldFile(2)    - Name of file containing BeamDyn input parameters for blade 2 (quoted string)
 "../../NRELOffshrBsline5MW_BeamDyn_Blade.dat"      BDBldFile(3)    - Name of file containing BeamDyn input parameters for blade 3 (quoted string)
-"../../Wind/S_1/1_23_IW.dat"    InflowFile      - Name of file containing inflow wind input parameters (quoted string)
+"../../Wind/S_5/5_23_IW.dat"    InflowFile      - Name of file containing inflow wind input parameters (quoted string)
 "../../AeroDyn15_WD30m.dat"    AeroFile        - Name of file containing aerodynamic input parameters (quoted string)
 "../../NRELOffshrBsline5MW_OC3Monopile_ServoDyn.dat"    ServoFile       - Name of file containing control and electrical-drive input parameters (quoted string)
-"../../HydroDyn/Hydro.dat"      HydroFile       - Name of file containing hydrodynamic input parameters (quoted string)
+"../../HydroDyn/15_12_Hydro.dat"      HydroFile       - Name of file containing hydrodynamic input parameters (quoted string)
 "../../SubDyn_Monopile_WaterDepth30m.dat"      SubFile         - Name of file containing sub-structural input parameters (quoted string)
 "unused"      MooringFile     - Name of file containing mooring system input parameters (quoted string)
 "unused"      IceFile         - Name of file containing ice input parameters (quoted string)
