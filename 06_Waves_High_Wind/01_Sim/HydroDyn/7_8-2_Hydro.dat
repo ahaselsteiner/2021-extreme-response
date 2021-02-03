@@ -1,5 +1,5 @@
 ------- HydroDyn v2.03.* Input File --------------------------------------------
-Wave Height: 5m		Spectral peak period: 6.9s 		Water Depth: 30 m
+Wave Height: 7m		Spectral peak period: 8.2s 		Water Depth: 30 m
 False            Echo           - Echo the input file data (flag)
 ---------------------- ENVIRONMENTAL CONDITIONS --------------------------------
           1025		  WtrDens        - Water density (kg/m^3)
@@ -10,8 +10,8 @@ False            Echo           - Echo the input file data (flag)
              0   WaveStMod      - Model for stretching incident wave kinematics to instantaneous free surface {0: none=no stretching, 1: vertical stretching, 2: extrapolation stretching, 3: Wheeler stretching} (switch) [unused when WaveMod=0 or when PotMod/=0]
           3630   WaveTMax       - Analysis time for incident wave calculations (sec) [unused when WaveMod=0; determines WaveDOmega=2Pi/WaveTMax in the IFFT]
           0.025  WaveDT         - Time step for incident wave calculations     (sec) [unused when WaveMod=0; 0.1<=WaveDT<=1.0 recommended; determines WaveOmegaMax=Pi/WaveDT in the IFFT]
-             5   WaveHs         - Significant wave height of incident waves (meters) [used only when WaveMod=1, 2, or 3]
-             6.9 WaveTp         - Peak-spectral period of incident waves       (sec) [used only when WaveMod=1 or 2]
+             7   WaveHs         - Significant wave height of incident waves (meters) [used only when WaveMod=1, 2, or 3]
+             8.2 WaveTp         - Peak-spectral period of incident waves       (sec) [used only when WaveMod=1 or 2]
 "DEFAULT"        WavePkShp      - Peak-shape parameter of incident wave spectrum (-) or DEFAULT (string) [used only when WaveMod=2; use 1.0 for Pierson-Moskowitz]
        0.15708   WvLowCOff      - Low  cut-off frequency or lower frequency limit of the wave spectrum beyond which the wave spectrum is zeroed (rad/s) [unused when WaveMod=0, 1, or 6]
            15    WvHiCOff       - High cut-off frequency or upper frequency limit of the wave spectrum beyond which the wave spectrum is zeroed (rad/s) [unused when WaveMod=0, 1, or 6]
