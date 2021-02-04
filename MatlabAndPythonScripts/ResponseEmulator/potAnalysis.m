@@ -1,14 +1,17 @@
+load('OverturningMomentWindspeed9.mat')
+
 rs = {M.S1, M.S2, M.S3, M.S4, M.S5, M.S6};
 ks = [];
 sigmas = [];
 thetas = [];
 npeaks = [];
 maxima = [];
+pds = [];
 t = M.t;
 for j = 1 : 6
     r = rs{j};
     maxima = [maxima; max(r)];
-    u = mean(r) + 1.5*std(r);
+    u = mean(r) + 2*std(r);
     peaks = [];
     peak_ids = [];
     cluster_members = [];
@@ -58,6 +61,8 @@ for j = 1 : 6
     pd.theta = u;
     qqplot(peaks, pd)
     
+    pds = [pds; pd];
+    pdPeaks{j} = peaks;
     ks = [ks; pd.k];
     sigmas = [sigmas; pd.sigma];
     thetas = [thetas; pd.theta];
@@ -67,7 +72,7 @@ end
 
 chis = npeaks / length(t);
 m = length(t);
-x1 = thetas + sigmas / ks * ((m * chis).^ks - 1);
+x1 = thetas + sigmas ./ ks .* ((m .* chis).^ks - 1);
 
 figure
 subplot(1, 6, 1)
@@ -84,6 +89,35 @@ bar(y)
 set(gca, 'XTick', [1,2,3,4])
 set(gca, 'XTickLabel', {'\sigma', '\theta', 'x_{1hr}', 'realized max'})
 
+fig = figure();
 
+x = [8:0.01:12] * 10^7;
 
+% PDF
+for i = 1:6
+    subplot(6, 3, i * 3 - 2)
+    hold on
+    histogram(pdPeaks{i}, 'normalization', 'pdf')
+    f = pds(i).pdf(x);
+    plot(x, f);
+end
+
+% CDF of 1-hr maximum
+for i = 1:6
+    subplot(6, 3, i * 3 - 1)
+    hold on
+    p = pds(i).cdf(x);
+    plot(x, p);
+    p = pds(i).cdf(x).^npeaks(i);
+    plot(x, p);
+    realizedp(i) = pds(i).cdf(maxima(i)).^npeaks(i);
+end
+
+% ICDF of 1-hr maximum
+for i = 1:6
+    subplot(6, 3, i * 3)
+    p = rand(10^4, 1).^(1/npeaks(i));
+    x = pds(i).icdf(p);
+    histogram(x);
+end
 
