@@ -1,5 +1,8 @@
 load('OverturningMomentWindspeed9.mat')
 
+std_factor_for_threshold = 1.5;
+delta_between_clusters = 10 * 1 / timestep; % in time steps
+
 rs = {M.S1, M.S2, M.S3, M.S4, M.S5, M.S6};
 ks = [];
 sigmas = [];
@@ -11,12 +14,11 @@ t = M.t;
 for j = 1 : 6
     r = rs{j};
     maxima = [maxima; max(r)];
-    u = mean(r) + 2*std(r);
+    u = mean(r) + std_factor_for_threshold * std(r);
     peaks = [];
     peak_ids = [];
     cluster_members = [];
     timestep = t(2) - t(1);
-    delta_between_clusters = 60 * 1 / timestep; % in time steps
     for i = 1 : length(t)
         if r(i) > u
            cluster_members = [cluster_members; i];
@@ -91,7 +93,7 @@ set(gca, 'XTickLabel', {'\sigma', '\theta', 'x_{1hr}', 'realized max'})
 
 fig = figure();
 
-x = [8:0.01:12] * 10^7;
+x = [8:0.01:14] * 10^7;
 
 % PDF
 for i = 1:6
@@ -100,6 +102,7 @@ for i = 1:6
     histogram(pdPeaks{i}, 'normalization', 'pdf')
     f = pds(i).pdf(x);
     plot(x, f);
+    xlim([7*10^7, 12*10^7]);
 end
 
 % CDF of 1-hr maximum
@@ -111,6 +114,7 @@ for i = 1:6
     p = pds(i).cdf(x).^npeaks(i);
     plot(x, p);
     realizedp(i) = pds(i).cdf(maxima(i)).^npeaks(i);
+    xlim([7*10^7, 13*10^7]);
 end
 
 % ICDF of 1-hr maximum
@@ -119,5 +123,6 @@ for i = 1:6
     p = rand(10^4, 1).^(1/npeaks(i));
     x = pds(i).icdf(p);
     histogram(x);
+    xlim([10*10^7, 13*10^7]);
 end
 
