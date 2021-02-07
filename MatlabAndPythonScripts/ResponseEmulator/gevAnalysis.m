@@ -3,7 +3,7 @@ load('OverturningMomentWindspeed9.mat')
 N_BLOCKS = 60;
 
 
-rs = {M.S1, M.S2, M.S3, M.S4, M.S5, M.S6};
+rs = {M.S1, M.S2, M.S3, M.S4, M.S5, M.S6, M.V15, M.V21};
 t = M.t;
 block_length = floor(length(t) / N_BLOCKS);
 
@@ -19,7 +19,7 @@ x1 = zeros(n_seeds, 1);
 blocks = zeros(N_BLOCKS, block_length);
 block_maxima = zeros(n_seeds, N_BLOCKS);
 block_max_i = zeros(N_BLOCKS, 1);
-for j = 1 : 6
+for j = 1 : length(rs)
     r = rs{j};
     maxima(j) = max(r);
     
@@ -79,8 +79,8 @@ for i = 1:6
 end
 
 % CDF of 1-hr maximum
-for i = 1:6
-    subplot(6, 3, i * 3 - 1)
+for i = 1:length(rs)
+    subplot(length(rs), 3, i * 3 - 1)
     hold on
     p = pds(i).cdf(x);
     plot(x, p);
@@ -91,8 +91,8 @@ for i = 1:6
 end
 
 % ICDF of 1-hr maximum
-for i = 1:6
-    subplot(6, 3, i * 3)
+for i = 1:length(rs)
+    subplot(length(rs), 3, i * 3)
     p = rand(10^4, 1).^(1/N_BLOCKS);
     x = pds(i).icdf(p);
     histogram(x);
