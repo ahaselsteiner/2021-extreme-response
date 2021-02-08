@@ -25,12 +25,14 @@ vslice = [10];
 hslice = [];
 tslice = [3 7 15];
 slice(tmesh, vmesh, hmesh, rmedian, tslice, vslice, hslice)
-colorbar
+c = colorbar;
+c.Label.String = 'Median maximum 1-hr oveturning moment (Nm) ';
 ylabel('1-hr wind speed (m/s)');
 zlabel('Significant wave height (m)');
 xlabel('Peak period (s)');
 view(3)
-%camup([0 0 1])
+%exportgraphics(gca, 'gfx/ResponseField3d.jpg') 
+%exportgraphics(gca, 'gfx/ResponseField3d.pdf') 
 
 
 v = [0:0.2:50];
@@ -41,12 +43,13 @@ sigmas = R.sigma(vmesh, hmesh, tpbreaking(hmesh));
 mus = R.mu(vmesh, hmesh, tpbreaking(hmesh));
 rmedian = R.ICDF1hr(vmesh, hmesh, tpbreaking(hmesh), 0.5);
 
-capacity = 13 * 10^7;
+capacity = 18.77 * 10^7;
 figure
-contour(vmesh, hmesh, rmedian)
+contourf(vmesh, hmesh, rmedian)
 hold on
-contour(vmesh, hmesh, rmedian, [capacity capacity], 'linewidth', 2)
-colorbar
+c = colorbar;
+c.Label.String = 'Median maximum 1-hr oveturning moment (Nm) ';
 xlabel('1-hr wind speed (m/s)');
 ylabel('Significant wave height (m)');
+%exportgraphics(gca, 'gfx/ResponseFieldAtBreakingTp.pdf') 
 
