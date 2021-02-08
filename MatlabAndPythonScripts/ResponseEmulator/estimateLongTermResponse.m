@@ -20,6 +20,7 @@ ylabel('Overturning moment (Nm)')
 yyaxis right 
 plot(t(1:n), v1hr(1:n));
 ylabel('1-hr wind speed (m/s)')
+xlim([t(1) t(n)]);
 
 
 n = length(t);
@@ -58,10 +59,13 @@ x1_am = pd.icdf(exp(-1));
 x50_am = pd.icdf(1 - 1/50);
 
 
-figure
-response_quantiles = [0.5 0.90 0.95];;
+figure('Position', [100 100 900 250])
+tiledlayout(1,3);
+
+response_quantiles = [0.5 0.90 0.95];
 for i = 1 : 3
-    response_quantile = response_quantiles(i)
+    nexttile
+    response_quantile = response_quantiles(i);
 
     HDC.v = [3 : 2 : 37];
     HDC.hs = [5. 5. 5. 5.15 5.4 5.75 6.35 7.05 7.9 8.85 9.95 11.1 ...
@@ -76,30 +80,41 @@ for i = 1 : 3
     IFORM.tp = R.tpbreaking(IFORM.hs);
     IFORM.r = R.ICDF1hr(IFORM.v, IFORM.hs, IFORM.tp, response_quantile);
 
-    subplot(1, 3, i);
     hold on
-    plot(IFORM.v, IFORM.hs, '-k');
-    plot(HDC.v, HDC.hs, '--k');
-    sz = 50;
+    lw = 1;
+    plot(IFORM.v, IFORM.hs, '-k', 'linewidth', lw);
+    plot(HDC.v, HDC.hs, ':k', 'linewidth', lw);
+    sz = 25;
     scatter(IFORM.v, IFORM.hs, sz, IFORM.r / x50_am, 'filled', 'MarkerEdgeColor', 'black')
     scatter(HDC.v, HDC.hs, sz, HDC.r / x50_am, 'filled', 'MarkerEdgeColor', 'black')
+    plot([25, 25], [0 16], 'color', [0.5 0.5 0.5]);
+    xticks([0 10 20 25 30 40]);
     xlabel('1-hr wind speed (m/s)') 
-    ylabel('Significant wave height (m)');
-    zlabel('Overturning moment (Nm)');
+    if i == 1
+        ylabel('Significant wave height (m)');
+    end
     xlim([0 40]);
     ylim([0 16]);
-    c = colorbar;
-    c.Label.String = 'Oveturning moment / (18.4 x 10^8 Nm)';
-    legend('IFORM', 'Highest density', 'location', 'northwest', 'box', 'off');
+    caxis([0.4 1])
+    if i == 1
+        legend('IFORM', 'Highest density', 'location', 'northwest', 'box', 'off');
+    end
+    if i == 3
+        cb = colorbar;
+        cb.Layout.Tile = 'east';
+        cb.Label.String = ['Oveturning moment / ' num2str(x50_am, '%.3G') ' Nm'];
+    end
     
     [max_iform, maxi] = max(IFORM.r / x50_am);
-    txt = ['\leftarrow '  num2str(max_iform)];
+    txt = ['\leftarrow '  num2str(max_iform, '%4.3f')];
     text(IFORM.v(maxi), IFORM.hs(maxi), txt);
     
     [max_hdc, maxi] = max(HDC.r / x50_am);
-    txt = [num2str(max_hdc) ' \rightarrow'];
+    txt = [num2str(max_hdc, '%4.3f') ' \rightarrow'];
     text(HDC.v(maxi), HDC.hs(maxi), txt, 'HorizontalAlignment','right')
     
     title([num2str(response_quantile) '-quantile']);
 end
+exportgraphics(gcf, 'gfx/ResponseAtContour.jpg') 
+exportgraphics(gcf, 'gfx/ResponseAtContour.pdf') 
 
