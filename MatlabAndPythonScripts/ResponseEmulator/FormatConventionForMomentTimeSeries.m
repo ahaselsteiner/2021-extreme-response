@@ -1,7 +1,7 @@
 v = [3:2:25, 26, 30, 35, 40, 45];
 hs = [1:2:15];
 y = @(x) x.^a;
-% S_p = 2 \pi H_s / (g T_p^2)
+% S_p = (2 pi H_s) / (g T_p^2)
 % --> tp = sqrt(2 * pi * hs / (g * s_p))
 tp1 = @(hs) sqrt(2 * pi * hs / (9.81 * 1/15));
 tp2 = @(hs) sqrt(2 * pi * hs / (9.81 * 1/20));
