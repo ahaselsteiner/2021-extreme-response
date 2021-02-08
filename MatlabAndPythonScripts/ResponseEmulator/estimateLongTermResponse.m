@@ -58,6 +58,48 @@ x1_am = pd.icdf(exp(-1));
 x50_am = pd.icdf(1 - 1/50);
 
 
+figure
+response_quantiles = [0.5 0.90 0.95];;
+for i = 1 : 3
+    response_quantile = response_quantiles(i)
 
+    HDC.v = [3 : 2 : 37];
+    HDC.hs = [5. 5. 5. 5.15 5.4 5.75 6.35 7.05 7.9 8.85 9.95 11.1 ...
+     12.2 13.25 14.15 14.85 15.1 14.55];
+    HDC.tp = R.tpbreaking(HDC.hs);
+    HDC.r = R.ICDF1hr(HDC.v, HDC.hs, HDC.tp, response_quantile);
 
+    IFORM.v = [3 : 2 : 37];
+    IFORM.hs = [ 4.1813075   4.31982528  4.45515316  4.63534418  4.91139501  5.31650706 ...
+      5.86769763  6.56401926  7.39117007  8.32700302  9.33825991 10.38286802 ...
+     11.41011393 12.35470575 13.12327318 13.57407459 13.41291495 10.54162581];
+    IFORM.tp = R.tpbreaking(IFORM.hs);
+    IFORM.r = R.ICDF1hr(IFORM.v, IFORM.hs, IFORM.tp, response_quantile);
+
+    subplot(1, 3, i);
+    hold on
+    plot(IFORM.v, IFORM.hs, '-k');
+    plot(HDC.v, HDC.hs, '--k');
+    sz = 50;
+    scatter(IFORM.v, IFORM.hs, sz, IFORM.r / x50_am, 'filled', 'MarkerEdgeColor', 'black')
+    scatter(HDC.v, HDC.hs, sz, HDC.r / x50_am, 'filled', 'MarkerEdgeColor', 'black')
+    xlabel('1-hr wind speed (m/s)') 
+    ylabel('Significant wave height (m)');
+    zlabel('Overturning moment (Nm)');
+    xlim([0 40]);
+    ylim([0 16]);
+    c = colorbar;
+    c.Label.String = 'Oveturning moment / (18.4 x 10^8 Nm)';
+    legend('IFORM', 'Highest density', 'location', 'northwest', 'box', 'off');
+    
+    [max_iform, maxi] = max(IFORM.r / x50_am);
+    txt = ['\leftarrow '  num2str(max_iform)];
+    text(IFORM.v(maxi), IFORM.hs(maxi), txt);
+    
+    [max_hdc, maxi] = max(HDC.r / x50_am);
+    txt = [num2str(max_hdc) ' \rightarrow'];
+    text(HDC.v(maxi), HDC.hs(maxi), txt, 'HorizontalAlignment','right')
+    
+    title([num2str(response_quantile) '-quantile']);
+end
 
