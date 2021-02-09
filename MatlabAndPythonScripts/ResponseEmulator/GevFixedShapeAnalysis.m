@@ -1,7 +1,7 @@
 load('OverturningMomentWindspeed9.mat')
 
 % GEV with fixed shape parameter.
-SHAPE = -0.2;
+SHAPE = -0.3;
 gev = @(x, sigma, mu) gevpdf(x, SHAPE, sigma, mu); 
 
 N_BLOCKS = 60;
@@ -84,7 +84,7 @@ for i = 1:6
     histogram(block_maxima(i,:), 'normalization', 'pdf')
     f = pds(i).pdf(x);
     plot(x, f);
-    xlim([7*10^7, 12*10^7]);
+    xlim([7*10^7, 13*10^7]);
 end
 
 % CDF of 1-hr maximum
@@ -102,9 +102,14 @@ end
 % ICDF of 1-hr maximum
 for i = 1:length(rs)
     subplot(length(rs), 3, i * 3)
+    hold on
     p = rand(10^4, 1).^(1/N_BLOCKS);
     x = pds(i).icdf(p);
     histogram(x);
+    if i <= 6
+        plot([min(maxima) min(maxima)], [0 500], '-r')
+        plot([max(maxima) max(maxima)], [0 500], '-r')
+    end
     xlim([10*10^7, 13*10^7]);
 end
 

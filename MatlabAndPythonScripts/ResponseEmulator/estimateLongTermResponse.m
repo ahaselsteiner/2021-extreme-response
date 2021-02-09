@@ -13,7 +13,7 @@ n = 1000;
 p = rand(n, 1);
 r = R.ICDF1hr(v1hr(1:n), hs(1:n), tp(1:n), p);
 
-figure
+figure('Position', [100 100 900 250])
 yyaxis left 
 plot(t(1:n), r);
 ylabel('Overturning moment (Nm)')
@@ -21,7 +21,8 @@ yyaxis right
 plot(t(1:n), v1hr(1:n));
 ylabel('1-hr wind speed (m/s)')
 xlim([t(1) t(n)]);
-
+exportgraphics(gcf, 'gfx/ShortResponseTimeLine.jpg') 
+exportgraphics(gcf, 'gfx/ShortResponseTimeLine.pdf') 
 
 n = length(t);
 p = rand(n, 1);
@@ -40,8 +41,8 @@ for i = 1 : full_years
     block_max_i(i) = maxid + (i - 1) * block_length;
 end
 
-figure()
-subplot(2, 1, 1)
+figure('Position', [100 100 900 600])
+subplot(3, 2, 1:2)
 hold on
 yyaxis left 
 plot(t(1:n), r);
@@ -51,9 +52,16 @@ yyaxis right
 plot(t(1:n), v1hr(1:n));
 ylabel('1-hr wind speed (m/s)') 
 xlabel('Time (s)');
-subplot(2, 1, 2)
+subplot(3, 2, [3 5])
+plot(v1hr(block_max_i), r(block_max_i), 'xr');
+box off
+xlabel('1-hr wind speed at maximum (m/s)') 
+ylabel('Annual maximum of moment (Nm)')
+subplot(3, 2, [4 6])
 pd = fitdist(block_maxima, 'GeneralizedExtremeValue');
 qqplot(block_maxima, pd)
+exportgraphics(gcf, 'gfx/LongResponseTimeLine.jpg') 
+exportgraphics(gcf, 'gfx/LongResponseTimeLine.pdf') 
 
 x1_am = pd.icdf(exp(-1));
 x50_am = pd.icdf(1 - 1/50);
