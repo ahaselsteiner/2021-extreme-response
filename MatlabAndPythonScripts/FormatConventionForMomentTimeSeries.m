@@ -5,9 +5,11 @@ M(1,3,4,:) = 'Response time series (as a double vector)';
 % v(1), hs(3), tp(hs(3), 4)
 % v = 1, hs = 5, tp = 13.4889
 
+
 v = [1:2:25, 26, 30, 35, 40, 45];
 hs = [1:2:15];
 y = @(x) x.^a;
+
 % S_p = (2 pi H_s) / (g T_p^2)
 % --> tp = sqrt(2 * pi * hs / (g * s_p))
 tp1 = @(hs) sqrt(2 * pi * hs / (9.81 * 1/15));
@@ -18,6 +20,37 @@ tp = @(hs, idx) (idx == 1) .* tp1(hs) + (idx == 2) .* tp2(hs) + (idx ==3) .* tp3
 
 % ** End of explanation. **
 
+tpMat = zeros(numel(hs),4);
+tpMat(:,1)=round(tp1(hs),2);
+tpMat(:,2)=round(tp2(hs),2);
+tpMat(:,3)=round(tp3(hs),2);
+tpMat(:,4)=round(tp4(hs),2);
+
+% Cell arrays
+
+Flp1 = cell(18,8,32);
+Flp2 = cell(18,8,32);
+Flp3 = cell(18,8,32);
+
+Edg1 = cell(18,8,32);
+Edg2 = cell(18,8,32);
+Edg3 = cell(18,8,32);
+
+Ovr = cell(18,8,32);
+
+% Environmental conditions
+
+windspeed = 5;
+waveheigth = 1;
+period = 3.10;         % 2 digits behind the comma                               
+idx = 1;
+
+filename = '1_5_1_3-1.out';
+
+a = find(v == windspeed);
+b = find(hs == waveheigth);
+c = find(tpMat == period);
+ 
 
 
 if exist ('DataEmulator.mat')
@@ -26,14 +59,6 @@ else
     warningMessage = sprintf('Warning: File does not exist or path is incorrect');
     uiwait(msgbox(warningMessage));
 end
-
-% Environmental conditions
-
-windspeed = 5;
-waveheigth = 1;                                     
-period = 3;         % digits before the comma                               
-
-filename = '1_5_1_3-1.out'; 
 
 % Load file
 
@@ -110,14 +135,15 @@ ovrM = sqrt(ReactMXss.^2 + ReactMYss.^2);
 % 1. dimension = wind, 2. dimension = hs, 3. dimension = tp (digits before
 % the comma)
 
-Flp1(windspeed,waveheigth,period,:)=timeseries(RootMFlp1, Time);
-Flp2(windspeed,waveheigth,period,:)=timeseries(RootMFlp2, Time);
-Flp3(windspeed,waveheigth,period,:)=timeseries(RootMFlp3, Time);
+ Flp1{a,b,c}=RootMFlp1; 
+ Flp2{a,b,c}=RootMFlp2; 
+ Flp3{a,b,c}=RootMFlp3; 
+ 
+ Edg1{a,b,c}=RootMEdg1; 
+ Edg2{a,b,c}=RootMEdg2; 
+ Edg3{a,b,c}=RootMEdg3;
+ 
+ Ovr{a,b,c}=ovrM;
 
-Edg1(windspeed,waveheigth,period,:)=timeseries(RootMEdg1, Time);
-Edg2(windspeed,waveheigth,period,:)=timeseries(RootMEdg2, Time);
-Edg3(windspeed,waveheigth,period,:)=timeseries(RootMEdg3, Time);
 
-Ovr(windspeed,waveheigth,period,:)=timeseries(ovrM, Time);
-
-save('DataEmulator.mat','Flp1','Flp2','Flp3','Edg1','Edg2','Edg3','Ovr');
+save('DataEmulator.mat','Flp1','Flp2','Flp3','Edg1','Edg2','Edg3','Ovr', 'Time');
