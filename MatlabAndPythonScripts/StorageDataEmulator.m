@@ -12,42 +12,42 @@ tp3 = @(hs) sqrt(2 * pi * hs / (9.81 * 1/20)) + 1 ./ (1 + sqrt(hs + 2)) * 8;
 tp4 = @(hs) sqrt(2 * pi * hs / (9.81 * 1/20)) + 1 ./ (1 + sqrt(hs + 2)) * 20;
 tp = @(hs, idx) (idx == 1) .* tp1(hs) + (idx == 2) .* tp2(hs) + (idx ==3) .* tp3(hs) + (idx ==4) .* tp4(hs);
 
-Flp1=zeros(18,8,4,288001);
-Flp2=zeros(18,8,4,288001);
-Flp3=zeros(18,8,4,288001);
-
-Edg1=zeros(18,8,4,288001);
-Edg2=zeros(18,8,4,288001);
-Edg3=zeros(18,8,4,288001);
+% Flp1=zeros(18,8,4,288001);
+% Flp2=zeros(18,8,4,288001);
+% Flp3=zeros(18,8,4,288001);
+% 
+% Edg1=zeros(18,8,4,288001);
+% Edg2=zeros(18,8,4,288001);
+% Edg3=zeros(18,8,4,288001);
 
 Ovr=zeros(18,8,4,288001);
 
 
 % Environmental conditions
 
-windspeed = 9;
+windspeed = 5;
 waveheigth = 1;                              
 idx = 1;
 
-filename = 'D:\Uni_Bremen\01_Arbeit\Veroeffentlichung\02_Simulationen\05_Waves_Low_Wind\02_Out\Hs1\S1\1_9_1_3-1.out';     % Path to file
+filename = 'D:\Uni_Bremen\01_Arbeit\Veroeffentlichung\02_Simulationen\05_Waves_Low_Wind\02_Out\Hs1\S1\1_5_1_3-1.out';     % Path to file
 
 a = find(v == windspeed);
 b = find(hs == waveheigth);
 c = idx;
  
-if exist ('DataEmulator.mat')
-    load 'DataEmulator.mat';
-else 
-    warningMessage = sprintf('Warning: File does not exist or path is incorrect');
-    uiwait(msgbox(warningMessage));
-end
+% if exist ('DataEmulator.mat')
+%     load 'DataEmulator.mat';
+% else 
+%     warningMessage = sprintf('Warning: File does not exist or path is incorrect');
+%     uiwait(msgbox(warningMessage));
+% end
 
 % Load file
 
 startRow = 2406;
 endRow = 290406;
 
-formatSpec = '%11s%*11*s%*11*s%*11s%11s%11s%11s%11s%10s%12s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*10*s%*12*s%*11*s%*11*s%*10*s%*12*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11s%11s%s%[^\n\r]';
+formatSpec = '%11s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*10*s%*12*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*22*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11*s%*11s%11s%s%[^\n\r]';
 
 fileID = fopen(filename,'r');
 
@@ -62,7 +62,7 @@ for col=1:length(dataArray)-1
 end
 numericData = NaN(size(dataArray{1},1),size(dataArray,2));
 
-for col=[1,2,3,4,5,6,7,8,9]
+for col=[1,2,3]
     % Converts text in the input cell array to numbers. Replaced non-numeric
     % text with NaN.
     rawData = dataArray{col};
@@ -99,17 +99,10 @@ R = cellfun(@(x) ~isnumeric(x) && ~islogical(x),raw); % Find non-numeric cells
 raw(R) = {NaN}; % Replace non-numeric cells
 
 Time = cell2mat(raw(:, 1));
-RootMFlp1 = cell2mat(raw(:, 2));
-RootMFlp2 = cell2mat(raw(:, 3));
-RootMFlp3 = cell2mat(raw(:, 4));
-RootMEdg1 = cell2mat(raw(:, 5));
-RootMEdg2 = cell2mat(raw(:, 6));
-RootMEdg3 = cell2mat(raw(:, 7));
-ReactMXss = cell2mat(raw(:, 8));
-ReactMYss = cell2mat(raw(:, 9));
+ReactMXss = cell2mat(raw(:, 2));
+ReactMYss = cell2mat(raw(:, 3));
 
 clearvars filename startRow endRow formatSpec fileID dataArray ans raw col numericData rawData row regexstr result numbers invalidThousandsSeparator thousandsRegExp R;
-
 % Calculate Ovrturning Moment
 
 ovrM = sqrt(ReactMXss.^2 + ReactMYss.^2);
@@ -117,14 +110,14 @@ ovrM = sqrt(ReactMXss.^2 + ReactMYss.^2);
 % 1. dimension = wind, 2. dimension = hs, 3. dimension = tp (digits before
 % the comma)
 
-Flp1(a,b,c,:)=RootMFlp1;
-Flp2(a,b,c,:)=RootMFlp2;
-Flp3(a,b,c,:)=RootMFlp3;
-
-Edg1(a,b,c,:)=RootMEdg1;
-Edg2(a,b,c,:)=RootMEdg2;
-Edg3(a,b,c,:)=RootMEdg3;
+% Flp1(a,b,c,:)=RootMFlp1;
+% Flp2(a,b,c,:)=RootMFlp2;
+% Flp3(a,b,c,:)=RootMFlp3;
+% 
+% Edg1(a,b,c,:)=RootMEdg1;
+% Edg2(a,b,c,:)=RootMEdg2;
+% Edg3(a,b,c,:)=RootMEdg3;
 
 Ovr(a,b,c,:)=ovrM;
 
-save('DataEmulator.mat','Flp1','Flp2','Flp3','Edg1','Edg2','Edg3','Ovr', 'Time');
+save('OvrDataEmulator.mat','Ovr', 'Time');
