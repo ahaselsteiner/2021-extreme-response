@@ -1,4 +1,6 @@
 load('OverturningMomentWindspeed9.mat')
+file_dist = {'v = 9 m/s', 'v = 9 m/s', 'v = 9 m/s', 'v = 9 m/s', ...
+    'v = 9 m/s', 'v = 9 m/s', 'v = 15 m/s', 'v = 21 m/s'}; 
 
 N_BLOCKS = 60;
 
@@ -56,21 +58,29 @@ end
 figure
 subplot(1, 5, 1)
 bar(1, ks)
+box off
 set(gca, 'XTick', [1,])
 set(gca, 'XTickLabel', {'k'})
 subplot(1, 5, 2:5)
 y = [sigmas, mus, x1, maxima]';
-bar(y)
+h = bar(y);
+set(h, {'DisplayName'}, file_dist')
+legend('location', 'northwest', 'box', 'off') 
+box off
 set(gca, 'XTick', [1,2,3,4])
-set(gca, 'XTickLabel', {'\sigma', '\mu', 'x_{1hr}', 'realized max'})
+set(gca, 'XTickLabel', {'$\sigma$', '$\mu$', '$\hat{x}_{1hr}$', 'realized max'}, 'TickLabelInterpreter', 'latex')
+exportgraphics(gcf, 'gfx/GEVParameters.jpg') 
+exportgraphics(gcf, 'gfx/GEVParameters.pdf') 
 
-fig = figure();
-
-x = [8:0.01:14] * 10^7;
+figure('Position', [100 100 900 900])
+x = [7:0.01:14] * 10^7;
 
 % PDF
-for i = 1:6
-    subplot(6, 3, i * 3 - 2)
+for i = 1:length(rs)
+    subplot(length(rs), 3, i * 3 - 2)
+    ax = gca;
+    title(file_dist{i});
+    ax.TitleHorizontalAlignment = 'left'; 
     hold on
     histogram(block_maxima(i,:), 'normalization', 'pdf')
     f = pds(i).pdf(x);
@@ -96,11 +106,22 @@ for i = 1:length(rs)
     hold on
     p = rand(10^4, 1).^(1/N_BLOCKS);
     x = pds(i).icdf(p);
-    histogram(x);
+    histogram(x, 'normalization', 'pdf');
+    ylims = get(gca, 'ylim');
     if i <= 6
-        plot([min(maxima) min(maxima)], [0 500], '-r')
-        plot([max(maxima) max(maxima)], [0 500], '-r')
+        plot([min(maxima) min(maxima)], [0 ylims(2)], '-r')
+        plot([max(maxima) max(maxima)], [0 ylims(2)], '-r')
+        h = text(min(maxima) -0.3 * 10^7, 0.5 * ylims(2), ...
+            'min(realized)', 'fontsize', 6', 'color', 'red', ...
+            'horizontalalignment', 'center');
+        set(h,'Rotation',90);
+        h = text(max(maxima) + 0.3 * 10^7, 0.5 * ylims(2), ...
+            'max(realized)', 'fontsize', 6', 'color', 'red', ...
+            'horizontalalignment', 'center');
+        set(h,'Rotation',90);
     end
-    xlim([10*10^7, 13*10^7]);
+    xlim([9*10^7, 14*10^7]);
 end
 
+exportgraphics(gcf, 'gfx/GEV-PDFs.jpg') 
+exportgraphics(gcf, 'gfx/GEV-PDFs.pdf') 

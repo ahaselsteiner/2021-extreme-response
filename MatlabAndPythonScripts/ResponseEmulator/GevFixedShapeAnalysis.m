@@ -1,4 +1,6 @@
 load('OverturningMomentWindspeed9.mat')
+file_dist = {'v = 9 m/s', 'v = 9 m/s', 'v = 9 m/s', 'v = 9 m/s', ...
+    'v = 9 m/s', 'v = 9 m/s', 'v = 15 m/s', 'v = 21 m/s'}; 
 
 % GEV with fixed shape parameter.
 SHAPE = -0.3;
@@ -65,21 +67,30 @@ end
 figure
 subplot(1, 5, 1)
 bar(1, ks)
+box off
 set(gca, 'XTick', [1,])
 set(gca, 'XTickLabel', {'k'})
 subplot(1, 5, 2:5)
 y = [sigmas, mus, x1, maxima]';
-bar(y)
+h = bar(y);
+set(h, {'DisplayName'}, file_dist')
+legend('location', 'northwest', 'box', 'off') 
+box off
 set(gca, 'XTick', [1,2,3,4])
-set(gca, 'XTickLabel', {'\sigma', '\mu', 'x_{1hr}', 'realized max'})
+set(gca, 'XTickLabel', {'$\sigma$', '$\mu$', '$\hat{x}_{1hr}$', 'realized max'}, 'TickLabelInterpreter', 'latex')
+exportgraphics(gcf, 'gfx/GevFixedShape-Parameters.jpg') 
+exportgraphics(gcf, 'gfx/GevFixedShape-Parameters.pdf') 
 
-fig = figure();
+figure('Position', [100 100 900 900])
 
-x = [8:0.01:14] * 10^7;
+x = [7:0.01:14] * 10^7;
 
 % PDF
-for i = 1:6
-    subplot(6, 3, i * 3 - 2)
+for i = 1:length(rs)
+    subplot(length(rs), 3, i * 3 - 2)
+    ax = gca;
+    title(file_dist{i});
+    ax.TitleHorizontalAlignment = 'left'; 
     hold on
     histogram(block_maxima(i,:), 'normalization', 'pdf')
     f = pds(i).pdf(x);
@@ -99,17 +110,75 @@ for i = 1:length(rs)
     xlim([7*10^7, 13*10^7]);
 end
 
-% ICDF of 1-hr maximum
+% Distribution as histogram of 1-hr maximum
 for i = 1:length(rs)
     subplot(length(rs), 3, i * 3)
     hold on
     p = rand(10^4, 1).^(1/N_BLOCKS);
     x = pds(i).icdf(p);
-    histogram(x);
+    histogram(x, 'normalization', 'pdf');
+    ylims = get(gca, 'ylim');
     if i <= 6
-        plot([min(maxima) min(maxima)], [0 500], '-r')
-        plot([max(maxima) max(maxima)], [0 500], '-r')
+        plot([min(maxima) min(maxima)], [0 ylims(2)], '-r')
+        plot([max(maxima) max(maxima)], [0 ylims(2)], '-r')
+        h = text(min(maxima) -0.3 * 10^7, 0.5 * ylims(2), ...
+            'min(realized)', 'fontsize', 6', 'color', 'red', ...
+            'horizontalalignment', 'center');
+        set(h,'Rotation',90);
+        h = text(max(maxima) + 0.3 * 10^7, 0.5 * ylims(2), ...
+            'max(realized)', 'fontsize', 6', 'color', 'red', ...
+            'horizontalalignment', 'center');
+        set(h,'Rotation',90);
     end
-    xlim([10*10^7, 13*10^7]);
+    xlim([9*10^7, 14*10^7]);
 end
+
+exportgraphics(gcf, 'gfx/GevFixedShape-PDFs.jpg') 
+exportgraphics(gcf, 'gfx/GevFixedShape-PDFs.pdf') 
+
+% Combined figure for paper
+figure('Position', [100 100 1200 700])
+subplot(4, 6, [1 2 7 8])
+bar(1, ks)
+box off
+set(gca, 'XTick', [1,])
+set(gca, 'XTickLabel', {'k'})
+subplot(4, 6, [3 4 5 6 9 10 11 12])
+y = [sigmas, mus, x1, maxima]';
+hbar = bar(y);
+set(hbar, {'DisplayName'}, file_dist')
+legend('location', 'northwest', 'box', 'off') 
+box off
+set(gca, 'XTick', [1,2,3,4])
+set(gca, 'XTickLabel', {'$\sigma$', '$\mu$', '$\hat{x}_{1hr}$', 'realized max'}, 'TickLabelInterpreter', 'latex')
+
+% Distribution as histogram of 1-hr maximum
+for i = 1:length(rs)
+    subplot(4, 6, 12 + i)
+    hold on
+    p = rand(10^4, 1).^(1/N_BLOCKS);
+    x = pds(i).icdf(p);
+    h = histogram(x, 'normalization', 'pdf', 'FaceColor', hbar(i).FaceColor, 'BinWidth', 2E6);
+    ylims = get(gca, 'ylim');
+    if i <= 6
+        plot([min(maxima) min(maxima)], [0 ylims(2)], '-k')
+        plot([max(maxima) max(maxima)], [0 ylims(2)], '-k')
+        h = text(min(maxima) -0.3 * 10^7, 0.5 * ylims(2), ...
+            'min(realized)', 'fontsize', 6', 'color', 'black', ...
+            'horizontalalignment', 'center');
+        set(h,'Rotation',90);
+        h = text(max(maxima) + 0.3 * 10^7, 0.5 * ylims(2), ...
+            'max(realized)', 'fontsize', 6', 'color', 'black', ...
+            'horizontalalignment', 'center');
+        set(h,'Rotation',90);
+    end
+    %legend(file_dist{i}, 'location', 'northeast', 'box', 'off', 'fontsize', 6) 
+    title(file_dist{i})%,  'Units', 'normalized', 'Position', [0.8, 0.8, 0]);
+    ax = gca;
+    ax.TitleHorizontalAlignment = 'left';
+    xlim([9*10^7, 14*10^7]);
+end
+
+exportgraphics(gcf, 'gfx/GevFixedShape.jpg') 
+exportgraphics(gcf, 'gfx/GevFixedShape.pdf') 
 
