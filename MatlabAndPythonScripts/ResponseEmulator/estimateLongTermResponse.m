@@ -21,6 +21,7 @@ yyaxis right
 plot(t(1:n), v1hr(1:n));
 ylabel('1-hr wind speed (m/s)')
 xlim([t(1) t(n)]);
+box off
 exportgraphics(gcf, 'gfx/ShortResponseTimeLine.jpg') 
 exportgraphics(gcf, 'gfx/ShortResponseTimeLine.pdf') 
 
