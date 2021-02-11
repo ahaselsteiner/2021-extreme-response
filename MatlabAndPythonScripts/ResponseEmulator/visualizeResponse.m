@@ -20,7 +20,6 @@ ylabel('sigma');
 xlabel('v_{1hr} (m/s)');
 
 figure
-
 vslice = [10];   
 hslice = [];
 tslice = [3 7 15];
