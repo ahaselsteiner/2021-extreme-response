@@ -1,16 +1,21 @@
 load('OverturningMomentWindspeed9.mat')
-file_dist = {'v = 9 m/s', 'v = 9 m/s', 'v = 9 m/s', 'v = 9 m/s', ...
-    'v = 9 m/s', 'v = 9 m/s', 'v = 15 m/s', 'v = 21 m/s'}; 
+load('OverturningMomentWindspeed15.mat')
+load('OverturningMomentWindspeed21.mat')
+file_dist = {'v = 9 m/s', 'v = 9 m/s', 'v = 9 m/s', 'v = 9 m/s', 'v = 9 m/s', 'v = 9 m/s', ...
+    'v = 15 m/s', 'v = 15 m/s', 'v = 15 m/s', 'v = 15 m/s', 'v = 15 m/s', 'v = 15 m/s', ...
+    'v = 21 m/s', 'v = 21 m/s', 'v = 21 m/s', 'v = 21 m/s', 'v = 21 m/s', 'v = 21 m/s'}; 
 
 % GEV with fixed shape parameter.
-SHAPE = -0.3;
+SHAPE = -0.25;
 gev = @(x, sigma, mu) gevpdf(x, SHAPE, sigma, mu); 
 
 N_BLOCKS = 60;
 
 
-rs = {M.S1, M.S2, M.S3, M.S4, M.S5, M.S6, M.V15, M.V21};
-t = M.t;
+rs = {V9.S1, V9.S2, V9.S3, V9.S4, V9.S5, V9.S6, ...
+    V15.S1, V15.S2, V15.S3, V15.S4, V15.S5, V15.S6, ...
+    V21.S1, V21.S2, V21.S3, V21.S4, V21.S5, V21.S6};
+t = V9.t;
 block_length = floor(length(t) / N_BLOCKS);
 
 n_seeds = 6;
@@ -111,6 +116,7 @@ for i = 1:length(rs)
 end
 
 % Distribution as histogram of 1-hr maximum
+maxs9 = maxima(1:6);
 for i = 1:length(rs)
     subplot(length(rs), 3, i * 3)
     hold on
@@ -119,13 +125,13 @@ for i = 1:length(rs)
     histogram(x, 'normalization', 'pdf');
     ylims = get(gca, 'ylim');
     if i <= 6
-        plot([min(maxima) min(maxima)], [0 ylims(2)], '-r')
-        plot([max(maxima) max(maxima)], [0 ylims(2)], '-r')
-        h = text(min(maxima) -0.3 * 10^7, 0.5 * ylims(2), ...
+        plot([min(maxs9) min(maxs9)], [0 ylims(2)], '-r')
+        plot([max(maxs9) max(maxs9)], [0 ylims(2)], '-r')
+        h = text(min(maxs9) -0.3 * 10^7, 0.5 * ylims(2), ...
             'min(realized)', 'fontsize', 6', 'color', 'red', ...
             'horizontalalignment', 'center');
         set(h,'Rotation',90);
-        h = text(max(maxima) + 0.3 * 10^7, 0.5 * ylims(2), ...
+        h = text(max(maxs9) + 0.3 * 10^7, 0.5 * ylims(2), ...
             'max(realized)', 'fontsize', 6', 'color', 'red', ...
             'horizontalalignment', 'center');
         set(h,'Rotation',90);
@@ -138,40 +144,55 @@ exportgraphics(gcf, 'gfx/GevFixedShape-PDFs.pdf')
 
 % Combined figure for paper
 figure('Position', [100 100 1200 700])
-subplot(4, 6, [1 2 7 8])
-bar(1, ks)
+c1 = [0, 0.4470, 0.7410];
+c2 = [0.8500, 0.3250, 0.0980];
+c3 = [0.9290, 0.6940, 0.1250];
+barcolors = [repmat(c1,6,1);
+    repmat(c2,6,1);
+    repmat(c3,6,1)];
+subplot(5, 6, [1 2 7 8])
+hbar1 = bar(1, ks)
 box off
 set(gca, 'XTick', [1,])
 set(gca, 'XTickLabel', {'k'})
-subplot(4, 6, [3 4 5 6 9 10 11 12])
+subplot(5, 6, [3 4 5 6 9 10 11 12])
 y = [sigmas, mus, x1, maxima]';
-hbar = bar(y);
-set(hbar, {'DisplayName'}, file_dist')
-legend('location', 'northwest', 'box', 'off') 
+hbar2 = bar(y);
+for i = 1:length(rs)
+    hbar1(i).FaceColor = barcolors(i,:);
+    hbar2(i).FaceColor = barcolors(i,:);
+end
+set(hbar2, {'DisplayName'}, file_dist')
+legend(hbar2([1, 7, 13]), 'location', 'northwest', 'box', 'off') 
 box off
 set(gca, 'XTick', [1,2,3,4])
 set(gca, 'XTickLabel', {'$\sigma$', '$\mu$', '$\hat{x}_{1hr}$', 'realized max'}, 'TickLabelInterpreter', 'latex')
 
 % Distribution as histogram of 1-hr maximum
 for i = 1:length(rs)
-    subplot(4, 6, 12 + i)
+    subplot(5, 6, 12 + i)
     hold on
     p = rand(10^4, 1).^(1/N_BLOCKS);
     x = pds(i).icdf(p);
-    h = histogram(x, 'normalization', 'pdf', 'FaceColor', hbar(i).FaceColor, 'BinWidth', 2E6);
+    h = histogram(x, 'normalization', 'pdf', 'FaceColor', hbar2(i).FaceColor, 'BinWidth', 2E6);
     ylims = get(gca, 'ylim');
     if i <= 6
-        plot([min(maxima) min(maxima)], [0 ylims(2)], '-k')
-        plot([max(maxima) max(maxima)], [0 ylims(2)], '-k')
-        h = text(min(maxima) -0.3 * 10^7, 0.5 * ylims(2), ...
-            'min(realized)', 'fontsize', 6', 'color', 'black', ...
-            'horizontalalignment', 'center');
-        set(h,'Rotation',90);
-        h = text(max(maxima) + 0.3 * 10^7, 0.5 * ylims(2), ...
-            'max(realized)', 'fontsize', 6', 'color', 'black', ...
-            'horizontalalignment', 'center');
-        set(h,'Rotation',90);
+        maxsgroup = maxima(1:6);
+    elseif i > 6 && i <= 12
+        maxsgroup = maxima(7:12);
+    else
+        maxsgroup = maxima(13:18);
     end
+    plot([min(maxsgroup) min(maxsgroup)], [0 ylims(2)], '-k')
+    plot([max(maxsgroup) max(maxsgroup)], [0 ylims(2)], '-k')
+    h = text(min(maxsgroup) -0.3 * 10^7, 0.5 * ylims(2), ...
+        'min(realized)', 'fontsize', 6', 'color', 'black', ...
+        'horizontalalignment', 'center');
+    set(h,'Rotation',90);
+    h = text(max(maxsgroup) + 0.3 * 10^7, 0.5 * ylims(2), ...
+        'max(realized)', 'fontsize', 6', 'color', 'black', ...
+        'horizontalalignment', 'center');
+    set(h,'Rotation',90);
     %legend(file_dist{i}, 'location', 'northeast', 'box', 'off', 'fontsize', 6) 
     title(file_dist{i})%,  'Units', 'normalized', 'Position', [0.8, 0.8, 0]);
     ax = gca;
