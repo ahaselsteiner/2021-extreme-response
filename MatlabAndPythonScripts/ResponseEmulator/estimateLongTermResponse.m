@@ -53,13 +53,21 @@ plot(t(1:n), v1hr(1:n));
 ylabel('1-hr wind speed (m/s)') 
 xlabel('Time (s)');
 subplot(3, 2, [3 5])
-plot(v1hr(block_max_i), r(block_max_i), 'xr');
+hold on
+plot(v1hr(block_max_i), hs(block_max_i), 'xr');
+%plot(mean(v1hr(block_max_i)), mean(hs(block_max_i)), 'ok', 'markerfacecolor', 'red');
+%text(double(mean(v1hr(block_max_i))), double(mean(hs(block_max_i))*0.96), 'average', ...
+%    'horizontalalignment', 'center', 'fontsize', 6);
 box off
 xlabel('1-hr wind speed at maximum (m/s)') 
-ylabel('Annual maximum of moment (Nm)')
+ylabel('Significant wave height at maximum (m)')
 subplot(3, 2, [4 6])
 pd = fitdist(block_maxima, 'GeneralizedExtremeValue');
-qqplot(block_maxima, pd)
+h = qqplot(block_maxima, pd);
+set(h(1), 'Marker', 'x')
+set(h(1), 'MarkerEdgeColor', 'r')
+set(h(2), 'Color', 'k')
+set(h(3), 'Color', 'k')
 exportgraphics(gcf, 'gfx/LongResponseTimeLine.jpg') 
 exportgraphics(gcf, 'gfx/LongResponseTimeLine.pdf') 
 
