@@ -46,7 +46,6 @@ g = 9.81
 steepness = 2 * math.pi * hs / ( g * tp ** 2)
 steepness_label = 'Peak steepness (-)'
 tp_s = np.sqrt((2 * math.pi * hs_s) / (g * const_s))
-#hs_s = const_s * g * tp_s ** 2 / (2 * math.pi)
 
 
 fig_rawdata, axs = plt.subplots(1, 2, figsize=(8, 4), dpi=300, sharey=True)
@@ -59,6 +58,18 @@ axs[1].scatter(tp, hs, c='black', s=5, alpha=0.5, rasterized=True)
 axs[1].plot(tp_s, hs_s, c='blue')
 axs[1].text(8, 8, 'Steepness = 1/15', fontsize=8, rotation=71,
     horizontalalignment='center', verticalalignment='center',
+    c='blue')
+const_ss =  1 / np.array([20, 30, 40, 50])
+for const_s in const_ss:
+    tp_s = np.sqrt((2 * math.pi * hs_s) / (g * const_s))
+    axs[1].plot(tp_s, hs_s, c='blue')
+axs[1].text(11.5, 11.1, '1/20', fontsize=8, horizontalalignment='center', 
+    c='blue')
+axs[1].text(14.2, 11.1, '1/30', fontsize=8, horizontalalignment='center', 
+    c='blue')
+axs[1].text(16.7, 11.1, '1/40', fontsize=8, horizontalalignment='center', 
+    c='blue')
+axs[1].text(18.9, 11.1, '1/50', fontsize=8, horizontalalignment='center', 
     c='blue')
 axs[1].set_xlabel(tp_label)
 axs[1].spines['right'].set_visible(False)
@@ -210,7 +221,7 @@ dist_description_hs = {'name': 'Weibull_Exp',
                        'width_of_intervals': 0.5,
                        'fixed_parameters': (None, None, None, 5),
                        # shape, location, scale, shape2
-                       'dependency': (0, None, 0, None),
+                       'dependency': (0, None, 0, None<),
                        # shape, location, scale, shape2
                        'functions': ('logistics4', None, 'alpha3', None),
                        # shape, location, scale, shape2
