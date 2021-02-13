@@ -19,6 +19,16 @@ plot(v, R.sigma(v, 3, 10));
 ylabel('sigma');
 xlabel('v_{1hr} (m/s)');
 
+
+figure('Position', [100 100 500 500])
+vv = [1:2:25 26 30 35 40 45];
+n = 6;
+r = nan(length(vv), n);
+for i = 1 : length(vv)
+    r(i, :) = R.randomSample1hr(vv(i), 0, 0, n);
+end
+plot(vv, r, 'ok')
+
 figure
 vslice = [10];   
 hslice = [];

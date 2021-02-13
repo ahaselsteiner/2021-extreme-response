@@ -44,6 +44,14 @@ classdef ResponseEmulator
             end
         end
         
+        function r = randomSample1hr(obj, v1hr, hs, tp, n)
+            p = rand(n, 1);
+            r = nan(n, 1);
+            for i = 1 : n
+                r(i) = obj.ICDF1hr(v1hr, hs, tp, p(i));
+            end
+        end
+        
         function f = PDF1hr(obj, v1hr, hs, tp, r)
             pd = makedist('GeneralizedExtremeValue', 'k', obj.k, 'sigma', obj.sigma(v1hr,hs,tp), 'mu', obj.mu(v1hr,hs,tp));
             f = 60 .* pd.cdf(r).^59 .* pd.pdf(r);
