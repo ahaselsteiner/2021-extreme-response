@@ -4,8 +4,8 @@ classdef ResponseEmulator
     
     properties
         k = -0.1
-        sigma = @(v1hr, hs, tp) 0 + (tp >= sqrt(2 * pi .* hs ./ (9.81 .* 1/14.99))) .* (2.1e+03 .* v1hr.^2 + (v1hr <= 25) .* (1.4e+06 .* v1hr -  5.3e+04 .* v1hr.^2) + 1.7e+06  .* hs ./ (1 + 0.05 .* (tp - 3)))
-        mu = @(v1hr, hs, tp) 0 + (tp >= sqrt(2 * pi .* hs ./ (9.81 .* 1/14.99))) .* (3.5e+04 .* v1hr.^2 + (v1hr <= 25) .* (8e+06 .* v1hr -  2.5e+05 .* v1hr.^2) + 3.2e+06  .* hs ./ (1 + 0.05 .* (tp - 3)))
+        sigma = @(v1hr, hs, tp) 0 + (tp >= sqrt(2 * pi .* hs ./ (9.81 .* 1/14.99))) .* (5.0e+03 .* v1hr.^2 + (v1hr <= 25) .* (1.4e+06 .* v1hr -  5.3e+04 .* v1hr.^2) + 1.7e+06  .* hs ./ (1 + 0.05 .* (tp - 3)))
+        mu = @(v1hr, hs, tp) 0 + (tp >= sqrt(2 * pi .* hs ./ (9.81 .* 1/14.99))) .* (3.3e+04 .* v1hr.^2 + (v1hr <= 25) .* (8e+06 .* v1hr -  2.5e+05 .* v1hr.^2) + 3.2e+06  .* hs ./ (1 + 0.05 .* (tp - 3)))
         maxima_per_hour = 60;
         tpbreaking = @(hs) sqrt(2 * pi * hs / (9.81 * 1/15));
     end

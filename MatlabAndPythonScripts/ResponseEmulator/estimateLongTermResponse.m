@@ -55,10 +55,12 @@ ylabel('1-hr wind speed (m/s)')
 xlabel('Time (s)');
 subplot(3, 2, [3 5])
 hold on
-plot(v1hr(block_max_i), hs(block_max_i), 'xr');
-%plot(mean(v1hr(block_max_i)), mean(hs(block_max_i)), 'ok', 'markerfacecolor', 'red');
-%text(double(mean(v1hr(block_max_i))), double(mean(hs(block_max_i))*0.96), 'average', ...
-%    'horizontalalignment', 'center', 'fontsize', 6);
+%plot(v1hr(block_max_i), hs(block_max_i), 'xr');
+sp = (2 * pi * hs(block_max_i)) ./ (9.81 * tp(block_max_i).^2);
+scatter(v1hr(block_max_i), hs(block_max_i), 30, sp, 'filled', 'MarkerEdgeColor', 'k');
+c = colorbar;
+caxis([1/40 1/25])
+c.Label.String = 'Steepness at maximum (-)';
 box off
 xlabel('1-hr wind speed at maximum (m/s)') 
 ylabel('Significant wave height at maximum (m)')
