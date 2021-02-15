@@ -22,45 +22,45 @@ for i = 1 : 4
     mus(:, :, i) = R.mu(vgrid, hgrid, tp(hgrid, i)) .* (1 + normrnd(0, 0.02, size(vgrid)));
 end
 
-figure
-for i = 1 : 4
-    nexttile
-    contourf(vgrid, hgrid, squeeze(sigmas(:, :, i)), 10);
-    title(['Tp index = ' num2str(i) ]);
-    caxis([0.4 2.5] * 10^7)
-    if mod(i, 2) == 1
-        ylabel('Significant wave height (m)');
-    end
-    if i >= 3
-        xlabel('1-hr wind speed (m/s)');
-    end
-end
-c = colorbar;
-c.Label.String = '\sigma (Nm) ';
-c.Layout.Tile = 'east';
+% figure
+% for i = 1 : 4
+%     nexttile
+%     contourf(vgrid, hgrid, squeeze(sigmas(:, :, i)), 10);
+%     title(['Tp index = ' num2str(i) ]);
+%     caxis([0.4 2.5] * 10^7)
+%     if mod(i, 2) == 1
+%         ylabel('Significant wave height (m)');
+%     end
+%     if i >= 3
+%         xlabel('1-hr wind speed (m/s)');
+%     end
+% end
+% c = colorbar;
+% c.Label.String = '\sigma (Nm) ';
+% c.Layout.Tile = 'east';
+% 
+% figure
+% for i = 1 : 4
+%     nexttile
+%     contourf(vgrid, hgrid, squeeze(mus(:, :, i)), 10);
+%     title(['Tp index = ' num2str(i) ]);
+%     caxis([2 10] * 10^7)
+%     if mod(i, 2) == 1
+%         ylabel('Significant wave height (m)');
+%     end
+%     if i >= 3
+%         xlabel('1-hr wind speed (m/s)');
+%     end
+% end
+% c = colorbar;
+% c.Label.String = '\mu (Nm) ';
+% c.Layout.Tile = 'east';
 
-figure
 for i = 1 : 4
-    nexttile
-    contourf(vgrid, hgrid, squeeze(mus(:, :, i)), 10);
-    title(['Tp index = ' num2str(i) ]);
-    caxis([2 10] * 10^7)
-    if mod(i, 2) == 1
-        ylabel('Significant wave height (m)');
-    end
-    if i >= 3
-        xlabel('1-hr wind speed (m/s)');
-    end
-end
-c = colorbar;
-c.Label.String = '\mu (Nm) ';
-c.Layout.Tile = 'east';
-
-for i = 1 : 4
-    t2d = squeeze(tgrid(:,:,i));
+    t2d = squeeze(tp(hgrid, i));
     temp = [vgrid(:), hgrid(:), t2d(:)];
     sigma2d = squeeze(sigmas(:,:,i));
-    mu2d = squeeze(sigmas(:,:,i));
+    mu2d = squeeze(mus(:,:,i));
     if i == 1
         X = temp;
         ysigma = sigma2d(:);
@@ -76,46 +76,116 @@ end
 % x(:, 1) = v, x(:, 2) = hs, x(:, 3) = tp
 modelfunSigma = @(b, x) 0 + (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* (b(1) .* x(:,1).^2 + ...
     (x(:,1) <= 25) .* (b(2) .* x(:,1) - b(3) .* x(:,1).^2) + b(4) .* x(:,2) ./ (1 + 0.05 .* (x(:,3) - 3)));
-
 beta0 = [10^5 10^5 10^5 10^5];
 mdlSigma = fitnlm(X, ysigma, modelfunSigma, beta0)
-
 sigmaHat = predict(mdlSigma, X);
 
-figure
-nexttile
-scatter3(X(:,1), X(:,2), X(:,3), 20, ysigma)
-xlabel('1-hr wind speed (m/s)');
-ylabel('Significant wave height (m)');
-zlabel('Significant wave height');
-title('Observed')
+modelfunMu = @(b, x) 0 + (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* (b(1) .* x(:,1).^2 + ...
+    (x(:,1) <= 25) .* (b(2) .* x(:,1) - b(3) .* x(:,1).^2) + b(4) .* x(:,2) ./ (1 + 0.05 .* (x(:,3) - 3)));
+beta0 = [10^5 10^5 10^5 10^5];
+mdlMu = fitnlm(X, ymu, modelfunMu, beta0)
+muHat = predict(mdlMu, X);
 
-nexttile
-scatter3(X(:,1), X(:,2), X(:,3), 20, sigmaHat)
-xlabel('1-hr wind speed (m/s)');
-ylabel('Significant wave height (m)');
-zlabel('Significant wave height');
-title('Predicted')
+% figure
+% nexttile
+% scatter3(X(:,1), X(:,2), X(:,3), 20, ysigma)
+% xlabel('1-hr wind speed (m/s)');
+% ylabel('Significant wave height (m)');
+% zlabel('Significant wave height');
+% title('Observed')
+% 
+% nexttile
+% scatter3(X(:,1), X(:,2), X(:,3), 20, sigmaHat)
+% xlabel('1-hr wind speed (m/s)');
+% ylabel('Significant wave height (m)');
+% zlabel('Significant wave height');
+% title('Predicted')
+% c = colorbar;
+% c.Label.String = '\sigma (Nm) ';
+% c.Layout.Tile = 'east';
+% sgtitle('sigma')
 
-c = colorbar;
-c.Label.String = '\sigma (Nm) ';
-c.Layout.Tile = 'east';
 
-figure
-nexttile
-contourf(vgrid, hgrid, squeeze(sigmas(:, :, i)))
-title('Observed')
-nexttile
-sigmatp1 = nan(size(vgrid));
-for i = 1 : size(vgrid, 1)
-    for j = 1 : size(vgrid, 2)
-        X = [vgrid(i, j), hgrid(i, j), tp(hgrid(i, j), 1)];
-        sigmatp1(i, j) = predict(mdlSigma, X);
+figure('Position', [100 100 500 800])
+t = tiledlayout(4, 2);
+clower = min(sigmas(:));
+cupper = max(sigmas(:)) * 0.95;
+for ii = 1 : 4
+    nexttile
+    contourf(vgrid, hgrid, squeeze(sigmas(:, :, ii)), 10)
+    title(['from 1-hr simulation, t_{tp' num2str(ii) '} surface'])
+    caxis([clower cupper])
+    nexttile
+    sigmatp1 = nan(size(vgrid));
+    for i = 1 : size(vgrid, 1)
+        for j = 1 : size(vgrid, 2)
+            Xtemp = [vgrid(i, j), hgrid(i, j), tp(hgrid(i, j), ii)];
+            sigmatp1(i, j) = predict(mdlSigma, Xtemp);
+        end
     end
+    contourf(vgrid, hgrid, sigmatp1, 10);
+    title(['predicted, t_{tp' num2str(ii) '} surface'])
+    caxis([clower cupper])
 end
-contourf(vgrid, hgrid, sigmatp1, 10);
-title('Predicted');
 
 c = colorbar;
 c.Label.String = '\sigma (Nm) ';
 c.Layout.Tile = 'east';
+t.XLabel.String = '1-hr wind speed (m/s)';
+t.YLabel.String = 'Significant wave height (m)';
+%sgtitle('sigma')
+exportgraphics(gcf, 'gfx/EmulatorFit_Sigma.jpg') 
+exportgraphics(gcf, 'gfx/EmulatorFit_Sigma.pdf') 
+
+% mu
+% figure
+% nexttile
+% scatter3(X(:,1), X(:,2), X(:,3), 20, ymu)
+% xlabel('1-hr wind speed (m/s)');
+% ylabel('Significant wave height (m)');
+% zlabel('Significant wave height');
+% title('Observed')
+% 
+% nexttile
+% scatter3(X(:,1), X(:,2), X(:,3), 20, muHat)
+% xlabel('1-hr wind speed (m/s)');
+% ylabel('Significant wave height (m)');
+% zlabel('Significant wave height');
+% title('Predicted')
+% c = colorbar;
+% c.Label.String = '\sigma (Nm) ';
+% c.Layout.Tile = 'east';
+% sgtitle('mu')
+
+
+figure('Position', [100 100 500 800])
+t = tiledlayout(4, 2);
+clower = min(mus(:));
+cupper = max(mus(:)) * 0.95;
+for ii = 1 : 4
+    nexttile
+    contourf(vgrid, hgrid, squeeze(mus(:, :, ii)), 10)
+    title(['from 1-hr simulation, t_{tp' num2str(ii) '} surface'])
+    caxis([clower cupper]);
+    nexttile
+    mutp1 = nan(size(vgrid));
+    for i = 1 : size(vgrid, 1)
+        for j = 1 : size(vgrid, 2)
+            Xtemp = [vgrid(i, j), hgrid(i, j), tp(hgrid(i, j), ii)];
+            mutp1(i, j) = predict(mdlMu, Xtemp);
+        end
+    end
+    contourf(vgrid, hgrid, mutp1, 10);
+    title(['predicted, t_{tp' num2str(ii) '} surface'])
+    caxis([clower cupper]);
+end
+
+c = colorbar;
+c.Label.String = '\mu (Nm) ';
+c.Layout.Tile = 'east';
+t.XLabel.String = '1-hr wind speed (m/s)';
+t.YLabel.String = 'Significant wave height (m)';
+exportgraphics(gcf, 'gfx/EmulatorFit_Mu.jpg') 
+exportgraphics(gcf, 'gfx/EmulatorFit_Mu.pdf') 
+
+%sgtitle('mu')

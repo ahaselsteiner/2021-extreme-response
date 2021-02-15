@@ -4,10 +4,15 @@ classdef ResponseEmulator
     
     properties
         k = -0.1
-        sigma = @(v1hr, hs, tp) 0 + (tp >= sqrt(2 * pi .* hs ./ (9.81 .* 1/14.99))) .* (2.1e+03 .* v1hr.^2 + (v1hr <= 25) .* (1.4e+06 .* v1hr -  5.3e+04 .* v1hr.^2) + 1.7e+06  .* hs ./ (1 + 0.05 .* (tp - 3)))
-        mu = @(v1hr, hs, tp) 0 + (tp >= sqrt(2 * pi .* hs ./ (9.81 .* 1/14.99))) .* (3.5e+04 .* v1hr.^2 + (v1hr <= 25) .* (8e+06 .* v1hr -  2.5e+05 .* v1hr.^2) + 3.2e+06  .* hs ./ (1 + 0.05 .* (tp - 3)))
+        sigma = @(v1hr, hs, tp) 0 + (tp >= sqrt(2 * pi .* hs ./ (9.81 .* 1/14.99))) .* (5.0e+03 .* v1hr.^2 + (v1hr <= 25) .* (1.4e+06 .* v1hr -  5.3e+04 .* v1hr.^2) + 1.7e+06  .* hs ./ (1 + 0.05 .* (tp - 3)))
+        mu = @(v1hr, hs, tp) 0 + (tp >= sqrt(2 * pi .* hs ./ (9.81 .* 1/14.99))) .* (3.3e+04 .* v1hr.^2 + (v1hr <= 25) .* (8e+06 .* v1hr -  2.5e+05 .* v1hr.^2) + 3.2e+06  .* hs ./ (1 + 0.05 .* (tp - 3)))
         maxima_per_hour = 60;
         tpbreaking = @(hs) sqrt(2 * pi * hs / (9.81 * 1/15));
+        tpSteepness = @(hs, steepness) sqrt(2 * pi * hs / (9.81 * steepness))
+        tp = @(hs, idx) (idx == 1) .* sqrt(2 * pi * hs / (9.81 * 1/15)) + ...
+            (idx == 2) .* sqrt(2 * pi * hs / (9.81 * 1/20)) + ...
+            (idx == 3) .* (sqrt(2 * pi * hs / (9.81 * 1/20)) + 1 ./ (1 + sqrt(hs + 2)) * 8) + ...
+            (idx == 4) .* (sqrt(2 * pi * hs / (9.81 * 1/20)) + 1 ./ (1 + sqrt(hs + 2)) * 20);
     end
     
     methods
@@ -41,6 +46,14 @@ classdef ResponseEmulator
                         end
                     end
                 end
+            end
+        end
+        
+        function r = randomSample1hr(obj, v1hr, hs, tp, n)
+            p = rand(n, 1);
+            r = nan(n, 1);
+            for i = 1 : n
+                r(i) = obj.ICDF1hr(v1hr, hs, tp, p(i));
             end
         end
         
