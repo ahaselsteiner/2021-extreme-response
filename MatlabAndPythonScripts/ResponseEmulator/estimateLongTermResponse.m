@@ -60,6 +60,12 @@ sp = (2 * pi * hs(block_max_i)) ./ (9.81 * tp(block_max_i).^2);
 scatter(v1hr(block_max_i), hs(block_max_i), 30, sp, 'filled', 'MarkerEdgeColor', 'k');
 c = colorbar;
 caxis([1/40 1/25])
+c.Ticks = [1/40 1/30 1/25];
+c.TickLabels = {'1/40', '1/30', '1/25'};  
+c.Label.String = 'Steepness at maximum (-)';
+box off
+set(gca, 'XLim', [0, get(gca, 'XLim') * [0; 1]])
+set(gca, 'YLim', [0, get(gca, 'YLim') * [0; 1]])
 c.Label.String = 'Steepness at maximum (-)';
 box off
 xlabel('1-hr wind speed at maximum (m/s)') 
