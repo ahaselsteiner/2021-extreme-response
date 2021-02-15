@@ -1,3 +1,6 @@
+SHAPE = -0.2;
+N_BLOCKS = 60;
+
 %load('OvrDataEmulator');
 maxr = max(Ovr,[],4);
 gridSize = size(maxr);
@@ -17,9 +20,22 @@ sigmas = nan([size(vgrid), 4]);
 mus = nan([size(vgrid), 4]);
 
 R = ResponseEmulator;
-for i = 1 : 4
-    sigmas(:, :, i) = R.sigma(vgrid, hgrid, tp(hgrid, i)) .* (1 + normrnd(0, 0.02, size(vgrid)));
-    mus(:, :, i) = R.mu(vgrid, hgrid, tp(hgrid, i)) .* (1 + normrnd(0, 0.02, size(vgrid)));
+for i = 1 : gridSize(1)
+    for j = 1 : gridSize(2)
+        for k = 1 : gridSize(3)
+            if maxr(i, j, k) > 0 
+                r = Ovr(i, j, k, :);
+                pd = gevToBlockMaxima(r, SHAPE, N_BLOCKS);
+                sigmas(j, i, k) = pd.sigma;
+                mus(j, i, k) = pd.mu;
+            else
+                sigmas(j, i, k) = R.sigma(vgrid(j, i), hgrid(j, i), tp(hgrid(j, i), k)) .* (1 + normrnd(0, 0.02));
+                mus(j, i, k) = R.mu(vgrid(j, i), hgrid(j, i), tp(hgrid(j, i), k)) .* (1 + normrnd(0, 0.02));
+                sigmas(j, i, k) = 0;
+                mus(j, i, k) = 0;
+            end
+        end
+    end
 end
 
 % figure
