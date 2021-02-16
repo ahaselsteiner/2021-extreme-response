@@ -109,7 +109,7 @@ rmedian = R.ICDF1hr(vmesh, hmesh, tpbreaking(hmesh), 0.5);
 
 capacity = 18.77 * 10^7;
 figure
-contourf(vmesh, hmesh, rmedian)
+contourf(vmesh, hmesh, rmedian, 10)
 hold on
 c = colorbar;
 c.Label.String = 'Median maximum 1-hr oveturning moment (Nm) ';
