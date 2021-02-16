@@ -1,12 +1,12 @@
-load('DEF_with_3_variables.mat')
+load('datasets-complete-DEF-3-variables.mat')
 
 
 % According to IEC61400-3-1:2019-04, page 18, a logarithmic profile and a 
 % power law profile are commonly used. Liu et al.
 % (10.1016/j.renene.2019.02.011) use the power law (see their Eq. 1).
-hubHeight = 90;
-alpha = 0.1; % as in 10.1016/j.renene.2019.02.011
-v10hub = D.V .* (90/10)^alpha;
+hubHeight = 87.6;
+alpha = 0.14; % as for normal wind speed in IEC 61400-3-1 p. 35
+v10hub = D.V .* (hubHeight/10)^alpha;
 v1hhub = v10hub * 0.95;
 Hs = D.Hs;
 Tz = D.Tz;

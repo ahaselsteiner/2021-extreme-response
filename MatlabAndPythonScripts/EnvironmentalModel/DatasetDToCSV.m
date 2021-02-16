@@ -1,10 +1,10 @@
-load('DEF_with_3_variables.mat')
+load('datasets-complete-DEF-3-variables.mat')
 
 
 % According to IEC61400-3-1:2019-04, page 18, a logarithmic profile and a 
 % power law profile are commonly used. Liu et al.
 % (10.1016/j.renene.2019.02.011) use the power law (see their Eq. 1).
-hubHeight = 90;
+hubHeight = 87.6;
 alpha = 0.14; % as for normal wind speed in IEC 61400-3-1 p. 35
 
 % Possible alpha values: 
@@ -13,10 +13,10 @@ alpha = 0.14; % as for normal wind speed in IEC 61400-3-1 p. 35
 %   0.20 for normal wind speed in IEC 61400-1 p. 31
 %   0.11 for turbulent extreme wind speed model in 61400-1 p. 33
 
-V10hub = D.V .* (90/10)^alpha;
-D.V1h_hub = V10hub * 0.95; % 61400-3-1:2019 p. 34
+V10hub = Dc.V .* (hubHeight/10)^alpha;
+Dc.V1h_hub = V10hub * 0.95; % 61400-3-1:2019 p. 34
 
-vHsTzStruct2Csv(D, 'DForNREL.txt');
+vHsTzStruct2Csv(Dc, 'DForNREL.txt');
 
 
 
@@ -26,7 +26,7 @@ function vHsTzStruct2Csv(Data, fileName)
        strTime{iTime} = datestr(time(iTime), 'yyyy-mm-dd-HH') ; 
     end
     %%Write CSV file
-    fullPath = ['2020-loads\' fileName]
+    fullPath = ['' fileName];
     fid = fopen(fullPath, 'wt') ;
     
     % Print the header
