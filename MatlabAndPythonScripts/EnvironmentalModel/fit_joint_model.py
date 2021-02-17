@@ -78,15 +78,15 @@ fig_rawdata.savefig('gfx/EnvironmentalDataset.pdf', bbox_inches='tight')
 
 fig_sim_points, axs = plt.subplots(1, 2, figsize=(9,4), dpi=300, sharey=True)
 inc = 2
-hs_sim = np.arange(1, 15 + inc, inc)
+hs_sim = np.append(0, np.arange(1, 15 + inc, inc))
 inc = 2
-v_sim = np.arange(1, 25 + inc, inc)
+v_sim = np.append(0, np.arange(1, 25 + inc, inc))
 v_sim = np.append(v_sim, np.array([26, 30, 35, 40, 45]))
 vgrid, hsgrid = np.meshgrid(v_sim, hs_sim)
 axs[0].scatter(v, hs, c='black', s=5, alpha=0.5, rasterized=True)
 axs[0].scatter(vgrid, hsgrid, c='red', s=10)
 
-verts = [(0, 8), (8, 8), (8, 10), (16, 10), (16, 12), (20, 12), (20, 15.5), (0, 15.5)]
+verts = [(-0.5, 8), (8, 8), (8, 10), (16, 10), (16, 12), (20, 12), (20, 15.5), (-0.5, 15.5)]
 poly = Polygon(verts, facecolor='0.9', edgecolor='0.5')
 axs[0].add_patch(poly)
 
@@ -95,7 +95,7 @@ axs[0].set_ylabel(hs_label)
 axs[0].spines['right'].set_visible(False)
 axs[0].spines['top'].set_visible(False)
 axs[1].scatter(tp, hs, c='black', s=5, alpha=0.5, rasterized=True)
-hs_s = np.arange(0.1, 15, 0.2)
+hs_s = np.arange(0, 15, 0.1)
 sps = [1/15, 1/20]
 for i in range(2):
     sp = sps[i]
