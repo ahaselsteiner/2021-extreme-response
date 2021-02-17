@@ -4,6 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import csv, math
+import pandas as pd
 
 from viroconcom.fitting import Fit
 from viroconcom.plot import plot_marginal_fit, plot_dependence_functions
@@ -74,8 +75,10 @@ print('Done with calculating f')
 
 fig, ax = plt.subplots(1,1, figsize=(5,5), dpi=300)
 ax.scatter(v, hs, c='black', s=5, alpha=0.5, rasterized=True)
+dc_v = np.array([np.arange(3, 37.1, 2), np.arange(3, 37.1 + 0.1, 2)])
+dc_hs = np.empty(dc_v.shape)
 for i in range(2):
-    if i == 1:
+    if i == 0:
         contour_v = IFORMC.coordinates[0]
         contour_hs = IFORMC.coordinates[1]
     else:
@@ -91,29 +94,27 @@ for i in range(2):
     contour_hs_upper = contour_hs_upper[p]
 
     # Select design conditons along the frontier interval, one condition per 1 s Tz.
-    dc_v = np.arange(3, max(contour_v_upper) + 0.1, 2)
-    #dc_v = np.append(dc_v, [26, 30, 35])
-    dc_hs = np.interp(dc_v, contour_v_upper, contour_hs_upper)
+    dc_hs[i,:] = np.interp(dc_v[i,:], contour_v_upper, contour_hs_upper)
 
 
-    if i == 1:
+    if i == 0:
         ax.plot(np.append(contour_v, contour_v[0]), np.append(contour_hs, contour_hs[0]), '-b')
-        ax.plot(dc_v, dc_hs, 'ob', label='IFORM')
+        ax.plot(dc_v[i,:], dc_hs[i,:], 'ob', label='IFORM')
     else:
         CS = ax.contour(vgrid, hgrid, f, [HDC2D.fm], colors='red')
-        ax.plot(dc_v, dc_hs, 'or', label='Highest density')
+        ax.plot(dc_v[i,:], dc_hs[i,:], 'or', label='Highest density')
 
-    if i == 1:
+    if i == 0:
         csv_name = 'iform_wind_wave.csv'
     else:
         csv_name = 'hdc_wind_wave.csv'
     
     # Write contour coordinates into a CSV file
-    write_contour(dc_v, dc_hs, csv_name, label_x=v_label, label_y=hs_label)
-    print('V: ')
-    print(dc_v)
-    print('Hs: ')
-    print(dc_hs)
+    write_contour(dc_v[i,:], dc_hs[i,:], csv_name, label_x=v_label, label_y=hs_label)
+    #print('V: ')
+    #print(dc_v[i,:])
+    #print('Hs: ')
+    #print(dc_hs[i,:])
 
 ax.spines['right'].set_visible(False)
 ax.spines['top'].set_visible(False)
@@ -123,5 +124,25 @@ ax.set_xlabel(v_label)
 ax.set_ylabel(hs_label)
 ax.legend()
 fig.savefig('gfx/Contour_50yr.pdf', bbox_inches='tight')
-plt.show()
+
+# Print coordinates in table: V_1h_hub, Tp at 1/15 steepness.
+const_s = 1.0 / 15
+g = 9.81
+tp_iform = np.sqrt((2 * math.pi * dc_hs[0,:]) / (g * const_s))
+tp_hdc = np.sqrt((2 * math.pi * dc_hs[1,:]) / (g * const_s))
+tbl = pd.DataFrame(np.vstack((dc_v[0,:], dc_hs[0,:], tp_iform, dc_v[1,:], dc_hs[1,:], tp_hdc)).transpose(), 
+                columns=['IFORM: V (m/s)', 'H_s (m)', 'T_p (s)', 'HDC: V (m/s)', 'H_s (m)', 'T_p (s)'])
+print(tbl.to_latex(formatters=[
+    lambda x : '%.2g' % x, # v
+    lambda x : '%.2f' % x, # hs
+    lambda x : '%.2f' % x, # tp
+    lambda x : '%.2g' % x, # v
+    lambda x : '%.2f' % x, # hs
+    lambda x : '%.2f' % x, # tp
+],
+column_format='lllllll',
+index=False,
+escape=False))
+
+#plt.show()
 # %%

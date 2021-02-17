@@ -87,7 +87,7 @@ axs[0].scatter(v, hs, c='black', s=5, alpha=0.5, rasterized=True)
 axs[0].scatter(vgrid, hsgrid, c='red', s=10)
 
 verts = [(-0.5, 8), (8, 8), (8, 10), (16, 10), (16, 12), (20, 12), (20, 15.5), (-0.5, 15.5)]
-poly = Polygon(verts, facecolor='0.9', edgecolor='0.5')
+poly = Polygon(verts, facecolor='1', edgecolor='1')
 axs[0].add_patch(poly)
 
 axs[0].set_xlabel(v_label)
@@ -221,7 +221,7 @@ dist_description_hs = {'name': 'Weibull_Exp',
                        'width_of_intervals': 0.5,
                        'fixed_parameters': (None, None, None, 5),
                        # shape, location, scale, shape2
-                       'dependency': (0, None, 0, None<),
+                       'dependency': (0, None, 0, None),
                        # shape, location, scale, shape2
                        'functions': ('logistics4', None, 'alpha3', None),
                        # shape, location, scale, shape2
