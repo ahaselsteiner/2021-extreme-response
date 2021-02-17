@@ -51,15 +51,33 @@ dist_description_hs = {'name': 'Weibull_Exp',
                        'do_use_weights_for_dependence_function': True}
 
 # Fit the model to the data.
-fit2D = Fit((v, hs), (dist_description_v, dist_description_hs))
-dist2D = fit2D.mul_var_dist
+fit = Fit((v, hs), (dist_description_v, dist_description_hs))
+joint_dist = fit.mul_var_dist
 print('Done with fitting the 2D joint distribution')
 
-IFORMC = IFormContour(dist2D, return_period=50, state_duration=1)
+# Show goodness of fit plot.
+dist_v = joint_dist.distributions[0]
+fig_fit = plt.figure(figsize=(12.5, 4), dpi=150)
+ax1 = fig_fit.add_subplot(131)
+ax2 = fig_fit.add_subplot(132)
+ax3 = fig_fit.add_subplot(133)
+plot_marginal_fit(v, dist_v, fig=fig_fit, ax=ax1, label='$v$ (m s$^{-1}$)', dataset_char='D')
+plot_dependence_functions(fit=fit, fig=fig_fit, ax1=ax2, ax2=ax3, unconditonal_variable_label=v_label)
+fig_fit.subplots_adjust(wspace=0.25, bottom=0.15)
+figure_folder = 'gfx/'
+figure_fname = figure_folder + 'FitVHs'
+#fig_fit.savefig(figure_fname + '.pdf', bbox_inches='tight')
+fig_fit.savefig(figure_fname, dpi=dpi_for_printing_figures, facecolor='w', edgecolor='w',
+        orientation='portrait', papertype=None, format=None,
+        transparent=False, bbox_inches=None, pad_inches=0.1,
+        frameon=None, metadata=None)
+
+
+IFORMC = IFormContour(joint_dist, return_period=50, state_duration=1)
 
 limits = [(0, 45), (0, 25)]
 deltas = [0.05, 0.05]
-HDC2D = HighestDensityContour(dist2D, return_period=50, state_duration=1, 
+HDC2D = HighestDensityContour(joint_dist, return_period=50, state_duration=1, 
     limits=limits, deltas=deltas)
 print('Done with calcluating the 2D HDC')
 
@@ -69,7 +87,7 @@ vgrid, hgrid = np.mgrid[0:45:v_step, 0:22:h_step]
 f = np.empty_like(vgrid)
 for i in range(vgrid.shape[0]):
     for j in range(vgrid.shape[1]):
-        f[i,j] = dist2D.pdf([vgrid[i,j], hgrid[i,j]])
+        f[i,j] = joint_dist.pdf([vgrid[i,j], hgrid[i,j]])
 print('Done with calculating f')
 
 
@@ -111,10 +129,12 @@ for i in range(2):
     
     # Write contour coordinates into a CSV file
     write_contour(dc_v[i,:], dc_hs[i,:], csv_name, label_x=v_label, label_y=hs_label)
-    #print('V: ')
-    #print(dc_v[i,:])
-    #print('Hs: ')
-    #print(dc_hs[i,:])
+    
+    # Print coordinates to to copy them into matlab
+    print('V: ')
+    print(dc_v[i,:])
+    print('Hs: ')
+    print(dc_hs[i,:])
 
 ax.spines['right'].set_visible(False)
 ax.spines['top'].set_visible(False)

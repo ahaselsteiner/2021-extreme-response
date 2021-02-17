@@ -1,7 +1,7 @@
 % ** Explanation about the file format: **
 %
 % 1. dimension = wind, 2. dimension = hs, 3. dimension = tp
-M(1,3,4,:) = 'Response time series (as a double vector)';
+% M(1,3,4,:) = 'Response time series (as a double vector)';
 % v(1), hs(3), tp(hs(3), 4)
 % v = 1, hs = 5, tp = 13.4889
 
