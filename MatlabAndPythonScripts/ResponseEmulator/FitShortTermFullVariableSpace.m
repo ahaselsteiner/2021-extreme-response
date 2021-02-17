@@ -7,8 +7,10 @@ gridSize = size(maxr);
 currentNrEntries = sum(sum(sum(maxr>0)))
 
 % Checking whether the results make sense:
-figure('Position', [100 100 900 600])
-subplot(3, 1, 1:2);
+vid = 1;
+hsid = 3;
+figure('Position', [100 100 900 900])
+subplot(4, 1, 1:2);
 addpath('03_Calm_Sea_Complete_Wind')
 load 'CalmSeaComplete.mat';
 OvrAllSeeds = [Ovr_S1; Ovr_S2; Ovr_S3; Ovr_S4; Ovr_S5; Ovr_S6];
@@ -25,18 +27,28 @@ for i = 1 : 6
 end
 hold on
 FormatConventionForMomentTimeSeries % to get the variables: v, hs, tp(hs, idx)
-h = scatter(v, maxr(:, 1, 1), ms, 'MarkerFaceColor', 'red', ...
-    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k', 'DisplayName', 'Hs = 1 m');
+h = scatter(v, maxr(:, hsid, 1), ms, 'MarkerFaceColor', 'red', ...
+    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k', 'DisplayName', ['Hs = ' num2str(hs(hsid)) ' m, Tp = ' num2str(tp(hs(hsid), 1))]);
+h = scatter(v, maxr(:, hsid, 2), ms, 'MarkerFaceColor', 'blue', ...
+    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k', 'DisplayName', ['Hs = ' num2str(hs(hsid)) ' m, Tp = ' num2str(tp(hs(hsid), 2))]);
 legend('box', 'off', 'location', 'eastoutside')
 xlabel('1-hr wind speed (m/s)');
 ylabel('Max 1-hr overturning moment (Nm)');
 
-subplot(3, 1, 3);
-plot(squeeze(Ovr(14, 1, 1, :)))
-xlabel('Time step (-)');
-ylabel('Max 1-hr overturning moment (Nm)');
+subplot(4, 1, 3);
+
+plot(minutes(Time/60), squeeze(Ovr(vid, hsid, 1, :)))
+%xlabel('Time step (-)');
+ylabel('Overturning moment (Nm)');
 box off
-legend('V = 26 m/s, Hs = 1 m', 'box', 'off', 'location', 'eastoutside');
+legend(['V = ' num2str(v(vid)) ' m/s, Hs = ' num2str(hs(hsid)) ' m, Tp = ' num2str(tp(hs(hsid), 1))], 'box', 'off', 'location', 'eastoutside');
+
+subplot(4, 1, 4);
+plot(minutes(Time/60), squeeze(Ovr(vid, hsid, 2, :)))
+%xlabel('Time step (-)');
+ylabel('Overturning moment (Nm)');
+box off
+legend(['V = ' num2str(v(vid)) ' m/s, Hs = ' num2str(hs(hsid)) ' m, Tp = ' num2str(tp(hs(hsid), 2))], 'box', 'off', 'location', 'eastoutside');
 
 exportgraphics(gcf, 'gfx/ValidtyCheckHs1.jpg') 
 
