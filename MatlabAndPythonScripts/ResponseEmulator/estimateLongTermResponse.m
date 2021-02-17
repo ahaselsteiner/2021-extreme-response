@@ -3,7 +3,7 @@ load('datasets-complete-DEF-3-variables.mat');
 half_year = 365/2 * 24;
 
 t = Dc.t(half_year : end);
-v1hr = Dc.V1hr(half_year : end);
+v1hr = Dc.V1h_hub(half_year : end);
 hs = Dc.Hs(half_year : end);
 tz = Dc.Tz(half_year : end);
 tp = 1.2796 * tz; % Assuming a JONSWAP spectrum with gamma = 3.3
@@ -51,6 +51,7 @@ plot(t(block_max_i), r(block_max_i), 'xr');
 ylabel('Overturning moment (Nm)')
 yyaxis right 
 plot(t(1:n), v1hr(1:n));
+ylim([0 50])
 ylabel('1-hr wind speed (m/s)') 
 xlabel('Time (s)');
 subplot(4, 2, [5 7])

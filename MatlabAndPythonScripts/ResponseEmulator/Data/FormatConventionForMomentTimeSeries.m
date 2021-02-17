@@ -6,7 +6,7 @@ M(1,3,4,:) = 'Response time series (as a double vector)';
 % v = 1, hs = 5, tp = 13.4889
 
 v = [1:2:25, 26, 30, 35, 40, 45];
-hs = [1:2:15];
+hs = [0 1:2:15];
 y = @(x) x.^a;
 
 % S_p = (2 pi H_s) / (g T_p^2)
