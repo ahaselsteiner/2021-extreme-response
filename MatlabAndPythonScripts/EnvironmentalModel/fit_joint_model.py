@@ -206,14 +206,13 @@ axs[1].spines['top'].set_visible(False)
 
 
 fig_steepness.savefig('gfx/Steepness.pdf', bbox_inches='tight')
-plt.show()
+#plt.show()
 
 
 # %%
-# Fit 3D joint distribution model and plot fits.
+# Fit joint distribution and plot fits.
 
-# Define the structure of the probabilistic model that will be fitted to the
-# dataset.
+# Define the structure of the joint model.
 dist_description_v = {'name': 'Weibull_Exp',
                       'dependency': (None, None, None, None),
                       'width_of_intervals': 2}
@@ -227,287 +226,28 @@ dist_description_hs = {'name': 'Weibull_Exp',
                        # shape, location, scale, shape2
                        'min_datapoints_for_fit': 50,
                        'do_use_weights_for_dependence_function': True}
-dist_description_t = {'name': 'Lognormal_SigmaMu',
-                      'dependency': (1,  None, 1), #Shape, Location, Scale
-                      'functions': ('asymdecrease3', None, 'lnsquare2'), #Shape, Location, Scale
-                      'min_datapoints_for_fit': 50
-                      }
 
 
 # Fit the model to the data.
-fit = Fit((v, hs, tp),
-          (dist_description_v, dist_description_hs, dist_description_t))
+fit = Fit((v, hs),
+          (dist_description_v, dist_description_hs))
 joint_dist = fit.mul_var_dist
 dist_v = joint_dist.distributions[0]
 
 
-fig1 = plt.figure(figsize=(12.5, 4), dpi=150)
-ax1 = fig1.add_subplot(131)
-ax2 = fig1.add_subplot(132)
-ax3 = fig1.add_subplot(133)
-plot_marginal_fit(v, dist_v, fig=fig1, ax=ax1, label='$v$ (m s$^{-1}$)', dataset_char='D')
-plot_dependence_functions(fit=fit, fig=fig1, ax1=ax2, ax2=ax3, unconditonal_variable_label=v_label)
-fig1.subplots_adjust(wspace=0.25, bottom=0.15)
+fig_fit = plt.figure(figsize=(12.5, 4), dpi=150)
+ax1 = fig_fit.add_subplot(131)
+ax2 = fig_fit.add_subplot(132)
+ax3 = fig_fit.add_subplot(133)
+plot_marginal_fit(v, dist_v, fig=fig_fit, ax=ax1, label='$v$ (m s$^{-1}$)', dataset_char='D')
+plot_dependence_functions(fit=fit, fig=fig_fit, ax1=ax2, ax2=ax3, unconditonal_variable_label=v_label)
+fig_fit.subplots_adjust(wspace=0.25, bottom=0.15)
 figure_folder = 'gfx/'
 figure_fname = figure_folder + 'FitVHs'
-plt.savefig(figure_fname, dpi=dpi_for_printing_figures, facecolor='w', edgecolor='w',
+#fig_fit.savefig(figure_fname + '.pdf', bbox_inches='tight')
+fig_fit.savefig(figure_fname, dpi=dpi_for_printing_figures, facecolor='w', edgecolor='w',
         orientation='portrait', papertype=None, format=None,
         transparent=False, bbox_inches=None, pad_inches=0.1,
         frameon=None, metadata=None)
 
-dist_t = joint_dist.distributions[2]
-inspect_t = fit.multiple_fit_inspection_data[2]
-
-marker_discrete='o'
-markersize_discrete=5
-markerfacecolor_discrete='lightgray'
-markeredgecolor_discrete='k'
-style_dependence_function='b-'
-legend_fontsize=8
-factor_draw_longer=1.1
-
-fig2 = plt.figure(figsize=(12.5, 4), dpi=150)
-ax1 = fig2.add_subplot(131)
-sorted_hs = np.sort(hs)
-sorted_hs = sorted_hs[0::1000] # In paper's figure with 1, for speed higher
-n = sorted_hs.size
-i = np.array(range(n)) + 1
-pi = np.divide((i - 0.5), n)
-theoretical_quantiles = joint_dist.marginal_icdf(pi, dim=1)
-color_sample = 'k'
-marker_sample = 'x'
-marker_size = 10
-color_fit = 'b'
-plt.scatter(theoretical_quantiles, sorted_hs, c=color_sample, s=marker_size, 
-    marker=marker_sample, linewidths=1)
-plt.plot([0, max(theoretical_quantiles)], [0, max(theoretical_quantiles)], c=color_fit)
-xlabel_string = 'Theoretical quantiles, $h_s$ (m)'
-ylabel_string = 'Ordered values, $h_s$ (m)'
-plt.xlabel(xlabel_string)
-plt.ylabel(ylabel_string)
-ax1.spines['right'].set_visible(False)
-ax1.spines['top'].set_visible(False)
-
-ax2 = fig2.add_subplot(132)
-plt.sca(ax2)
-dp_function =   r'$\ln(' + str('%.3g' % dist_t.scale.a) + \
-                r'+' + str('%.3g' % dist_t.scale.b) + \
-                r'\sqrt{h_s / g})$'
-scale_at = inspect_t.scale_at
-x1 = np.linspace(0, max(scale_at) * factor_draw_longer, 100)
-plt.plot(scale_at, np.log(inspect_t.scale_value),
-            marker_discrete,
-            markersize=markersize_discrete,
-            markerfacecolor=markerfacecolor_discrete,
-            markeredgecolor=markeredgecolor_discrete,)
-plt.plot(x1, np.log(dist_t.scale(x1)),
-            style_dependence_function, label=dp_function)
-plt.xlabel(hs_label)
-plt.ylabel('$μ_{tz}$')
-plt.legend(frameon=False, prop={'size': legend_fontsize})
-ax2.spines['right'].set_visible(False)
-ax2.spines['top'].set_visible(False)
-
-ax3 = fig2.add_subplot(133)
-plt.sca(ax3)
-dp_function =   r'$' + str('%.4f' % dist_t.shape.a) + \
-                r' + ' + str('%.3g' % dist_t.shape.b) + \
-                r' / (1 + ' + str('%.3g' % dist_t.shape.c) + ' h_s )$'
-shape_at = inspect_t.shape_at
-x1 = np.linspace(0, max(shape_at) * factor_draw_longer, 100)
-plt.plot(shape_at, inspect_t.shape_value,
-            marker_discrete,
-            markersize=markersize_discrete,
-            markerfacecolor=markerfacecolor_discrete,
-            markeredgecolor=markeredgecolor_discrete,)
-plt.plot(x1, dist_t.shape(x1),
-             style_dependence_function,
-             label=dp_function)
-plt.xlabel(hs_label)
-plt.ylabel('$σ_{tz}$')
-plt.legend(frameon=False, prop={'size': legend_fontsize})
-ax3.spines['right'].set_visible(False)
-ax3.spines['top'].set_visible(False)
-figure_fname = figure_folder + 'FitHsTz'
-plt.savefig(figure_fname, dpi=dpi_for_printing_figures, facecolor='w', edgecolor='w',
-        orientation='portrait', papertype=None, format=None,
-        transparent=False, bbox_inches=None, pad_inches=0.1,
-        frameon=None, metadata=None)
 #plt.show()
-
-# %%
-# Calculate isosurface where density is almost zero
-
-from skimage.measure import marching_cubes_lewiner
-from mpl_toolkits.mplot3d import Axes3D
-
-v_step = 1.0
-h_step = 0.2
-t_step = 0.2
-v1d = np.arange(0, 50, v_step)
-vgrid, h, t = np.mgrid[0:50:v_step, 0:22:h_step, 0:22:t_step]
-f = np.empty_like(vgrid)
-for i in range(vgrid.shape[0]):
-    for j in range(vgrid.shape[1]):
-        for k in range(vgrid.shape[2]):
-            f[i,j,k] = joint_dist.pdf([vgrid[i,j,k], h[i,j,k], t[i,j,k]])
-print('Done with calculating f')
-
-
-#iso_val = 1E-10 # 50-yr HDC has a density value of ca. 9.1 E-9
-alpha = 1 / (50 * 365.25 * 24)
-
-HDC = HighestDensityContour(fit.mul_var_dist, return_period=50,
-    state_duration=1, limits=[(0, 50), (0, 25), (0, 25)])
-print('50-yr HDC has a density value of ' + str(HDC.fm))
-iso_val = HDC.fm
-
-#verts, faces, _, _ = marching_cubes_lewiner(f, iso_val, 
-#    spacing=(v_step, h_step, t_step))
-
-
-#fig = plt.figure()
-#ax = fig.add_subplot(111, projection='3d')
-#ax.plot_trisurf(verts[:, 0], verts[:,1], faces, verts[:, 2], cmap='Spectral',
-#                lw=1)
-#ax.set_xlabel('Wind speed (m/s)')
-#ax.set_ylabel('Significant wave height (m)')
-#ax.set_zlabel('Zero-up-crossing period (s)')
-
-# %%
-# Plot some slices
-import seaborn as sns
-
-fig3 = plt.figure()
-ax = fig3.add_subplot(111)
-
-contours_at_v = [1, 5, 10, 15, 20, 25, 30, 35]
-c = sns.color_palette(None, len(contours_at_v))
-
-fig4, axs = plt.subplots(2, 4, sharex=True, sharey=True, 
-    figsize=(8.5,5), dpi=300)
- 
-hs_axlim = 21
-for i, axi in enumerate(axs):
-    for j, subax in enumerate(axi):
-        idx = i * 4 + j
-        filter_v = contours_at_v[idx]
-        v_ind = np.where(v1d == filter_v)
-        v_ind = v_ind[0].astype(int)[0]
-        CS = ax.contour(t[v_ind,:,:], h[v_ind,:,:], f[v_ind,:,:], 
-            [iso_val], colors=[c[idx]])
-        CSsub = subax.contour(t[v_ind,:,:], h[v_ind,:,:], f[v_ind,:,:], 
-            [iso_val], colors=[c[idx]])
-        fmt = {}
-        strs = [f'{filter_v} m/s']
-        for l, s in zip(CS.levels, strs):
-            fmt[l] = s
-        ax.clabel(CS, CS.levels, fmt=fmt, inline=True, fontsize=8)
-        subax.clabel(CSsub, CS.levels, fmt=fmt, inline=True, fontsize=8)
-        v_threshold = 0.5
-        mask = (v > filter_v - v_threshold) & (v < filter_v + v_threshold)
-        subax.scatter(tp[mask], hs[mask], c='black', s=5, alpha=0.5, 
-            zorder=-2, rasterized=True)
-        subax.spines['right'].set_visible(False)
-        subax.spines['top'].set_visible(False)
-ax.scatter(tp, hs,c='black', s=5, alpha=0.5, zorder=-2, rasterized=True)
-ax.plot([3, 3], [0, hs_axlim], '--k')
-ax.text(2.5, 10, 'Eigenfrequency', fontsize=8, rotation=90,
-    verticalalignment='center')
-ax.set_ylim([0, hs_axlim])
-ax.set_xlim([0, 20])
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
-ax.set_xlabel(tp_label)
-ax.set_ylabel(hs_label)
-
-fs = 10
-fig4.tight_layout(rect=(0.075,0.1,1,1))
-fig4.text(0.56, 0.075, tp_label,
-         ha='center', 
-         fontsize=fs, 
-         weight='bold')
-fig4.text(0.04, 0.56, hs_label,
-         va='center', 
-         rotation='vertical', 
-         fontsize=fs, 
-         weight='bold')
-
-
-fig3.tight_layout()
-fig3.savefig('gfx/DensityAlmost0AtDifferentWindSpeeds.pdf', 
-bbox_inches='tight')
-fig4.savefig('gfx/DensityAlmost0AtDifferentWindSpeedsSubplots.pdf', 
-    bbox_inches='tight')
-
-# %%
-# Calculate a 2D wind-wave contour.
-
-# Define the structure of the 2D joint distribution
-dist_description_v = {'name': 'Weibull_Exp',
-                      'dependency': (None, None, None, None),
-                      'width_of_intervals': 2}
-dist_description_hs = {'name': 'Weibull_Exp',
-                       'width_of_intervals': 0.5,
-                       'fixed_parameters': (None, None, None, 5),
-                       # shape, location, scale, shape2
-                       'dependency': (0, None, 0, None),
-                       # shape, location, scale, shape2
-                       'functions': ('logistics4', None, 'alpha3', None),
-                       # shape, location, scale, shape2
-                       'min_datapoints_for_fit': 50,
-                       'do_use_weights_for_dependence_function': True}
-
-# Fit the model to the data.
-fit2D = Fit((v, hs), (dist_description_v, dist_description_hs))
-dist2D = fit2D.mul_var_dist
-print('Done with fitting the 2D joint distribution')
-
-limits = [(0, 45), (0, 25)]
-deltas = [0.05, 0.05]
-HDC2D = HighestDensityContour(dist2D, return_period=50, state_duration=3, 
-    limits=limits, deltas=deltas)
-print('Done with calcluating the 2D HDC')
-
-v_step = 0.1
-h_step = 0.1
-vgrid, hgrid = np.mgrid[0:45:v_step, 0:22:h_step]
-f = np.empty_like(vgrid)
-for i in range(vgrid.shape[0]):
-    for j in range(vgrid.shape[1]):
-        f[i,j] = dist2D.pdf([vgrid[i,j], hgrid[i,j]])
-print('Done with calculating f')
-
-fig5, ax = plt.subplots(1,1, figsize=(5,5), dpi=300)
-ax.scatter(v, hs, c='black', s=5, alpha=0.5, rasterized=True)
-CS = ax.contour(vgrid, hgrid, f, [HDC2D.fm], colors='blue')
-
-contour_v = HDC2D.coordinates[0]
-contour_hs = HDC2D.coordinates[1]
-# Get the frontier interval and sort it.
-mask = ((contour_v < 25) & (contour_hs > 2)) | ((contour_v >= 25) & (contour_hs > 8))
-contour_v_upper = contour_v[mask]
-contour_hs_upper = contour_hs[mask]
-p = contour_v_upper.argsort()
-contour_v_upper = contour_v_upper[p]
-contour_hs_upper = contour_hs_upper[p]
-
-# Select design conditons along the frontier interval, one condition per 1 s Tz.
-dc_v = np.arange(3, 25.1, 2)
-dc_v = np.append(dc_v, [26, 30, 35])
-dc_hs = np.interp(dc_v, contour_v_upper, contour_hs_upper)
-
-ax.plot(dc_v, dc_hs, 'ob')
-
-
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
-ax.set_xlim([0, 40])
-ax.set_ylim([0, 16])
-ax.set_xlabel(v_label)
-ax.set_ylabel(hs_label)
-
-fig5.savefig('gfx/WindWaveHDC.pdf', bbox_inches='tight')
-
-plt.show()
-# %%
