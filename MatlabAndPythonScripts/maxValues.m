@@ -1,5 +1,5 @@
 %% Initialize variables.
-filename = '4_30_1_3-1.out';
+filename = '6_30_1_3-1.out';
 startRow = 2406;
 endRow = 290406;
 
