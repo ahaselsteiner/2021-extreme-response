@@ -11,8 +11,14 @@ file_dist21{21} = [file_dist{7} ', pooled'];
 file_dist21{22} = [file_dist{13} ', pooled'];
 
 % GEV with fixed shape parameter.
-SHAPE = -0.2;
-gev = @(x, sigma, mu) gevpdf(x, SHAPE, sigma, mu); 
+SHAPE1 = -0.2;
+SHAPE2 = 0;
+V_THRESHOLD = 16.5;
+shape = @(v1hr) (v1hr <= V_THRESHOLD) .* SHAPE1 + (v1hr > V_THRESHOLD) .* SHAPE2;
+%SHAPE1 = @(v1hr) (v1hr <= 13) .* -0.2 + (v1hr > 13 & v1hr < 17) .* (-0.2 + (v1hr - 13) * 0.05) + (v1hr >= 17) .* 0
+gev1 = @(x, sigma, mu) gevpdf(x, SHAPE1, sigma, mu); 
+gev2 = @(x, sigma, mu) gevpdf(x, SHAPE2, sigma, mu); 
+
 
 N_BLOCKS = 60;
 
@@ -23,6 +29,7 @@ rs = {V9.S1, V9.S2, V9.S3, V9.S4, V9.S5, V9.S6, ...
 rs_6hr = {[V9.S1; V9.S2; V9.S3; V9.S4; V9.S5; V9.S6], ...
     [V15.S1; V15.S2; V15.S3; V15.S4; V15.S5; V15.S6], ...
     [V21.S1; V21.S2; V21.S3; V21.S4; V21.S5; V21.S6]};
+vs = [zeros(6,1) + 9; zeros(6,1) + 15; zeros(6,1) + 21; ];
 t = minutes(V9.t/60);
 block_length = floor(length(t) / N_BLOCKS);
 
@@ -36,7 +43,8 @@ pds = [];
 maxima = zeros(n_seeds, 1);
 x1 = zeros(n_seeds, 1);
 blocks = zeros(N_BLOCKS, block_length);
-block_maxima = zeros(n_seeds, N_BLOCKS);
+block_maxima = zeros(n_seeds * 3, N_BLOCKS);
+block_maxima_pooled = zeros(3, N_BLOCKS * n_seeds);
 block_max_i = zeros(N_BLOCKS, 1);
 for j = 1 : length(rs)
     r = rs{j};
@@ -57,14 +65,21 @@ for j = 1 : length(rs)
     plot(t(block_max_i), r(block_max_i), 'xr');
     xlabel('Time (s)');
     ylabel('Overturning moment (Nm)');
+    title(['V = ' num2str(vs(j)) ' m/s'])
 
     subplot(1, 4, 4)
     % Specific options are required to make MLE work for certain datasets.
     % Thanks to: https://groups.google.com/g/comp.soft-sys.matlab/c/vTkovg1IpMQ?pli=1
     o = statset('mlecustom');
     o.FunValCheck = 'off';
-    [parHat,parCI] = mle(block_maxima(j, :), 'pdf', gev, 'start', [std(r) max(r)], 'lower', [1, 1], 'upper', [10E12, 10E12], 'options', o);
-    pd = makedist('GeneralizedExtremeValue','k', SHAPE, 'sigma', parHat(1), 'mu', parHat(2));
+    if vs(j) < V_THRESHOLD
+        [parHat,parCI] = mle(block_maxima(j, :), 'pdf', gev1, 'start', [std(r) max(r)], 'lower', [1, 1], 'upper', [10E12, 10E12], 'options', o);
+        pd = makedist('GeneralizedExtremeValue','k', SHAPE1, 'sigma', parHat(1), 'mu', parHat(2));
+    else
+        [parHat,parCI] = mle(block_maxima(j, :), 'pdf', gev2, 'start', [std(r) max(r)], 'lower', [1, 1], 'upper', [10E12, 10E12], 'options', o);
+        pd = makedist('GeneralizedExtremeValue','k', SHAPE2, 'sigma', parHat(1), 'mu', parHat(2));
+    end
+    
     h = qqplot(block_maxima(j,:), pd);
     set(h(1), 'Marker', 'x')
     set(h(1), 'MarkerEdgeColor', 'r')
@@ -86,15 +101,21 @@ for j = 1 : length(rs)
     end
 end
 
-for j = 1: 3
+for j = 1 : 3
     r = rs_6hr{j};
     for i = 1 : N_BLOCKS * 6
         blocks(i,:) = r((i - 1) * block_length + 1 : i * block_length);
-        [block_maxima(j, i), maxid] = max(blocks(i,:));
+        [block_maxima_pooled(j, i), maxid] = max(blocks(i,:));
         block_max_i(i) = maxid + (i - 1) * block_length;
     end
-    [parHat,parCI] = mle(block_maxima(j, :), 'pdf', gev, 'start', [std(r) max(r)], 'lower', [1, 1], 'upper', [10E12, 10E12], 'options', o);
-    pd = makedist('GeneralizedExtremeValue','k', SHAPE, 'sigma', parHat(1), 'mu', parHat(2));
+    if j <= 2
+        [parHat,parCI] = mle(block_maxima_pooled(j, :), 'pdf', gev1, 'start', [std(r) max(r)], 'lower', [1, 1], 'upper', [10E12, 10E12], 'options', o);
+        pd = makedist('GeneralizedExtremeValue','k', SHAPE1, 'sigma', parHat(1), 'mu', parHat(2));
+    else
+        [parHat,parCI] = mle(block_maxima_pooled(j, :), 'pdf', gev2, 'start', [std(r) max(r)], 'lower', [1, 1], 'upper', [10E12, 10E12], 'options', o);
+        pd = makedist('GeneralizedExtremeValue','k', SHAPE2, 'sigma', parHat(1), 'mu', parHat(2));
+    end
+    
     pds_6hr(j) = pd;
 end
 
@@ -194,7 +215,7 @@ end
 set(hbar2, {'DisplayName'}, file_dist')
 legend(hbar2([1, 7, 13]), 'location', 'northwest', 'box', 'off') 
 box off
-text(0.64, 10*10^7, ['k = ' num2str(SHAPE)], 'fontsize', 7);
+text(0.64, 10*10^7, ['k1 = ' num2str(SHAPE1) ', k2 = ' num2str(SHAPE2)], 'fontsize', 7);
 set(gca, 'XTick', [1,2,3,4])
 set(gca, 'XTickLabel', {'$\sigma$', '$\mu$', '$\hat{x}_{1hr}$', 'realized max'}, 'TickLabelInterpreter', 'latex')
 

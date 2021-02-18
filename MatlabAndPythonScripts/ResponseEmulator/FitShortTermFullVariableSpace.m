@@ -71,7 +71,7 @@ for i = 1 : gridSize(1)
         for k = 1 : gridSize(3)
             if maxr(i, j, k) > 0 
                 r = Ovr(i, j, k, :);
-                pd = gevToBlockMaxima(r, SHAPE, N_BLOCKS);
+                pd = gevToBlockMaxima(r, N_BLOCKS, SHAPE);
                 sigmas(j, i, k) = pd.sigma;
                 mus(j, i, k) = pd.mu;
             else

@@ -5,7 +5,9 @@ classdef ResponseEmulator
     properties
         % Prameters of a GEV that describes 1-minute maxima of the over
         % turning moment.
-        k = -0.2
+        %k = -0.2
+        %k = @(v1hr) (v1hr < 16.5) .* -0.2 + (v1hr >= 16.5) .* 0
+        k = @(v1hr) (v1hr <= 13) .* -0.2 + (v1hr > 13 & v1hr < 17) .* (-0.2 + (v1hr - 13) * 0.05) + (v1hr >= 17) .* 0
         % The first guestimates.
         sigma = @(v1hr, hs, tp) 0 + (tp >= sqrt(2 * pi .* hs ./ (9.81 .* 1/14.99))) .* ...
             (5.0e+03 .* v1hr.^2 + (v1hr <= 25) .* (1.4e+06 .* v1hr -  5.3e+04 .* v1hr.^2) + ...
@@ -48,17 +50,17 @@ classdef ResponseEmulator
     
     methods
         function p = CDF1min(obj, v1hr, hs, tp, r)
-            pd = makedist('GeneralizedExtremeValue', 'k', obj.k, 'sigma', obj.sigma(v1hr,hs,tp), 'mu', obj.mu(v1hr,hs,tp));
+            pd = makedist('GeneralizedExtremeValue', 'k', obj.k(v1hr), 'sigma', obj.sigma(v1hr,hs,tp), 'mu', obj.mu(v1hr,hs,tp));
             p = pd.cdf(r);
         end
         
         function p = CDF1hr(obj, v1hr, hs, tp, r)
-            pd = makedist('GeneralizedExtremeValue', 'k', obj.k, 'sigma', obj.sigma(v1hr,hs,tp), 'mu', obj.mu(v1hr,hs,tp));
+            pd = makedist('GeneralizedExtremeValue', 'k', obj.k(v1hr), 'sigma', obj.sigma(v1hr,hs,tp), 'mu', obj.mu(v1hr,hs,tp));
             p = pd.cdf(r).^obj.maxima_per_hour;
         end
         
         function r = ICDF1min(obj, v1hr, hs, tp, p)
-            pd = makedist('GeneralizedExtremeValue','k', obj.k, 'sigma', obj.sigma(v1hr,hs,tp), 'mu', obj.mu(v1hr,hs,tp));
+            pd = makedist('GeneralizedExtremeValue','k', obj.k(v1hr), 'sigma', obj.sigma(v1hr,hs,tp), 'mu', obj.mu(v1hr,hs,tp));
             r = pd.icdf(p);
         end
         
@@ -69,7 +71,8 @@ classdef ResponseEmulator
                     for kk = 1 : size(v1hr,  3)
                         s = obj.sigma(v1hr(i,j,kk),hs(i,j,kk),tp(i,j,kk));
                         m = obj.mu(v1hr(i,j,kk),hs(i,j,kk),tp(i,j,kk));
-                        pd = makedist('GeneralizedExtremeValue','k', obj.k, 'sigma', s, 'mu', m);
+                        shapek = obj.k(v1hr(i,j,kk));
+                        pd = makedist('GeneralizedExtremeValue','k', shapek, 'sigma', s, 'mu', m);
                         if length(p) == 1
                             r(i,j,kk) = pd.icdf(p.^(1/obj.maxima_per_hour));
                         else
@@ -89,7 +92,7 @@ classdef ResponseEmulator
         end
         
         function f = PDF1hr(obj, v1hr, hs, tp, r)
-            pd = makedist('GeneralizedExtremeValue', 'k', obj.k, 'sigma', obj.sigma(v1hr,hs,tp), 'mu', obj.mu(v1hr,hs,tp));
+            pd = makedist('GeneralizedExtremeValue', 'k', obj.k(v1hr), 'sigma', obj.sigma(v1hr,hs,tp), 'mu', obj.mu(v1hr,hs,tp));
             f = 60 .* pd.cdf(r).^59 .* pd.pdf(r);
         end
     end
