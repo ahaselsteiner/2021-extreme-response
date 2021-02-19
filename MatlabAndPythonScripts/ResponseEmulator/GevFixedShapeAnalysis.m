@@ -15,8 +15,8 @@ file_dist_with_pooled{29} = [file_dist{19} ', pooled'];
 N_BLOCKS = 60;
 
 % GEV with fixed shape parameter.
-SHAPE1 = -0.2;
-SHAPE2 = 0;
+SHAPE1 = -0.1;
+SHAPE2 = -0.1;
 V_THRESHOLD = 16.5;
 shape = @(v1hr) (v1hr <= V_THRESHOLD) .* SHAPE1 + (v1hr > V_THRESHOLD) .* SHAPE2;
 %SHAPE1 = @(v1hr) (v1hr <= 13) .* -0.2 + (v1hr > 13 & v1hr < 17) .* (-0.2 + (v1hr - 13) * 0.05) + (v1hr >= 17) .* 0

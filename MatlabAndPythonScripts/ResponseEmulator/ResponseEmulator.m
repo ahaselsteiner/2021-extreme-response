@@ -7,7 +7,8 @@ classdef ResponseEmulator
         % turning moment.
         %k = -0.2
         %k = @(v1hr) (v1hr < 16.5) .* -0.2 + (v1hr >= 16.5) .* 0
-        k = @(v1hr) (v1hr <= 13) .* -0.2 + (v1hr > 13 & v1hr < 17) .* (-0.2 + (v1hr - 13) * 0.05) + (v1hr >= 17) .* 0
+        %k = @(v1hr) (v1hr <= 13) .* -0.2 + (v1hr > 13 & v1hr < 17) .* (-0.2 + (v1hr - 13) * 0.05) + (v1hr >= 17) .* 0
+        k = @(v1hr) -0.1
         % The first guestimates.
         sigma = @(v1hr, hs, tp) 0 + (tp >= sqrt(2 * pi .* hs ./ (9.81 .* 1/14.99))) .* ...
             (5.0e+03 .* v1hr.^2 + (v1hr <= 25) .* (1.4e+06 .* v1hr -  5.3e+04 .* v1hr.^2) + ...

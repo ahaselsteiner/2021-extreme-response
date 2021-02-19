@@ -1,4 +1,4 @@
-SHAPE = -0.2;
+SHAPE = -0.1;
 N_BLOCKS = 60;
 
 %load('OvrDataEmulator');
