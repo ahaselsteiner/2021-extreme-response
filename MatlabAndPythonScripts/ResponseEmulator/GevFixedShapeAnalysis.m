@@ -68,8 +68,11 @@ for j = 1 : length(rs)
     plot(t(block_max_i), r(block_max_i), 'xr');
     xlabel('Time (s)');
     ylabel('Overturning moment (Nm)');
-    title(['V = ' num2str(vs(j)) ' m/s'])
-
+    ttl = title(['V = ' num2str(vs(j)) ' m/s']);
+    ttl.Units = 'Normalize'; 
+    ttl.Position(1) = 0; % use negative values (ie, -0.1) to move further left
+    ttl.HorizontalAlignment = 'left';
+    
     subplot(1, 4, 4)
     % Specific options are required to make MLE work for certain datasets.
     % Thanks to: https://groups.google.com/g/comp.soft-sys.matlab/c/vTkovg1IpMQ?pli=1

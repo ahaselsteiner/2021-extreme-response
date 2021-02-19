@@ -2,7 +2,7 @@
 FormatConventionForMomentTimeSeries
 
 
-figure
+figure('Position', [100 100 900 900])
 t = tiledlayout(4, 5)
 ks = nan(size(Ovr, 1), size(Ovr, 2), size(Ovr, 3));
 for vid = 1 : size(Ovr, 1)
@@ -21,7 +21,7 @@ for vid = 1 : size(Ovr, 1)
 end
 
 ks(ks == 0) = nan;
-figure
+figure('Position', [100 100 1200 450])
 t = tiledlayout(2, 2);
 for tpid = 1 : 4
     nexttile
