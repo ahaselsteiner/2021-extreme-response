@@ -51,7 +51,7 @@ ylabel('Max 1-hr overturning moment (Nm)');
 fit_string = [num2str(round(fitted_curve.a)) ' * v^2'];
 legend({'Simulation seed', 'Average over seeds', fit_string}, 'location', 'southeast');
 legend box off
-title('Aeroelastic simulation');
+title('Aeroelastic simulation, h_s = 0 m');
 % Plot results from emulator
 nexttile
 hold on
@@ -67,7 +67,7 @@ for i = 1 : n
         set(h, 'HandleVisibility', 'off')
     end
 end
-meanR= mean(r');
+meanR = mean(r');
 plot(vv, meanR, '-k', 'linewidth', 2);
 FT = fittype('a * x.^2');
 fitted_curve = fit(vv(vv > 25)', meanR(vv > 25)', FT);
@@ -80,7 +80,7 @@ legend box off
 ylim([0 16 * 10^7]);
 xlabel('1-hr wind speed (m/s)');
 ylabel('Max 1-hr overturning moment (Nm)');
-title('Statistical response simulator');
+title('Statistical response simulator, h_s = 0 m');
 exportgraphics(gcf, 'gfx/ResponseAtCalmSea.jpg') 
 exportgraphics(gcf, 'gfx/ResponseAtCalmSea.pdf') 
 

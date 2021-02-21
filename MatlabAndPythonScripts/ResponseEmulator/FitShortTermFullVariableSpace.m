@@ -150,17 +150,16 @@ mdlSigma = fitnlm(X, ysigma, modelfunSigma, beta0, 'ErrorModel', 'proportional')
 sigmaHat = predict(mdlSigma, X);
 
 modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
-    ((x(:,1) <= 25) .* (b(1) .* x(:,1) + b(2) .* x(:,1).^2 + ...
-    b(3) .* x(:,2).^1.0 .* (1 + 0.3 ./ (1 + 5 .* (x(:,3) - 3).^2))) + ...
-    (x(:,1) > 25 ) .* (b(4) .* x(:,1).^2 + ...
-    b(5) .* b(3) .* x(:,2).^1.0 .* (1 + 0.3 ./ (1 + 5 .* (x(:,3) - 3).^2))));
+    ((x(:,1) <= 25) .* (b(1) ./ (1 + b(2) * (x(:,1) - 11.4).^2) + b(3) .* x(:,1)) + ...%(b(1) .* x(:,1) + (x(:,1) > 11) .* (b(2) .* (x(:,1) - 11) + b(3) .* (x(:,1) - 11).^2)) + ...
+    (x(:,1) > 25 ) .* (b(4) .* x(:,1).^2) + ...
+    b(5) .* x(:,2).^1.0 .* (1 + 0.3 ./ (1 + 5 .* (x(:,3) - 3).^2)));
 % modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
 %     ((x(:,1) <= 11) .* b(1) .* x(:,1) + ...
 %     (x(:,1) > 11 & x(:,1) <= 13) .* b(1) .* 11 + ...
 %     (x(:,1) > 13 & x(:,1) <= 25) .* (b(1) .* 11 + b(2) .* (x(:,1) - 13) + b(3) .* (x(:,1) - 13).^2) + ...
 %     (x(:,1) > 25) .* b(4) .* x(:,1).^2 + ...
 %     b(5) .* x(:,2).^1.25 ./ (1 + 0.005 .* (x(:,3) - 3).^2));
-beta0 = [10^5 10^5 10^5 10^5 10^5];
+beta0 = [10^5 0.02 10^5 10^5 10^5];
 mdlMu = fitnlm(X, ymu, modelfunMu, beta0, 'ErrorModel', 'proportional')
 muHat = predict(mdlMu, X);
 
@@ -170,14 +169,16 @@ t = tiledlayout(3, 4);
 for tpid = 1 : 4
     nexttile
     vv = [0 : 0.1 : 45];
-    colors = {'red', 'blue', 'black'};
-    for i = 1 : 3
+    colors = {'red', 'blue', 'black', 'green'};
+    countI = 1;
+    for i = [1, 2, 3, 9]
         X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
         hold on
         labelhs = ['H_s = ' num2str(hs(i)) ' m, from 1-hr simulation'];
-        plot(v, sigmas(i, :, tpid), 'o', 'color', colors{i}, 'DisplayName', labelhs);
+        plot(v, sigmas(i, :, tpid), 'o', 'color', colors{countI}, 'DisplayName', labelhs);
         labelhs = ['H_s = ' num2str(hs(i)) ' m, predicted'];
-        plot(vv, predict(mdlSigma, X), 'color', colors{i}, 'DisplayName', labelhs);
+        plot(vv, predict(mdlSigma, X), 'color', colors{countI}, 'DisplayName', labelhs);
+        countI = countI + 1;
     end
     xlabel('1-hr wind speed (m/s)');
     ylabel('\sigma (Nm)');
@@ -192,13 +193,15 @@ end
 for tpid = 1 : 4
     nexttile
     vv = [0 : 0.1 : 45];
-    colors = {'red', 'blue', 'black'};
-    for i = 1 : 3
+    colors = {'red', 'blue', 'black', 'green'};
+    countI = 1;
+    for i = [1, 2, 3, 9]
         X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
         hold on
-        plot(v, mus(i, :, tpid), 'o', 'color', colors{i});
+        plot(v, mus(i, :, tpid), 'o', 'color', colors{countI});
         labelhs = ['H_s = ' num2str(hs(i)) ' m'];
-        plot(vv, predict(mdlMu, X), 'color', colors{i}, 'DisplayName', labelhs);
+        plot(vv, predict(mdlMu, X), 'color', colors{countI}, 'DisplayName', labelhs);
+        countI = countI + 1;
     end
     xlabel('1-hr wind speed (m/s)');
     ylabel('\mu (Nm)');
