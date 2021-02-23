@@ -4,14 +4,25 @@ N_BLOCKS = 60;
 %load('OvrDataEmulator');
 maxr = max(Ovr,[],4);
 gridSize = size(maxr);
+maxr(maxr==0)=NaN;
 currentNrEntries = sum(sum(sum(maxr>0)))
+load 'CalmSeaComplete.mat'; % its variable v will be overwritten in next call
+FormatConventionForMomentTimeSeries % to get the variables: v, hs, tp(hs, idx)
+
 
 % Checking whether the results make sense:
-vid = 14;
-hsid = 2;
+c1 = [0, 0.4470, 0.7410];
+c2 = [0.8500, 0.3250, 0.0980];
+c3 = [0.9290, 0.6940, 0.1250];
+c4 = [0.4660, 0.6740, 0.1880];
+colorsTp = {c1, c2, c3, c4};
+darker = 0.6;
+darker_colors = [c1; c2; c3; c4] * darker;
+vid = 15;
+hsid = 9;
 figure('Position', [100 100 900 900])
-subplot(5, 1, 1:2);
-load 'CalmSeaComplete.mat';
+subplot(6, 1, 1:2);
+
 OvrAllSeeds = [Ovr_S1; Ovr_S2; Ovr_S3; Ovr_S4; Ovr_S5; Ovr_S6];
 OvrAllSeeds = OvrAllSeeds(:, 1:18);
 hold on
@@ -25,35 +36,26 @@ for i = 1 : 6
     end
 end
 hold on
-FormatConventionForMomentTimeSeries % to get the variables: v, hs, tp(hs, idx)
-h = scatter(v, maxr(:, hsid, 1), ms, 'MarkerFaceColor', 'red', ...
-    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k', 'DisplayName', ['Hs = ' num2str(hs(hsid)) ' m, Tp = ' num2str(tp(hs(hsid), 1))]);
-h = scatter(v, maxr(:, hsid, 2), ms, 'MarkerFaceColor', 'blue', ...
-    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k', 'DisplayName', ['Hs = ' num2str(hs(hsid)) ' m, Tp = ' num2str(tp(hs(hsid), 2))]);
-h = scatter(v, maxr(:, hsid, 3), ms, 'MarkerFaceColor', 'green', ...
-    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k', 'DisplayName', ['Hs = ' num2str(hs(hsid)) ' m, Tp = ' num2str(tp(hs(hsid), 3))]);
+
+
+for i = 1 : 4
+    h = scatter(v, maxr(:, hsid, i), ms, 'MarkerFaceColor', colorsTp{i}, ...
+        'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k', 'DisplayName', ['Hs = ' num2str(hs(hsid)) ' m, Tp = ' num2str(tp(hs(hsid), i))]);
+end
 legend('box', 'off', 'location', 'eastoutside')
+limsy=get(gca,'YLim');
+set(gca,'Ylim',[0 limsy(2)]);
 xlabel('1-hr wind speed (m/s)');
 ylabel('Max 1-hr overturning moment (Nm)');
 
-subplot(5, 1, 3);
-
-plot(minutes(Time/60), squeeze(Ovr(vid, hsid, 1, :)))
-ylabel('Overturning moment (Nm)');
-box off
-legend(['V = ' num2str(v(vid)) ' m/s, Hs = ' num2str(hs(hsid)) ' m, Tp = ' num2str(tp(hs(hsid), 1))], 'box', 'off', 'location', 'eastoutside');
-
-subplot(5, 1, 4);
-plot(minutes(Time/60), squeeze(Ovr(vid, hsid, 2, :)))
-ylabel('Overturning moment (Nm)');
-box off
-legend(['V = ' num2str(v(vid)) ' m/s, Hs = ' num2str(hs(hsid)) ' m, Tp = ' num2str(tp(hs(hsid), 2))], 'box', 'off', 'location', 'eastoutside');
-
-subplot(5, 1, 5);
-plot(minutes(Time/60), squeeze(Ovr(vid, hsid, 3, :)))
-ylabel('Overturning moment (Nm)');
-box off
-legend(['V = ' num2str(v(vid)) ' m/s, Hs = ' num2str(hs(hsid)) ' m, Tp = ' num2str(tp(hs(hsid), 3))], 'box', 'off', 'location', 'eastoutside');
+for i = 1 : 4
+    subplot(6, 1, 3 + (i-1));
+    plot(minutes(Time/60), squeeze(Ovr(vid, hsid, i, :)), 'color', colorsTp{i})
+    ylabel('Overturning moment (Nm)');
+    box off
+    legend(['V = ' num2str(v(vid)) ' m/s, Hs = ' num2str(hs(hsid)) ' m, Tp = ' num2str(tp(hs(hsid), i))], 'box', 'off', 'location', 'eastoutside');
+    box off
+end
 
 exportgraphics(gcf, 'gfx/ValidtyCheckHs1.jpg') 
 
@@ -61,9 +63,6 @@ exportgraphics(gcf, 'gfx/ValidtyCheckHs1.jpg')
 ks = zeros(gridSize) + SHAPE;
 sigmas = nan(gridSize);
 mus = nan(gridSize);
-
-
-
 
 
 [vgrid, hgrid] = meshgrid(v, hs);
@@ -150,16 +149,16 @@ mdlSigma = fitnlm(X, ysigma, modelfunSigma, beta0, 'ErrorModel', 'proportional')
 sigmaHat = predict(mdlSigma, X);
 
 modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
-    ((x(:,1) <= 25) .* (b(1) ./ (1 + b(2) * (x(:,1) - 11.4).^2) + b(3) .* x(:,1)) + ...%(b(1) .* x(:,1) + (x(:,1) > 11) .* (b(2) .* (x(:,1) - 11) + b(3) .* (x(:,1) - 11).^2)) + ...
-    (x(:,1) > 25 ) .* (b(4) .* x(:,1).^2) + ...
-    b(5) .* x(:,2).^1.0 .* (1 + 0.3 ./ (1 + 5 .* (x(:,3) - 3).^2)));
+    ((((x(:,1) <= 25) .* (b(1) .* x(:,1) + b(2) ./ (1 + b(3) * (x(:,1) - 11.4).^2)) + ...
+    (x(:,1) > 25 ) .* (b(4) .* x(:,1).^2)).^2.0 + ...
+    (b(5) .* x(:,2).^1.0 .* (1 + 0.3 ./ (1 + 5 .* (x(:,3) - 3).^2))).^2.0).^(1/2.0));
 % modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
 %     ((x(:,1) <= 11) .* b(1) .* x(:,1) + ...
 %     (x(:,1) > 11 & x(:,1) <= 13) .* b(1) .* 11 + ...
 %     (x(:,1) > 13 & x(:,1) <= 25) .* (b(1) .* 11 + b(2) .* (x(:,1) - 13) + b(3) .* (x(:,1) - 13).^2) + ...
 %     (x(:,1) > 25) .* b(4) .* x(:,1).^2 + ...
 %     b(5) .* x(:,2).^1.25 ./ (1 + 0.005 .* (x(:,3) - 3).^2));
-beta0 = [10^5 0.02 10^5 10^5 10^5];
+beta0 = [10^5 10^5 0.02 10^5 10^5];
 mdlMu = fitnlm(X, ymu, modelfunMu, beta0, 'ErrorModel', 'proportional')
 muHat = predict(mdlMu, X);
 
@@ -169,15 +168,15 @@ t = tiledlayout(3, 4);
 for tpid = 1 : 4
     nexttile
     vv = [0 : 0.1 : 45];
-    colors = {'red', 'blue', 'black', 'green'};
+    colorsHs = {'red', 'blue', 'black', 'green'};
     countI = 1;
     for i = [1, 2, 3, 9]
         X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
         hold on
         labelhs = ['H_s = ' num2str(hs(i)) ' m, from 1-hr simulation'];
-        plot(v, sigmas(i, :, tpid), 'o', 'color', colors{countI}, 'DisplayName', labelhs);
+        plot(v, sigmas(i, :, tpid), 'o', 'color', colorsHs{countI}, 'DisplayName', labelhs);
         labelhs = ['H_s = ' num2str(hs(i)) ' m, predicted'];
-        plot(vv, predict(mdlSigma, X), 'color', colors{countI}, 'DisplayName', labelhs);
+        plot(vv, predict(mdlSigma, X), 'color', colorsHs{countI}, 'DisplayName', labelhs);
         countI = countI + 1;
     end
     xlabel('1-hr wind speed (m/s)');
@@ -193,14 +192,14 @@ end
 for tpid = 1 : 4
     nexttile
     vv = [0 : 0.1 : 45];
-    colors = {'red', 'blue', 'black', 'green'};
+    colorsHs = {'red', 'blue', 'black', 'green'};
     countI = 1;
     for i = [1, 2, 3, 9]
         X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
         hold on
-        plot(v, mus(i, :, tpid), 'o', 'color', colors{countI});
+        plot(v, mus(i, :, tpid), 'o', 'color', colorsHs{countI});
         labelhs = ['H_s = ' num2str(hs(i)) ' m'];
-        plot(vv, predict(mdlMu, X), 'color', colors{countI}, 'DisplayName', labelhs);
+        plot(vv, predict(mdlMu, X), 'color', colorsHs{countI}, 'DisplayName', labelhs);
         countI = countI + 1;
     end
     xlabel('1-hr wind speed (m/s)');
@@ -366,10 +365,10 @@ exportgraphics(gcf, 'gfx/EmulatorFit_Sigma.pdf')
 figure('Position', [100 100 500 800])
 t = tiledlayout(4, 2);
 clower = min(mus(:));
-cupper = max(mus(:)) * 0.95;
+cupper = 2 * 10^8;
 for ii = 1 : 4
     nexttile
-    contourf(vgrid, hgrid, squeeze(mus(:, :, ii)), 10)
+    contourf(vgrid, hgrid, squeeze(mus(:, :, ii)), [clower : (cupper - clower) / 10 : cupper])
     title(['from 1-hr simulation, t_{tp' num2str(ii) '} surface'])
     caxis([clower cupper]);
     nexttile
