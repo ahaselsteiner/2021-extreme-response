@@ -1,7 +1,8 @@
-SHAPE = -0.1;
+SHAPE = 'free';
 N_BLOCKS = 60;
 
 %load('OvrDataEmulator');
+Ovr(1,:,:,:) = NaN;
 maxr = max(Ovr,[],4);
 gridSize = size(maxr);
 maxr(maxr==0)=NaN;
@@ -18,8 +19,8 @@ c4 = [0.4660, 0.6740, 0.1880];
 colorsTp = {c1, c2, c3, c4};
 darker = 0.6;
 darker_colors = [c1; c2; c3; c4] * darker;
-vid = 15;
-hsid = 9;
+vid = 16;
+hsid = 2;
 figure('Position', [100 100 900 900])
 subplot(6, 1, 1:2);
 
@@ -59,13 +60,11 @@ end
 
 exportgraphics(gcf, 'gfx/ValidtyCheckHs1.jpg') 
 
-% GEV parameters
-ks = zeros(gridSize) + SHAPE;
-sigmas = nan(gridSize);
-mus = nan(gridSize);
-
 
 [vgrid, hgrid] = meshgrid(v, hs);
+
+% GEV parameters
+ks = nan([size(vgrid), 4]);
 sigmas = nan([size(vgrid), 4]);
 mus = nan([size(vgrid), 4]);
 
@@ -76,11 +75,13 @@ for i = 1 : gridSize(1)
             if maxr(i, j, k) > 0 
                 r = Ovr(i, j, k, :);
                 pd = gevToBlockMaxima(r, N_BLOCKS, SHAPE);
+                ks(j, i, k) = pd.k;
                 sigmas(j, i, k) = pd.sigma;
                 mus(j, i, k) = pd.mu;
             else
                 %sigmas(j, i, k) = R.sigma(vgrid(j, i), hgrid(j, i), tp(hgrid(j, i), k)) .* (1 + normrnd(0, 0.02));
                 %mus(j, i, k) = R.mu(vgrid(j, i), hgrid(j, i), tp(hgrid(j, i), k)) .* (1 + normrnd(0, 0.02));
+                ks(j, i, k) = NaN;
                 sigmas(j, i, k) = NaN;
                 mus(j, i, k) = NaN;
             end
@@ -158,7 +159,7 @@ modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* 
 %     (x(:,1) > 13 & x(:,1) <= 25) .* (b(1) .* 11 + b(2) .* (x(:,1) - 13) + b(3) .* (x(:,1) - 13).^2) + ...
 %     (x(:,1) > 25) .* b(4) .* x(:,1).^2 + ...
 %     b(5) .* x(:,2).^1.25 ./ (1 + 0.005 .* (x(:,3) - 3).^2));
-beta0 = [10^5 10^5 0.02 10^5 10^5];
+beta0 = [10^6 10^6 0.02 10^6 10^6];
 mdlMu = fitnlm(X, ymu, modelfunMu, beta0, 'ErrorModel', 'proportional')
 muHat = predict(mdlMu, X);
 
@@ -290,45 +291,35 @@ for tpid = 1 : 4
 end
 
 
-% figure
-% nexttile
-% scatter3(X(:,1), X(:,2), X(:,3), 20, ysigma)
-% xlabel('1-hr wind speed (m/s)');
-% ylabel('Significant wave height (m)');
-% zlabel('Significant wave height');
-% title('Observed')
-% 
-% nexttile
-% scatter3(X(:,1), X(:,2), X(:,3), 20, sigmaHat)
-% xlabel('1-hr wind speed (m/s)');
-% ylabel('Significant wave height (m)');
-% zlabel('Significant wave height');
-% title('Predicted')
-% c = colorbar;
-% c.Label.String = '\sigma (Nm) ';
-% c.Layout.Tile = 'east';
-% sgtitle('sigma')
+% Ks contour plot
+figure('Position', [100 100 1100 280])
+t = tiledlayout(1, 4);
+clower = -0.6;
+cupper = 0.3;
+for ii = 1 : 4
+    nexttile
+    contourf(vgrid, hgrid, squeeze(ks(:, :, ii)), 10)
+    title(['t_{tp' num2str(ii) '} surface'])
+    caxis([clower cupper])
+end
 
+c = colorbar;
+c.Label.String = 'k (-) ';
+c.Layout.Tile = 'east';
+t.XLabel.String = '1-hr wind speed (m/s)';
+t.YLabel.String = 'Significant wave height (m)';
+exportgraphics(gcf, 'gfx/EmulatorFitKFree_k.jpg') 
+exportgraphics(gcf, 'gfx/EmulatorFitKFree_k.pdf') 
 
-figure('Position', [100 100 500 800])
-t = tiledlayout(4, 2);
+% Sigmas contour plot
+figure('Position', [100 100 1100 280])
+t = tiledlayout(1, 4);
 clower = min(sigmas(:));
 cupper = max(sigmas(:)) * 0.95;
 for ii = 1 : 4
     nexttile
     contourf(vgrid, hgrid, squeeze(sigmas(:, :, ii)), 10)
-    title(['from 1-hr simulation, t_{tp' num2str(ii) '} surface'])
-    caxis([clower cupper])
-    nexttile
-    sigmatp1 = nan(size(vgrid));
-    for i = 1 : size(vgrid, 1)
-        for j = 1 : size(vgrid, 2)
-            Xtemp = [vgrid(i, j), hgrid(i, j), tp(hgrid(i, j), ii)];
-            sigmatp1(i, j) = predict(mdlSigma, Xtemp);
-        end
-    end
-    contourf(vgrid, hgrid, sigmatp1, 10);
-    title(['predicted, t_{tp' num2str(ii) '} surface'])
+    title(['t_{tp' num2str(ii) '} surface'])
     caxis([clower cupper])
 end
 
@@ -337,50 +328,19 @@ c.Label.String = '\sigma (Nm) ';
 c.Layout.Tile = 'east';
 t.XLabel.String = '1-hr wind speed (m/s)';
 t.YLabel.String = 'Significant wave height (m)';
-%sgtitle('sigma')
-exportgraphics(gcf, 'gfx/EmulatorFit_Sigma.jpg') 
-exportgraphics(gcf, 'gfx/EmulatorFit_Sigma.pdf') 
-
-% mu
-% figure
-% nexttile
-% scatter3(X(:,1), X(:,2), X(:,3), 20, ymu)
-% xlabel('1-hr wind speed (m/s)');
-% ylabel('Significant wave height (m)');
-% zlabel('Significant wave height');
-% title('Observed')
-% 
-% nexttile
-% scatter3(X(:,1), X(:,2), X(:,3), 20, muHat)
-% xlabel('1-hr wind speed (m/s)');
-% ylabel('Significant wave height (m)');
-% zlabel('Significant wave height');
-% title('Predicted')
-% c = colorbar;
-% c.Label.String = '\sigma (Nm) ';
-% c.Layout.Tile = 'east';
-% sgtitle('mu')
+exportgraphics(gcf, 'gfx/EmulatorFitKFree_Sigma.jpg') 
+exportgraphics(gcf, 'gfx/EmulatorFitKFree_Sigma.pdf') 
 
 
-figure('Position', [100 100 500 800])
-t = tiledlayout(4, 2);
+% Mus contour plot
+figure('Position', [100 100 1100 280])
+t = tiledlayout(1, 4);
 clower = min(mus(:));
 cupper = 2 * 10^8;
 for ii = 1 : 4
     nexttile
     contourf(vgrid, hgrid, squeeze(mus(:, :, ii)), [clower : (cupper - clower) / 10 : cupper])
-    title(['from 1-hr simulation, t_{tp' num2str(ii) '} surface'])
-    caxis([clower cupper]);
-    nexttile
-    mutp1 = nan(size(vgrid));
-    for i = 1 : size(vgrid, 1)
-        for j = 1 : size(vgrid, 2)
-            Xtemp = [vgrid(i, j), hgrid(i, j), tp(hgrid(i, j), ii)];
-            mutp1(i, j) = predict(mdlMu, Xtemp);
-        end
-    end
-    contourf(vgrid, hgrid, mutp1, 10);
-    title(['predicted, t_{tp' num2str(ii) '} surface'])
+    title(['t_{tp' num2str(ii) '} surface'])
     caxis([clower cupper]);
 end
 
@@ -389,7 +349,7 @@ c.Label.String = '\mu (Nm) ';
 c.Layout.Tile = 'east';
 t.XLabel.String = '1-hr wind speed (m/s)';
 t.YLabel.String = 'Significant wave height (m)';
-exportgraphics(gcf, 'gfx/EmulatorFit_Mu.jpg') 
-exportgraphics(gcf, 'gfx/EmulatorFit_Mu.pdf') 
+exportgraphics(gcf, 'gfx/EmulatorFitKFree_Mu.jpg') 
+exportgraphics(gcf, 'gfx/EmulatorFitKFree_Mu.pdf') 
 
 %sgtitle('mu')
