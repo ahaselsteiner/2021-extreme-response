@@ -67,10 +67,7 @@ fig_fit.subplots_adjust(wspace=0.25, bottom=0.15)
 figure_folder = 'gfx/'
 figure_fname = figure_folder + 'FitVHs'
 #fig_fit.savefig(figure_fname + '.pdf', bbox_inches='tight')
-fig_fit.savefig(figure_fname, dpi=dpi_for_printing_figures, facecolor='w', edgecolor='w',
-        orientation='portrait', papertype=None, format=None,
-        transparent=False, bbox_inches=None, pad_inches=0.1,
-        frameon=None, metadata=None)
+fig_fit.savefig(figure_fname, dpi=dpi_for_printing_figures, bbox_inches='tight')
 
 
 IFORMC = IFormContour(joint_dist, return_period=50, state_duration=1)
