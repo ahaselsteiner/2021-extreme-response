@@ -86,7 +86,7 @@ vgrid, hsgrid = np.meshgrid(v_sim, hs_sim)
 axs[0].scatter(v, hs, c='black', s=5, alpha=0.5, rasterized=True)
 axs[0].scatter(vgrid, hsgrid, c='red', s=10)
 
-verts = [(-0.5, 8), (8, 8), (8, 10), (16, 10), (16, 12), (20, 12), (20, 15.5), (-0.5, 15.5)]
+verts = [(0.6, 8), (8, 8), (8, 10), (16, 10), (16, 12), (20, 12), (20, 15.5), (0.6, 15.5)]
 poly = Polygon(verts, facecolor='1', edgecolor='1')
 axs[0].add_patch(poly)
 
@@ -112,3 +112,4 @@ axs[1].set_xlabel(tp_label)
 axs[1].spines['right'].set_visible(False)
 axs[1].spines['top'].set_visible(False)
 fig_sim_points.savefig('gfx/SimulationPoints.pdf', bbox_inches='tight')
+fig_sim_points.savefig('gfx/SimulationPoints.jpg', bbox_inches='tight')

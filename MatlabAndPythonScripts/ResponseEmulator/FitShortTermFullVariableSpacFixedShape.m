@@ -3,6 +3,7 @@ N_BLOCKS = 60;
 
 %load('OvrDataEmulator');
 Ovr(1,:,:,:) = NaN;
+Ovr(:,9,4,:) = NaN;
 maxr = max(Ovr,[],4);
 gridSize = size(maxr);
 maxr(maxr==0)=NaN;
@@ -19,7 +20,7 @@ c4 = [0.4660, 0.6740, 0.1880];
 colorsTp = {c1, c2, c3, c4};
 darker = 0.6;
 darker_colors = [c1; c2; c3; c4] * darker;
-vid = 1;
+vid = 16;
 hsid = 2;
 figure('Position', [100 100 900 900])
 subplot(6, 1, 1:2);
@@ -148,17 +149,10 @@ modelfunSigma = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) 
 beta0 = [10^5 10^5 10^5 10^5];
 mdlSigma = fitnlm(X, ysigma, modelfunSigma, beta0, 'ErrorModel', 'proportional')
 sigmaHat = predict(mdlSigma, X);
-
 modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
     ((((x(:,1) <= 25) .* (b(1) .* x(:,1) + b(2) ./ (1 + b(3) * (x(:,1) - 11.4).^2)) + ...
     (x(:,1) > 25 ) .* (b(4) .* x(:,1).^2)).^2.0 + ...
-    (b(5) .* x(:,2).^1.0 .* (1 + 0.3 ./ (1 + 5 .* (x(:,3) - 3).^2))).^2.0).^(1/2.0));
-% modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
-%     ((x(:,1) <= 11) .* b(1) .* x(:,1) + ...
-%     (x(:,1) > 11 & x(:,1) <= 13) .* b(1) .* 11 + ...
-%     (x(:,1) > 13 & x(:,1) <= 25) .* (b(1) .* 11 + b(2) .* (x(:,1) - 13) + b(3) .* (x(:,1) - 13).^2) + ...
-%     (x(:,1) > 25) .* b(4) .* x(:,1).^2 + ...
-%     b(5) .* x(:,2).^1.25 ./ (1 + 0.005 .* (x(:,3) - 3).^2));
+    ((1 + (x(:,1) > 25) * 0.2) .* b(5) .* x(:,2).^1.0 .* (1 + 0.3 ./ (1 + 5 .* (x(:,3) - 3).^2))).^2.0).^(1/2.0));
 beta0 = [10^6 10^6 0.02 10^6 10^6];
 mdlMu = fitnlm(X, ymu, modelfunMu, beta0, 'ErrorModel', 'proportional')
 muHat = predict(mdlMu, X);
