@@ -84,36 +84,37 @@ title('Statistical response simulator, h_s = 0 m');
 exportgraphics(gcf, 'gfx/ResponseAtCalmSea.jpg') 
 exportgraphics(gcf, 'gfx/ResponseAtCalmSea.pdf') 
 
-figure
+fig = figure('position', [100, 100, 900, 400]);
+clower = 7.3E6;
+cupper = max(max(max(rmedian)));
+t = tiledlayout(1, 2);
+nexttile
 vslice = [10];   
 hslice = [];
 tslice = [3 7 15];
 slice(tmesh, vmesh, hmesh, rmedian, tslice, vslice, hslice)
-c = colorbar;
-c.Label.String = 'Median maximum 1-hr oveturning moment (Nm) ';
-ylabel('1-hr wind speed (m/s)');
+caxis([clower cupper]);
+ylabel('1-hour wind speed (m/s)');
 zlabel('Significant wave height (m)');
 xlabel('Peak period (s)');
 view(3)
-%exportgraphics(gca, 'gfx/ResponseField3d.jpg') 
-%exportgraphics(gca, 'gfx/ResponseField3d.pdf') 
 
-
-v = [0:0.2:50];
-hs = [0:0.1:9];
-[vmesh, hmesh] = meshgrid(v, hs);
+nexttile
+vv = [0:0.2:50];
+hss = [0:0.1:9];
+[vmesh, hmesh] = meshgrid(vv, hss);
 tpbreaking = @(hs) sqrt(2 * pi * hs / (9.81 * 1/15));
 sigmas = R.sigma(vmesh, hmesh, tpbreaking(hmesh));
 mus = R.mu(vmesh, hmesh, tpbreaking(hmesh));
 rmedian = R.ICDF1hr(vmesh, hmesh, tpbreaking(hmesh), 0.5);
-
-capacity = 18.77 * 10^7;
-figure
 contourf(vmesh, hmesh, rmedian, 10)
 hold on
+caxis([clower cupper]);
 c = colorbar;
 c.Label.String = 'Median maximum 1-hr oveturning moment (Nm) ';
-xlabel('1-hr wind speed (m/s)');
+c.Layout.Tile = 'east';
+xlabel('1-hour wind speed (m/s)');
 ylabel('Significant wave height (m)');
-%exportgraphics(gca, 'gfx/ResponseFieldAtBreakingTp.pdf') 
+exportgraphics(fig, 'gfx/MedianResponseFullField.jpg') 
+exportgraphics(fig, 'gfx/MedianResponseFullField.pdf') 
 
