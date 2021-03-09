@@ -143,15 +143,15 @@ end
 % See: https://de.mathworks.com/help/stats/fitnlm.html
 % x(:, 1) = v, x(:, 2) = hs, x(:, 3) = tp
 modelfunSigma = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
-    ((x(:,1) <= 25) .* (b(1) .* x(:,1) + b(2) .* x(:,1).^2) + ...
-    (x(:,1) > 25) .* b(3) + ...
-    b(4) .* x(:,2).^2 .* (1 + 0.3 ./ (1 + 5 .* (x(:,3) - 3).^2)));
+    ((((x(:,1) <= 25) .* (b(1) .* x(:,1) + b(2) ./ (1 + 0.064 * (x(:,1) - 11.6).^2) +  b(3) ./ (1 + 0.2 * (x(:,1) - 11.6).^2)) + ...
+    (x(:,1) > 25) .* 4400 .* x(:,1).^2).^2.0 + ...
+    ((1 + (x(:,1) > 25) * 0.2) .* b(4) .* x(:,2).^1.0 .* (1 + 0.3 ./ (1 + 5 .* (x(:,3) - 3).^2))).^2.0).^(1/2.0));
 beta0 = [10^5 10^5 10^5 10^5];
 mdlSigma = fitnlm(X, ysigma, modelfunSigma, beta0, 'ErrorModel', 'proportional')
 sigmaHat = predict(mdlSigma, X);
 modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
-    ((((x(:,1) <= 25) .* (b(1) .* x(:,1) + b(2) ./ (1 + b(3) * (x(:,1) - 11.4).^2)) + ...
-    (x(:,1) > 25 ) .* (b(4) .* x(:,1).^2)).^2.0 + ...
+    ((((x(:,1) <= 25) .* b(1) .* x(:,1) + b(2) ./ (1 + b(3) * (x(:,1) - 11.6).^2) + ... %.* min([(x(:,1) <= 25) .* 9.5 * 10^7], [b(1) .* x(:,1) + b(2) ./ (1 + b(3) * (x(:,1) - 11.6).^2)]) + ...
+    (x(:,1) > 25 ) .* (3.65 * 10^4 .* x(:,1).^2)).^2.0 + ...
     ((1 + (x(:,1) > 25) * 0.2) .* b(5) .* x(:,2).^1.0 .* (1 + 0.3 ./ (1 + 5 .* (x(:,3) - 3).^2))).^2.0).^(1/2.0));
 beta0 = [10^6 10^6 0.02 10^6 10^6];
 mdlMu = fitnlm(X, ymu, modelfunMu, beta0, 'ErrorModel', 'proportional')
@@ -165,7 +165,7 @@ for tpid = 1 : 4
     vv = [0 : 0.1 : 45];
     colorsHs = {'red', 'blue', 'black', 'green'};
     countI = 1;
-    for i = [1, 2, 3, 9]
+    for i = [1, 2, 3, 5]
         X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
         hold on
         labelhs = ['H_s = ' num2str(hs(i)) ' m, from 1-hr simulation'];
@@ -189,7 +189,7 @@ for tpid = 1 : 4
     vv = [0 : 0.1 : 45];
     colorsHs = {'red', 'blue', 'black', 'green'};
     countI = 1;
-    for i = [1, 2, 3, 9]
+    for i = [1, 2, 3, 5]
         X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
         hold on
         plot(v, mus(i, :, tpid), 'o', 'color', colorsHs{countI});
@@ -218,6 +218,36 @@ for tpid = 1 : 4
     title(['t_{p' num2str(tpid) '}']);
 end
 
+figure('Position', [100 100 900 500])
+t = tiledlayout(1, 2);
+nexttile
+for tpid = 1 : 4
+    vv = [0 : 0.1 : 25];
+    for i = 1
+        X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
+        hold on
+        plot(v(1:14), mus(i, 1:14, tpid), 'o', 'color', 'k');
+        if tpid == 1
+            plot(vv, predict(mdlMu, X), 'color', 'k');
+        end
+    end
+    xlabel('1-hr wind speed (m/s)');
+    ylabel('\mu (Nm)');
+end
+nexttile
+for tpid = 1 : 4
+    vv = [0 : 0.1 : 25];
+    for i = 1
+        X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
+        hold on
+        plot(v(1:14), sigmas(i, 1:14, tpid), 'o', 'color', 'k');
+        if tpid == 1
+            plot(vv, predict(mdlSigma, X), 'color', 'k');
+        end
+    end
+    xlabel('1-hr wind speed (m/s)');
+    ylabel('\sigma (Nm)');
+end
 
 % Sigma, mu over hs
 figure('Position', [100 100 900 500])
@@ -285,26 +315,6 @@ for tpid = 1 : 4
 end
 
 
-% figure
-% nexttile
-% scatter3(X(:,1), X(:,2), X(:,3), 20, ysigma)
-% xlabel('1-hr wind speed (m/s)');
-% ylabel('Significant wave height (m)');
-% zlabel('Significant wave height');
-% title('Observed')
-% 
-% nexttile
-% scatter3(X(:,1), X(:,2), X(:,3), 20, sigmaHat)
-% xlabel('1-hr wind speed (m/s)');
-% ylabel('Significant wave height (m)');
-% zlabel('Significant wave height');
-% title('Predicted')
-% c = colorbar;
-% c.Label.String = '\sigma (Nm) ';
-% c.Layout.Tile = 'east';
-% sgtitle('sigma')
-
-
 figure('Position', [100 100 500 800])
 t = tiledlayout(4, 2);
 clower = min(sigmas(:));
@@ -336,25 +346,6 @@ t.YLabel.String = 'Significant wave height (m)';
 exportgraphics(gcf, 'gfx/EmulatorFit_Sigma.jpg') 
 exportgraphics(gcf, 'gfx/EmulatorFit_Sigma.pdf') 
 
-% mu
-% figure
-% nexttile
-% scatter3(X(:,1), X(:,2), X(:,3), 20, ymu)
-% xlabel('1-hr wind speed (m/s)');
-% ylabel('Significant wave height (m)');
-% zlabel('Significant wave height');
-% title('Observed')
-% 
-% nexttile
-% scatter3(X(:,1), X(:,2), X(:,3), 20, muHat)
-% xlabel('1-hr wind speed (m/s)');
-% ylabel('Significant wave height (m)');
-% zlabel('Significant wave height');
-% title('Predicted')
-% c = colorbar;
-% c.Label.String = '\sigma (Nm) ';
-% c.Layout.Tile = 'east';
-% sgtitle('mu')
 
 
 figure('Position', [100 100 500 800])
