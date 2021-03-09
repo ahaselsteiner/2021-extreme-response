@@ -48,15 +48,15 @@ for j = 1 : length(rs)
         block_max_i(i) = maxid + (i - 1) * block_length;
     end
     
-    figure()
-    subplot(2, 1, 1)
+    figure('Position', [100 100 1200 250])
+    subplot(1, 4, 1:3)
     hold on
     plot(t, r);    
     plot(t(block_max_i), r(block_max_i), 'xr');
     xlabel('Time (s)');
     ylabel('Overturning moment (Nm)');
 
-    subplot(2, 1, 2)
+    subplot(1, 4, 4)
     pd = fitdist(block_maxima(j,:)', 'GeneralizedExtremeValue');
     h = qqplot(block_maxima(j,:), pd);
     set(h(1), 'Marker', 'x')
@@ -69,6 +69,16 @@ for j = 1 : length(rs)
     sigmas = [sigmas; pd.sigma];
     mus = [mus; pd.mu];
     x1(j) = pd.icdf(1 - 1/N_BLOCKS);
+    
+    if j == 1
+        exportgraphics(gcf, 'gfx/GEV-9mps.jpg') 
+    elseif j == 7
+        exportgraphics(gcf, 'gfx/GEV-15mps.jpg') 
+    elseif j == 13
+        exportgraphics(gcf, 'gfx/GEV-21mps.jpg') 
+    elseif j == 19
+        exportgraphics(gcf, 'gfx/GEV-30mps.jpg') 
+    end
 end
 
 for j = 1 : 4

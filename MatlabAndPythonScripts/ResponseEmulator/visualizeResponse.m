@@ -11,22 +11,29 @@ sigmas = R.sigma(vmesh, hmesh, tmesh);
 mus = R.mu(vmesh, hmesh, tmesh);
 rmedian = R.ICDF1hr(vmesh, hmesh, tmesh, 0.5);
 
-figure
+% Parameter values at h=0
+figure('Position', [100 100 500 600])
+t = tiledlayout(3, 1);
+vv = [0:0.05:45];
 hss = 0;
 tpp = 10;
-t = tiledlayout(3, 1);
 nexttile
 plot(vv, R.k(vv, hss));
 ylabel('k (-)');
+box off
 nexttile
 plot(vv, R.mu(vv, hss, tpp));
-ylabel('\mu');
+ylabel('\mu (Nm)');
+box off
 nexttile
 plot(vv, R.sigma(vv, hss, tpp));
-ylabel('\sigma');
+ylabel('\sigma (Nm)');
 xlabel('v_{1hr} (m/s)');
-sgtitle(['hs = ' num2str(hss) ', tp = ' num2str(tpp)]);
-
+box off
+%sgtitle(['hs = ' num2str(hss) ', tp = ' num2str(tpp)]);
+%sgtitle('Parameter values at h_s = 0 m');
+exportgraphics(gcf, 'gfx/ResponseParametersHs0.jpg') 
+exportgraphics(gcf, 'gfx/ResponseParametersHs0.pdf') 
 
 % Plot response of v curves.
 figure('Position', [100 100 500 600])
@@ -34,7 +41,7 @@ t = tiledlayout(2, 1);
 % Plot result from simulation
 ax1 = nexttile
 addpath('03_Calm_Sea_Complete_Wind')
-load 'CalmSeaComplete.mat';
+load 'CalmSeaComplete.mat'; % will also give variable 'vv'
 OvrAllSeeds = [Ovr_S1; Ovr_S2; Ovr_S3; Ovr_S4; Ovr_S5; Ovr_S6];
 OvrAllSeeds = OvrAllSeeds(:, 1:18);
 vv = vv(1:18);
@@ -99,11 +106,93 @@ xlabel(t, '1-hr wind speed (m/s)');
 ylabel(t, 'Max 1-hr overturning moment (Nm)');
 t.TileSpacing = 'compact';
 title('Statistical response emulator, h_s = 0 m');
-
 exportgraphics(gcf, 'gfx/ResponseAtCalmSea.jpg') 
 exportgraphics(gcf, 'gfx/ResponseAtCalmSea.pdf') 
 
 fig = figure('position', [100, 100, 900, 400]);
+t = tiledlayout(1,1);
+ax1 = nexttile
+hold on
+for tpi = 3
+    h = scatter(v, squeeze(max(Ovr(:, 1, tpi, :), [], 4)), ms, 'MarkerFaceColor', [0 0 0.5], ...
+    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
+end
+n = 6;
+r = nan(length(vv), n);
+for i = 1 : length(vv)
+    r(i, :) = R.randomSample1hr(vv(i), 3, tp(3, tpi), n);
+end
+for i = 1 : n
+    h = scatter(vv, r(:, i), ms, 'MarkerFaceColor', [0.5 0.5 0.5], ...
+    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
+    if i > 1 
+        set(h, 'HandleVisibility', 'off')
+    end
+end
+meanR = mean(r');
+plot(vv, meanR, '-k', 'linewidth', 2);
+legend box off
+xlabel('');
+ylabel('');
+linkaxes([ax1 ax2],'xy')
+xlabel(t, '1-hr wind speed (m/s)');
+ylabel(t, 'Max 1-hr overturning moment (Nm)');
+t.TileSpacing = 'compact';
+legend({'Aeroelastic simulation', 'Response emulator seed', 'Response emulator mean'}, 'location', 'southeast');
+legend box off
+title(['Statistical response emulator, h_s = 3 m, t_p = ' num2str(tp(3, tpi))]);
+
+
+% Plot response contours
+fig = figure('position', [100, 100, 900, 400]);
+t = tiledlayout(1,3);
+ax1 = nexttile;
+tpi = 3;
+robserved  = squeeze(max(Ovr(:, :, tpi, :), [], 4))';
+robserved(robserved == 0) = NaN;
+[vmesh, hmesh] = meshgrid(v, hs);
+contourf(vmesh, hmesh, robserved, 10)
+clower = 0.1 * 10^8;
+cupper = 3.8 * 10^8;
+caxis([clower cupper]);
+title('Aeroelastic simulation');
+
+ax2 = nexttile;
+vv = [0:0.5:45];
+hss = [0:0.2:15];
+[vmesh, hmesh] = meshgrid(vv, hss);
+r50 = R.ICDF1hr(vmesh, hmesh, tp(hmesh, tpid), 0.5);
+contourf(vmesh, hmesh, r50, 10)
+title('Emulator median response');
+caxis([clower cupper]);
+c1 = colorbar;
+c1.Label.String = '1-hour maximum oveturning moment (Nm) ';
+c1.Layout.Tile = 'south';
+linkaxes([ax1 ax2],'xy')
+xlabel(t, '1-hour wind speed (m/s)');
+ylabel(t, 'Significant wave height (m)');
+
+ax3 = nexttile;
+[vmesh, hmesh] = meshgrid(v, hs);
+r50 = R.ICDF1hr(vmesh, hmesh, tp(hmesh, tpid), 0.5);
+r50(isnan(robserved)) = NaN;
+contourf(vmesh, hmesh, robserved - r50, 10)
+c2 = colorbar;
+colormap(ax3, gray)
+c2.Label.String = 'Difference (Nm) ';
+c2.Layout.Tile = 'south';
+title('Difference');
+
+sgtitle(['1-hour response at t_{p ' num2str(tpi) '}']);
+
+exportgraphics(fig, 'gfx/CompareResponse2D.jpg') 
+exportgraphics(fig, 'gfx/CompareResponse2D.pdf') 
+
+% Plot with 3D graphic
+fig = figure('position', [100, 100, 900, 400]);
+vv = [0:0.5:45];
+hss = [0:0.2:15];
+[vmesh, hmesh] = meshgrid(vv, hss);
 clower = 7.3E6;
 cupper = max(max(max(rmedian)));
 t = tiledlayout(1, 2);
@@ -119,8 +208,8 @@ xlabel('Peak period (s)');
 view(3)
 
 nexttile
-vv = [0:0.2:50];
-hss = [0:0.1:9];
+vv = [0:0.5:45];
+hss = [0:0.2:15];
 [vmesh, hmesh] = meshgrid(vv, hss);
 tpbreaking = @(hs) sqrt(2 * pi * hs / (9.81 * 1/15));
 sigmas = R.sigma(vmesh, hmesh, tpbreaking(hmesh));

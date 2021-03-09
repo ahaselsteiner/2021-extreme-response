@@ -1,11 +1,11 @@
-load('D.mat');
+load('datasets-complete-DEF-3-variables.mat');
 
 half_year = 365/2 * 24;
 
-t = D.t(half_year : end);
-v1hr = D.V1hr(half_year : end);
-hs = D.Hs(half_year : end);
-tz = D.Tz(half_year : end);
+t = Dc.t(half_year : end);
+v1hr = Dc.V1h_hub(half_year : end);
+hs = Dc.Hs(half_year : end);
+tz = Dc.Tz(half_year : end);
 tp = 1.2796 * tz; % Assuming a JONSWAP spectrum with gamma = 3.3
 
 R = ResponseEmulator;

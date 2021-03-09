@@ -133,9 +133,33 @@ beta0 = [10^6 10^6 0.02 10^6 10^6];
 mdlMu = fitnlm(X, ymu, modelfunMu, beta0, 'ErrorModel', 'proportional')
 muHat = predict(mdlMu, X);
 
-% Sigma, mu over wind speed
-figure('Position', [100 100 900 500])
-t = tiledlayout(3, 4);
+% k, sigma, mu over wind speed
+figure('Position', [100 100 900 900])
+t = tiledlayout(4, 4);
+for tpid = 1 : 4
+    nexttile
+    vv = [0 : 0.1 : 45];
+    colorsHs = {'red', 'blue', 'black', 'green'};
+    countI = 1;
+    for i = [1, 2, 3, 5]
+        X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
+        hold on
+        labelhs = ['H_s = ' num2str(hs(i)) ' m, from 1-hr simulation'];
+        plot(v, ks(i, :, tpid), 'o', 'color', colorsHs{countI}, 'DisplayName', labelhs);
+        labelhs = ['H_s = ' num2str(hs(i)) ' m, predicted'];
+        plot(vv, predict(mdlK, X), 'color', colorsHs{countI}, 'DisplayName', labelhs);
+        countI = countI + 1;
+    end
+    xlabel('1-hr wind speed (m/s)');
+    ylabel('k (-)');
+    title(['t_{p' num2str(tpid) '}']);
+    if tpid == 1
+        lh = legend('box', 'off', 'Location','NorthOutside', ...
+            'Orientation', 'Horizontal', 'NumColumns', 2);
+        lh.Layout.Tile = 'North';
+    end
+end
+
 for tpid = 1 : 4
     nexttile
     vv = [0 : 0.1 : 45];
@@ -153,11 +177,6 @@ for tpid = 1 : 4
     xlabel('1-hr wind speed (m/s)');
     ylabel('\sigma (Nm)');
     title(['t_{p' num2str(tpid) '}']);
-    if tpid == 1
-        lh = legend('box', 'off', 'Location','NorthOutside', ...
-            'Orientation', 'Horizontal', 'NumColumns', 2);
-        lh.Layout.Tile = 'North'; % <----- relative to tiledlayout
-    end
 end
 
 for tpid = 1 : 4
