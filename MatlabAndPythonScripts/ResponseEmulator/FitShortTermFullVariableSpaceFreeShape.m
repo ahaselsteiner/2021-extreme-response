@@ -80,8 +80,6 @@ for i = 1 : gridSize(1)
                 sigmas(j, i, k) = pd.sigma;
                 mus(j, i, k) = pd.mu;
             else
-                %sigmas(j, i, k) = R.sigma(vgrid(j, i), hgrid(j, i), tp(hgrid(j, i), k)) .* (1 + normrnd(0, 0.02));
-                %mus(j, i, k) = R.mu(vgrid(j, i), hgrid(j, i), tp(hgrid(j, i), k)) .* (1 + normrnd(0, 0.02));
                 ks(j, i, k) = NaN;
                 sigmas(j, i, k) = NaN;
                 mus(j, i, k) = NaN;
@@ -90,51 +88,21 @@ for i = 1 : gridSize(1)
     end
 end
 
-% figure
-% for i = 1 : 4
-%     nexttile
-%     contourf(vgrid, hgrid, squeeze(sigmas(:, :, i)), 10);
-%     title(['Tp index = ' num2str(i) ]);
-%     caxis([0.4 2.5] * 10^7)
-%     if mod(i, 2) == 1
-%         ylabel('Significant wave height (m)');
-%     end
-%     if i >= 3
-%         xlabel('1-hr wind speed (m/s)');
-%     end
-% end
-% c = colorbar;
-% c.Label.String = '\sigma (Nm) ';
-% c.Layout.Tile = 'east';
-% 
-% figure
-% for i = 1 : 4
-%     nexttile
-%     contourf(vgrid, hgrid, squeeze(mus(:, :, i)), 10);
-%     title(['Tp index = ' num2str(i) ]);
-%     caxis([2 10] * 10^7)
-%     if mod(i, 2) == 1
-%         ylabel('Significant wave height (m)');
-%     end
-%     if i >= 3
-%         xlabel('1-hr wind speed (m/s)');
-%     end
-% end
-% c = colorbar;
-% c.Label.String = '\mu (Nm) ';
-% c.Layout.Tile = 'east';
 
 for i = 1 : 4
     t2d = squeeze(tp(hgrid, i));
     temp = [vgrid(:), hgrid(:), t2d(:)];
+    k2d = squeeze(ks(:,:,i));
     sigma2d = squeeze(sigmas(:,:,i));
     mu2d = squeeze(mus(:,:,i));
     if i == 1
         X = temp;
+        yk = k2d(:);
         ysigma = sigma2d(:);
         ymu = mu2d(:);
     else
         X = [X; temp];
+        yk = [yk; k2d(:)];
         ysigma = [ysigma; sigma2d(:)];
         ymu = [ymu; mu2d(:)];
     end
@@ -142,24 +110,25 @@ end
 
 % See: https://de.mathworks.com/help/stats/fitnlm.html
 % x(:, 1) = v, x(:, 2) = hs, x(:, 3) = tp
+modelfunK = @(b, x) (x(:,1) <= 25) .* (-0.1 - 0.65 ./ (1 + 0.3 .* (x(:,1) - 12).^2) + 0.3 ./ (1 + 0.3 .* (x(:,1) - 18).^2) + ...
+    x(:,2).^(1/3) .* ((b(1) -         (-0.1 - 0.65 ./ (1 + 0.3 .* (x(:,1) - 12).^2) + 0.3 ./ (1 + 0.3 .* (x(:,1) - 18).^2))) ./ 15^(1/3))) + ...
+    (x(:,1) > 25) .* (-0.2622 +  x(:,2).^(1/3) .* (b(1) - -0.2622) / 15.^(1/3))
+beta0 = [-0.1];
+mdlK = fitnlm(X, yk, modelfunK, beta0, 'ErrorModel', 'proportional')
+kHat = predict(mdlK, X);
+
 modelfunSigma = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
-    ((x(:,1) <= 25) .* (b(1) .* x(:,1) + b(2) .* x(:,1).^2) + ...
-    (x(:,1) > 25) .* b(3) + ...
-    (1 + (x(:,1) > 25) * 0.2) .* b(4) .* x(:,2).^2 .* (1 + 0.3 ./ (1 + 5 .* (x(:,3) - 3).^2)));
+    ((((x(:,1) <= 25) .* (b(1) .* x(:,1) + b(2) ./ (1 + 0.064 * (x(:,1) - 11.6).^2) +  b(3) ./ (1 + 0.2 * (x(:,1) - 11.6).^2)) + ...
+    (x(:,1) > 25) .* 4700 .* x(:,1).^2).^2.0 + ...
+    ((1 + (x(:,1) > 25) * 0.2) .* b(4) .* x(:,2).^1.0 .* (1 + 0.3 ./ (1 + 5 .* (x(:,3) - 3).^2))).^2.0).^(1/2.0));
 beta0 = [10^5 10^5 10^5 10^5];
 mdlSigma = fitnlm(X, ysigma, modelfunSigma, beta0, 'ErrorModel', 'proportional')
 sigmaHat = predict(mdlSigma, X);
 
 modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
-    ((((x(:,1) <= 25) .* (b(1) .* x(:,1) + b(2) ./ (1 + b(3) * (x(:,1) - 11.4).^2)) + ...
-    (x(:,1) > 25 ) .* (b(4) .* x(:,1).^2)).^2.0 + ...
+    ((((x(:,1) <= 25) .* b(1) .* x(:,1) + b(2) ./ (1 + b(3) * (x(:,1) - 11.6).^2) + ... %.* min([(x(:,1) <= 25) .* 9.5 * 10^7], [b(1) .* x(:,1) + b(2) ./ (1 + b(3) * (x(:,1) - 11.6).^2)]) + ...
+    (x(:,1) > 25 ) .* (3.9 * 10^4 .* x(:,1).^2)).^2.0 + ...
     ((1 + (x(:,1) > 25) * 0.2) .* b(5) .* x(:,2).^1.0 .* (1 + 0.3 ./ (1 + 5 .* (x(:,3) - 3).^2))).^2.0).^(1/2.0));
-% modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
-%     ((x(:,1) <= 11) .* b(1) .* x(:,1) + ...
-%     (x(:,1) > 11 & x(:,1) <= 13) .* b(1) .* 11 + ...
-%     (x(:,1) > 13 & x(:,1) <= 25) .* (b(1) .* 11 + b(2) .* (x(:,1) - 13) + b(3) .* (x(:,1) - 13).^2) + ...
-%     (x(:,1) > 25) .* b(4) .* x(:,1).^2 + ...
-%     b(5) .* x(:,2).^1.25 ./ (1 + 0.005 .* (x(:,3) - 3).^2));
 beta0 = [10^6 10^6 0.02 10^6 10^6];
 mdlMu = fitnlm(X, ymu, modelfunMu, beta0, 'ErrorModel', 'proportional')
 muHat = predict(mdlMu, X);
@@ -172,7 +141,7 @@ for tpid = 1 : 4
     vv = [0 : 0.1 : 45];
     colorsHs = {'red', 'blue', 'black', 'green'};
     countI = 1;
-    for i = [1, 2, 3, 9]
+    for i = [1, 2, 3, 5]
         X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
         hold on
         labelhs = ['H_s = ' num2str(hs(i)) ' m, from 1-hr simulation'];
@@ -196,7 +165,7 @@ for tpid = 1 : 4
     vv = [0 : 0.1 : 45];
     colorsHs = {'red', 'blue', 'black', 'green'};
     countI = 1;
-    for i = [1, 2, 3, 9]
+    for i = [1, 2, 3, 5]
         X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
         hold on
         plot(v, mus(i, :, tpid), 'o', 'color', colorsHs{countI});
@@ -225,6 +194,55 @@ for tpid = 1 : 4
     title(['t_{p' num2str(tpid) '}']);
 end
 
+
+figure
+t = tiledlayout(1, 2);
+ax1 = nexttile;
+hold on
+plot([v(1:14), v(1:14), v(1:14), v(1:14)], [ks(1, 1:14, 1), ks(1, 1:14, 2), ks(1, 1:14, 3), ks(1, 1:14, 4)], 'o', 'color', 'k');
+hold on
+plot(v(1:14), mean([ks(1, 1:14, 1); ks(1, 1:14, 2); ks(1, 1:14, 3); ks(1, 1:14, 4)]), '-k');
+vv = [0:0.1:25];
+k = -0.1 - 0.65 ./ (1 + 0.3 .* (vv - 12).^2) + 0.3 ./ (1 + 0.1 .* (vv - 18).^2);
+plot(vv, k)
+ax2 = nexttile;
+plot([v(15:19), v(15:19), v(15:19), v(15:19)], [ks(1, 15:19, 1), ks(1, 15:19, 2), ks(1, 15:19, 3), ks(1, 15:19, 4)], 'o', 'color', 'k');
+hold on
+plot([26, 45], [-0.2622, -0.2622]);
+linkaxes([ax1 ax2],'y')
+t.XLabel.String = '1-hr wind speed (m/s)';
+t.YLabel.String = 'k (-)';
+
+figure
+t = tiledlayout(1, 2);
+ax1 = nexttile;
+hold on
+plot([v(1:14), v(1:14), v(1:14), v(1:14)], [mus(1, 1:14, 1), mus(1, 1:14, 2), mus(1, 1:14, 3), mus(1, 1:14, 4)], 'o', 'color', 'k');
+hold on
+plot(v(1:14), mean([mus(1, 1:14, 1); mus(1, 1:14, 2); mus(1, 1:14, 3); mus(1, 1:14, 4)]), '-k');
+vv = [0:0.1:25];
+ax2 = nexttile;
+plot([v(15:19), v(15:19), v(15:19), v(15:19)], [mus(1, 15:19, 1), mus(1, 15:19, 2), mus(1, 15:19, 3), mus(1, 15:19, 4)], 'o', 'color', 'k');
+hold on
+linkaxes([ax1 ax2],'y')
+t.XLabel.String = '1-hr wind speed (m/s)';
+t.YLabel.String = '\mu (Nm)';
+
+
+figure
+t = tiledlayout(1, 2);
+ax1 = nexttile;
+hold on
+plot([v(1:14), v(1:14), v(1:14), v(1:14)], [sigmas(1, 1:14, 1), sigmas(1, 1:14, 2), sigmas(1, 1:14, 3), sigmas(1, 1:14, 4)], 'o', 'color', 'k');
+hold on
+plot(v(1:14), mean([sigmas(1, 1:14, 1); sigmas(1, 1:14, 2); sigmas(1, 1:14, 3); sigmas(1, 1:14, 4)]), '-k');
+vv = [0:0.1:25];
+ax2 = nexttile;
+plot([v(15:19), v(15:19), v(15:19), v(15:19)], [sigmas(1, 15:19, 1), sigmas(1, 15:19, 2), sigmas(1, 15:19, 3), sigmas(1, 15:19, 4)], 'o', 'color', 'k');
+hold on
+linkaxes([ax1 ax2],'y')
+t.XLabel.String = '1-hr wind speed (m/s)';
+t.YLabel.String = '\sigma (Nm)';
 
 % Sigma, mu over hs
 figure('Position', [100 100 900 500])
@@ -293,14 +311,25 @@ end
 
 
 % Ks contour plot
-figure('Position', [100 100 1100 280])
-t = tiledlayout(1, 4);
+figure('Position', [100 100 500 800])
+t = tiledlayout(4, 2);
 clower = -0.6;
 cupper = 0.3;
 for ii = 1 : 4
     nexttile
     contourf(vgrid, hgrid, squeeze(ks(:, :, ii)), 10)
     title(['t_{tp' num2str(ii) '} surface'])
+    caxis([clower cupper])
+    nexttile
+    ktp1 = nan(size(vgrid));
+    for i = 1 : size(vgrid, 1)
+        for j = 1 : size(vgrid, 2)
+            Xtemp = [vgrid(i, j), hgrid(i, j), tp(hgrid(i, j), ii)];
+            ktp1(i, j) = predict(mdlK, Xtemp);
+        end
+    end
+    contourf(vgrid, hgrid, ktp1, 10);
+    title(['predicted, t_{tp' num2str(ii) '} surface'])
     caxis([clower cupper])
 end
 
@@ -313,14 +342,25 @@ exportgraphics(gcf, 'gfx/EmulatorFitKFree_k.jpg')
 exportgraphics(gcf, 'gfx/EmulatorFitKFree_k.pdf') 
 
 % Sigmas contour plot
-figure('Position', [100 100 1100 280])
-t = tiledlayout(1, 4);
+figure('Position', [100 100 500 800])
+t = tiledlayout(4, 2);
 clower = min(sigmas(:));
 cupper = max(sigmas(:)) * 0.95;
 for ii = 1 : 4
     nexttile
     contourf(vgrid, hgrid, squeeze(sigmas(:, :, ii)), 10)
     title(['t_{tp' num2str(ii) '} surface'])
+    caxis([clower cupper])
+    nexttile
+    sigmatp1 = nan(size(vgrid));
+    for i = 1 : size(vgrid, 1)
+        for j = 1 : size(vgrid, 2)
+            Xtemp = [vgrid(i, j), hgrid(i, j), tp(hgrid(i, j), ii)];
+            sigmatp1(i, j) = predict(mdlSigma, Xtemp);
+        end
+    end
+    contourf(vgrid, hgrid, sigmatp1, 10);
+    title(['predicted, t_{tp' num2str(ii) '} surface'])
     caxis([clower cupper])
 end
 
@@ -334,8 +374,8 @@ exportgraphics(gcf, 'gfx/EmulatorFitKFree_Sigma.pdf')
 
 
 % Mus contour plot
-figure('Position', [100 100 1100 280])
-t = tiledlayout(1, 4);
+figure('Position', [100 100 500 800])
+t = tiledlayout(4, 2);
 clower = min(mus(:));
 cupper = 2 * 10^8;
 for ii = 1 : 4
@@ -343,6 +383,17 @@ for ii = 1 : 4
     contourf(vgrid, hgrid, squeeze(mus(:, :, ii)), [clower : (cupper - clower) / 10 : cupper])
     title(['t_{tp' num2str(ii) '} surface'])
     caxis([clower cupper]);
+    nexttile
+    mutp1 = nan(size(vgrid));
+    for i = 1 : size(vgrid, 1)
+        for j = 1 : size(vgrid, 2)
+            Xtemp = [vgrid(i, j), hgrid(i, j), tp(hgrid(i, j), ii)];
+            mutp1(i, j) = predict(mdlMu, Xtemp);
+        end
+    end
+    contourf(vgrid, hgrid, mutp1, 10);
+    title(['predicted, t_{tp' num2str(ii) '} surface'])
+    caxis([clower cupper])
 end
 
 c = colorbar;

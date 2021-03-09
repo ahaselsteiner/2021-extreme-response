@@ -12,20 +12,27 @@ mus = R.mu(vmesh, hmesh, tmesh);
 rmedian = R.ICDF1hr(vmesh, hmesh, tmesh, 0.5);
 
 figure
-subplot(2, 1, 1);
-plot(v, R.mu(v, 3, 10));
+hss = 0;
+tpp = 10;
+t = tiledlayout(3, 1);
+nexttile
+plot(vv, R.k(vv, hss));
+ylabel('k (-)');
+nexttile
+plot(vv, R.mu(vv, hss, tpp));
 ylabel('\mu');
-subplot(2, 1, 2);
-plot(v, R.sigma(v, 3, 10));
+nexttile
+plot(vv, R.sigma(vv, hss, tpp));
 ylabel('\sigma');
 xlabel('v_{1hr} (m/s)');
+sgtitle(['hs = ' num2str(hss) ', tp = ' num2str(tpp)]);
 
 
 % Plot response of v curves.
 figure('Position', [100 100 500 600])
-
+t = tiledlayout(2, 1);
 % Plot result from simulation
-nexttile
+ax1 = nexttile
 addpath('03_Calm_Sea_Complete_Wind')
 load 'CalmSeaComplete.mat';
 OvrAllSeeds = [Ovr_S1; Ovr_S2; Ovr_S3; Ovr_S4; Ovr_S5; Ovr_S6];
@@ -54,15 +61,14 @@ fitted_curve = fit(vv(vv > 25)', meanOvr(vv > 25)', FT);
 h = plot(fitted_curve);
 set(h, 'linewidth', 2)
 set(h, 'linestyle', '--')
-ylim([0 16 * 10^7]);
-xlabel('1-hr wind speed (m/s)');
-ylabel('Max 1-hr overturning moment (Nm)');
 fit_string = [num2str(round(fitted_curve.a)) ' * v^2'];
 legend({'Simulation seed', 'Average over seeds', fit_string}, 'location', 'southeast');
 legend box off
+xlabel('');
+ylabel('');
 title('Aeroelastic simulation, h_s = 0 m');
 % Plot results from emulator
-nexttile
+ax2 = nexttile
 hold on
 n = 6;
 r = nan(length(vv), n);
@@ -86,10 +92,14 @@ set(h, 'linestyle', '--')
 fit_string = [num2str(round(fitted_curve.a)) ' * v^2'];
 legend({'Simulation seed', 'Average over seeds', fit_string}, 'location', 'southeast');
 legend box off
-ylim([0 16 * 10^7]);
-xlabel('1-hr wind speed (m/s)');
-ylabel('Max 1-hr overturning moment (Nm)');
+xlabel('');
+ylabel('');
+linkaxes([ax1 ax2],'xy')
+xlabel(t, '1-hr wind speed (m/s)');
+ylabel(t, 'Max 1-hr overturning moment (Nm)');
+t.TileSpacing = 'compact';
 title('Statistical response emulator, h_s = 0 m');
+
 exportgraphics(gcf, 'gfx/ResponseAtCalmSea.jpg') 
 exportgraphics(gcf, 'gfx/ResponseAtCalmSea.pdf') 
 
