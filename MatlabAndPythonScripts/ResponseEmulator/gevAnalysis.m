@@ -94,81 +94,9 @@ end
 
 
 
-figure
-subplot(1, 5, 1)
-bar(1, ks)
-box off
-set(gca, 'XTick', [1,])
-set(gca, 'XTickLabel', {'k'})
-subplot(1, 5, 2:5)
-y = [sigmas, mus, x1, maxima]';
-h = bar(y);
-set(h, {'DisplayName'}, file_dist')
-legend('location', 'eastoutside', 'box', 'off') 
-box off
-set(gca, 'XTick', [1,2,3,4])
-set(gca, 'XTickLabel', {'$\sigma$', '$\mu$', '$\hat{x}_{1hr}$', 'realized max'}, 'TickLabelInterpreter', 'latex')
-exportgraphics(gcf, 'gfx/GEVParameters.jpg') 
-exportgraphics(gcf, 'gfx/GEVParameters.pdf') 
-
-figure('Position', [100 100 900 900])
-x = [7:0.01:14] * 10^7;
-
-% PDF
-for i = 1:length(rs)
-    subplot(length(rs), 3, i * 3 - 2)
-    ax = gca;
-    title(file_dist{i});
-    ax.TitleHorizontalAlignment = 'left'; 
-    hold on
-    histogram(block_maxima(i,:), 'normalization', 'pdf')
-    f = pds(i).pdf(x);
-    plot(x, f);
-    xlim([7*10^7, 12*10^7]);
-end
-
-% CDF of 1-hr maximum
-for i = 1:length(rs)
-    subplot(length(rs), 3, i * 3 - 1)
-    hold on
-    p = pds(i).cdf(x);
-    plot(x, p);
-    p = pds(i).cdf(x).^N_BLOCKS;
-    plot(x, p);
-    realizedp(i) = pds(i).cdf(maxima(i)).^N_BLOCKS;
-    xlim([7*10^7, 13*10^7]);
-end
-
-% ICDF of 1-hr maximum
-for i = 1:length(rs)
-    subplot(length(rs), 3, i * 3)
-    hold on
-    rlower = 9*10^7;
-    rupper = 14*10^7;
-    r = [rlower : (rupper - rlower) / 1000 : rupper];
-    f = 60 .* pds(i).cdf(r).^59 .* pds(i).pdf(r);
-    plot(r, f, 'linewidth', 1);
-    ylims = get(gca, 'ylim');
-    if i <= 6
-        plot([min(maxima) min(maxima)], [0 ylims(2)], '-k')
-        plot([max(maxima) max(maxima)], [0 ylims(2)], '-k')
-        h = text(min(maxima) -0.3 * 10^7, 0.5 * ylims(2), ...
-            'min(realized)', 'fontsize', 6', 'color', 'k', ...
-            'horizontalalignment', 'center');
-        set(h,'Rotation',90);
-        h = text(max(maxima) + 0.3 * 10^7, 0.5 * ylims(2), ...
-            'max(realized)', 'fontsize', 6', 'color', 'k', ...
-            'horizontalalignment', 'center');
-        set(h,'Rotation',90);
-    end
-    xlim([rlower rupper]);
-end
-
-exportgraphics(gcf, 'gfx/GEV-PDFs.jpg') 
-exportgraphics(gcf, 'gfx/GEV-PDFs.pdf') 
-
 % Combined figure for paper
-figure('Position', [100 100 1200 700])
+figure('Position', [100 100 1200 550])
+layout = tiledlayout(2, 5);
 c1 = [0, 0.4470, 0.7410];
 c2 = [0.8500, 0.3250, 0.0980];
 c3 = [0.9290, 0.6940, 0.1250];
@@ -181,13 +109,18 @@ barcolors = [repmat(c1,6,1);
     repmat(c4,6,1);
     [0, 0, 0];
     darker_colors];
-subplot(6, 6, [1 2 7 8])
+
+nexttile([1 1])
 hbar1 = bar(1, [ks; 0; pds_6hr(1).k; pds_6hr(2).k; pds_6hr(3).k; pds_6hr(4).k]);
 text(1.35, 0.05, 'pooled', 'fontsize', 6, 'horizontalalignment', 'center');
 box off
 set(gca, 'XTick', [1,])
 set(gca, 'XTickLabel', {'k'})
-subplot(6, 6, [3 4 5 6 9 10 11 12])
+set(hbar1, {'DisplayName'}, file_dist_with_pooled')
+lh = legend(hbar1([1, 7, 13, 19]), 'location', 'northoutside', 'Orientation','Horizontal');
+lh.Layout.Tile = 'North';
+
+nexttile([1 4])
 sigmas_wpooled = [sigmas; 0; pds_6hr(1).sigma; pds_6hr(2).sigma; pds_6hr(3).sigma; pds_6hr(4).sigma];
 mus_wpooled = [mus; 0; pds_6hr(1).mu; pds_6hr(2).mu; pds_6hr(3).mu; pds_6hr(4).mu];
 y = [sigmas_wpooled, mus_wpooled, [x1; nan(5,1)], [maxima; nan(5,1)]]';
@@ -199,91 +132,62 @@ for i = 1:length(rs) + 5
     hbar2(i).FaceColor = barcolors(i,:);
 end
 set(hbar2, {'DisplayName'}, file_dist_with_pooled')
-legend(hbar2([1, 7, 13, 19]), 'location', 'northwest', 'box', 'off') 
+%legend(hbar2([1, 7, 13, 19]), 'location', 'northwest', 'box', 'off') 
 box off
 set(gca, 'XTick', [1,2,3,4])
 set(gca, 'XTickLabel', {'$\sigma$', '$\mu$', '$\hat{x}_{1hr}$', 'realized max'}, 'TickLabelInterpreter', 'latex')
 
 % PDF of 1-hr maximum
+upper_ylim = 1.8E-7;
+nexttile
 for i = 1:length(rs)
-    if i <= 6
-        maxsgroup = maxima(1:6);
-        subplot(6, 7, 14 + i)
-    elseif i > 6 && i <= 12
-        maxsgroup = maxima(7:12);
-        subplot(6, 7, 21 + i - 6)
-    elseif i > 12 && i <= 18
-        maxsgroup = maxima(13:18);
-        subplot(6, 7, 28 + i - 12)
-    else
-        maxsgroup = maxima(19:24);
-        subplot(6, 7, 35 + i - 18)
-    end
-    
     hold on
     rlower = 9*10^7;
-    rupper = 14*10^7;
+    rupper = 15*10^7;
     r = [rlower : (rupper - rlower) / 1000 : rupper];
     f = 60 .* pds(i).cdf(r).^59 .* pds(i).pdf(r);
     plot(r, f, 'color', hbar2(i).FaceColor, 'linewidth', 1);
-    ylims = get(gca, 'ylim');
-
-    plot([min(maxsgroup) min(maxsgroup)], [0 ylims(2)], '-k')
-    plot([max(maxsgroup) max(maxsgroup)], [0 ylims(2)], '-k')
-    h = text(min(maxsgroup) -0.3 * 10^7, 0.5 * ylims(2), ...
-        'min(realized)', 'fontsize', 6', 'color', 'black', ...
-        'horizontalalignment', 'center');
-    set(h,'Rotation',90);
-    h = text(max(maxsgroup) + 0.3 * 10^7, 0.5 * ylims(2), ...
-        'max(realized)', 'fontsize', 6', 'color', 'black', ...
-        'horizontalalignment', 'center');
-    set(h,'Rotation',90);
-    %legend(file_dist{i}, 'location', 'northeast', 'box', 'off', 'fontsize', 6) 
-    title(file_dist{i})%,  'Units', 'normalized', 'Position', [0.8, 0.8, 0]);
-    ax = gca;
-    ax.TitleHorizontalAlignment = 'left';
-    xlim([rlower, rupper]);
-end
-for i = 1 : 4
-    if i == 1
-        maxsgroup = maxima(1:6);
-        subplot(6, 7, 21)
-    elseif i == 2
-        maxsgroup = maxima(7:12);
-        subplot(6, 7, 28)
-    elseif i == 3
-        maxsgroup = maxima(13:18);
-        subplot(6, 7, 35)
-    else
-        maxsgroup = maxima(19:24);
-        subplot(6, 7, 42)
-    end
     
-    hold on
-    rlower = 9*10^7;
-    rupper = 14*10^7;
-    r = [rlower : (rupper - rlower) / 1000 : rupper];
-    f = 60 .* pds_6hr(i).cdf(r).^59 .* pds_6hr(i).pdf(r);
-    plot(r, f, 'color', darker_colors(i, :), 'linewidth', 2);
-    ylims = get(gca, 'ylim');
-
-    plot([min(maxsgroup) min(maxsgroup)], [0 ylims(2)], '-k')
-    plot([max(maxsgroup) max(maxsgroup)], [0 ylims(2)], '-k')
-    h = text(min(maxsgroup) -0.3 * 10^7, 0.5 * ylims(2), ...
-        'min(realized)', 'fontsize', 6', 'color', 'black', ...
-        'horizontalalignment', 'center');
-    set(h,'Rotation',90);
-    h = text(max(maxsgroup) + 0.3 * 10^7, 0.5 * ylims(2), ...
-        'max(realized)', 'fontsize', 6', 'color', 'black', ...
-        'horizontalalignment', 'center');
-    set(h,'Rotation',90);
-    %legend(file_dist{i}, 'location', 'northeast', 'box', 'off', 'fontsize', 6) 
-    title(file_dist_with_pooled{19 + i})%,  'Units', 'normalized', 'Position', [0.8, 0.8, 0]);
-    ax = gca;
-    ax.TitleHorizontalAlignment = 'left';
-    xlim([rlower, rupper]);
+   
+    
+     if mod(i, 6) == 0
+        groupid = floor(i/6);
+        
+        % Distribution of the pooled data
+        f = 60 .* pds_6hr(groupid).cdf(r).^59 .* pds_6hr(groupid).pdf(r);
+        plot(r, f, 'color', darker_colors(groupid, :), 'linewidth', 2);
+        
+        xlim([rlower, rupper]);
+        ylim([0 upper_ylim]);
+        ylims = get(gca, 'ylim');
+        
+        maxsgroup = maxima((groupid - 1)* 6 + 1: groupid * 6);
+        x = [min(maxsgroup) max(maxsgroup) max(maxsgroup) min(maxsgroup)];
+        y = [0 0 ylims(2) ylims(2)];
+        pcolor = [0.9 0.9 0.9];
+        ph = patch(x, y, pcolor, 'EdgeColor', 'none');
+        uistack(ph, 'bottom')
+        set(gca, 'Layer', 'top')
+        
+        h = text(min(maxsgroup) + (max(maxsgroup) - min(maxsgroup)) / 2, 0.95 * ylims(2), ...
+            'realized maxima', 'fontsize', 6', 'color', 'black', ...
+            'horizontalalignment', 'center');
+        title(file_dist{i})
+        
+        nexttile
+    end
 end
 
+hold on
+for groupid = 1 : 4
+    % Distribution of the pooled data
+    f = 60 .* pds_6hr(groupid).cdf(r).^59 .* pds_6hr(groupid).pdf(r);
+    plot(r, f, 'color', darker_colors(groupid, :), 'linewidth', 2);
+    xlim([rlower, rupper]);
+    ylim([0 upper_ylim])
+end
+
+layout.Padding = 'compact';
 exportgraphics(gcf, 'gfx/GEV.jpg') 
 exportgraphics(gcf, 'gfx/GEV.pdf') 
 
