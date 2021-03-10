@@ -108,15 +108,20 @@ for i = 1 : 3
     IFORM.r = R.ICDF1hr(IFORM.v, IFORM.hs, IFORM.tp, response_quantile);
 
     hold on
+    x = [0 25 25 0];
+    y = [0 0 16 16];
+    pp_color = [0.8 0.8 0.8];
+    patch(x,y, pp_color, 'EdgeColor', 'none', 'HandleVisibility', 'off')
+    text(12.5, 2, 'power production', 'horizontalalignment', 'center');
+    text(33, 2, 'parked', 'horizontalalignment', 'center');
     lw = 1;
     plot(IFORM.v, IFORM.hs, '-k', 'linewidth', lw);
     plot(HDC.v, HDC.hs, ':k', 'linewidth', lw);
     sz = 25;
     scatter(IFORM.v, IFORM.hs, sz, IFORM.r / x50_am, 'filled', 'MarkerEdgeColor', 'black')
     scatter(HDC.v, HDC.hs, sz, HDC.r / x50_am, 'filled', 'MarkerEdgeColor', 'black')
-    plot([25, 25], [0 16], 'color', [0.5 0.5 0.5]);
     xticks([0 10 20 25 30 40]);
-    xlabel('1-hr wind speed (m/s)') 
+    xlabel('1-hour wind speed (m/s)') 
     if i == 1
         ylabel('Significant wave height (m)');
     end
@@ -141,6 +146,7 @@ for i = 1 : 3
     text(HDC.v(maxi), HDC.hs(maxi), txt, 'HorizontalAlignment','right')
     
     title([num2str(response_quantile) '-quantile']);
+    set(gca, 'Layer', 'top')
 end
 exportgraphics(gcf, 'gfx/ResponseAtContour.jpg') 
 exportgraphics(gcf, 'gfx/ResponseAtContour.pdf') 

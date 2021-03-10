@@ -144,55 +144,98 @@ title(['Statistical response emulator, h_s = 3 m, t_p = ' num2str(tp(3, tpi))]);
 
 
 % Plot response contours
-fig = figure('position', [100, 100, 900, 400]);
-t = tiledlayout(1,3);
-ax1 = nexttile;
-tpi = 3;
-robserved  = squeeze(max(Ovr(:, :, tpi, :), [], 4))';
-robserved(robserved == 0) = NaN;
-[vmesh, hmesh] = meshgrid(v, hs);
-contourf(vmesh, hmesh, robserved, 10)
-clower = 0.1 * 10^8;
-cupper = 3.8 * 10^8;
-caxis([clower cupper]);
-title('Aeroelastic simulation');
+fig = figure('position', [100, 100, 750, 850]);
+t = tiledlayout(4,3);
+for tpid = 1 : 4
+    ax1 = nexttile;
+    robserved  = squeeze(max(Ovr(:, :, tpid, :), [], 4))';
+    robserved(robserved == 0) = NaN;
+    [vmesh, hmesh] = meshgrid(v, hs);
+    contourf(vmesh, hmesh, robserved, 10)
+    clower = 0.1 * 10^8;
+    cupper = 3.8 * 10^8;
+    caxis([clower cupper]);
+    if tpid == 1
+        title(['Aeroelastic simulation, t_{p' num2str(tpid) '}']);
+    else
+        title(['t_{p' num2str(tpid) '}']);
+    end
 
-ax2 = nexttile;
-vv = [0:0.5:45];
-hss = [0:0.2:15];
-[vmesh, hmesh] = meshgrid(vv, hss);
-r50 = R.ICDF1hr(vmesh, hmesh, tp(hmesh, tpid), 0.5);
-contourf(vmesh, hmesh, r50, 10)
-title('Emulator median response');
-caxis([clower cupper]);
-c1 = colorbar;
-c1.Label.String = '1-hour maximum oveturning moment (Nm) ';
-c1.Layout.Tile = 'south';
-linkaxes([ax1 ax2],'xy')
+    ax2 = nexttile;
+    vv = [0:0.5:45];
+    hss = [0:0.2:15];
+    [vmesh, hmesh] = meshgrid(vv, hss);
+    r50 = R.ICDF1hr(vmesh, hmesh, tp(hmesh, tpid), 0.5);
+    contourf(vmesh, hmesh, r50, 10)
+    caxis([clower cupper]);
+    if tpid == 1 
+        title(['Emulator median response, t_{p' num2str(tpid) '}']);
+    else
+        title(['t_{p' num2str(tpid) '}']);
+    end
+    if tpid == 4
+        c1 = colorbar;
+        c1.Label.String = '1-hour maximum oveturning moment (Nm) ';
+        c1.Layout.Tile = 'south';
+    end
+    %linkaxes([ax1 ax2],'xy')
+
+
+    ax3 = nexttile;
+    [vmesh, hmesh] = meshgrid(v, hs);
+    r50 = R.ICDF1hr(vmesh, hmesh, tp(hmesh, tpid), 0.5);
+    r50(isnan(robserved)) = NaN;
+    contourf(vmesh, hmesh, robserved - r50, 10)
+    colormap(ax3, gray)
+    caxis([-5 * 10^7, 5 * 10^7]);
+    if tpid == 1
+        title('Difference');
+    end
+    if tpid == 4
+        c2 = colorbar;
+        c2.Label.String = 'Difference (Nm) ';
+        c2.Layout.Tile = 'south';
+    end
+end
 xlabel(t, '1-hour wind speed (m/s)');
 ylabel(t, 'Significant wave height (m)');
-
-ax3 = nexttile;
-[vmesh, hmesh] = meshgrid(v, hs);
-r50 = R.ICDF1hr(vmesh, hmesh, tp(hmesh, tpid), 0.5);
-r50(isnan(robserved)) = NaN;
-contourf(vmesh, hmesh, robserved - r50, 10)
-c2 = colorbar;
-colormap(ax3, gray)
-c2.Label.String = 'Difference (Nm) ';
-c2.Layout.Tile = 'south';
-title('Difference');
-
-sgtitle(['1-hour response at t_{p ' num2str(tpi) '}']);
-
+    
 exportgraphics(fig, 'gfx/CompareResponse2D.jpg') 
 exportgraphics(fig, 'gfx/CompareResponse2D.pdf') 
 
+% Plot response comparision as scatter
+fig = figure('position', [100, 100, 1400, 350]);
+t = tiledlayout(1, 5);
+ax1 = nexttile;
+robserved_all = [];
+r50_all = [];
+ms = 5;
+for tpid = 1 : 4
+    nexttile
+    robserved  = squeeze(max(Ovr(:, :, tpid, :), [], 4))';
+    robserved(robserved == 0) = NaN;
+    r50 = R.ICDF1hr(vmesh, hmesh, tp(hmesh, tpid), 0.5);
+    robserved_all = [robserved_all; robserved(:)];
+    r50_all = [r50_all; r50(:)];
+    scatter(robserved(:), r50(:), ms, 'ok');
+    hold on
+    plot([0, max(r50(:))], [0, max(r50(:))], '--r'); 
+    title(['t_{p' num2str(tpid) '}']);
+end
+axes(ax1);
+scatter(robserved_all, r50_all, ms, 'ok');
+hold on
+plot([0, max(r50_all)], [0, max(r50_all)], '--r'); 
+title('All simulated conditions');
+xlabel(t, '1-hour maximum in aeroelastic simulation (Nm)');
+ylabel(t, 'Emulator median 1-hour maximum (Nm)');
+exportgraphics(fig, 'gfx/CompareResponseScatter.jpg') 
+exportgraphics(fig, 'gfx/CompareResponseScatter.pdf') 
+
+
 % Plot with 3D graphic
 fig = figure('position', [100, 100, 900, 400]);
-vv = [0:0.5:45];
-hss = [0:0.2:15];
-[vmesh, hmesh] = meshgrid(vv, hss);
+[tmesh, vmesh, hmesh] = meshgrid(tp_temp, v_temp, hs_temp);
 clower = 7.3E6;
 cupper = max(max(max(rmedian)));
 t = tiledlayout(1, 2);

@@ -101,15 +101,20 @@ IFORM.tp = R.tpSteepness(IFORM.hs, steepness);
 IFORM.r = R.ICDF1hr(IFORM.v, IFORM.hs, IFORM.tp, response_quantile);
 
 hold on
+x = [0 25 25 0];
+y = [0 0 16 16];
+pp_color = [0.8 0.8 0.8];
+patch(x,y, pp_color, 'EdgeColor', 'none', 'HandleVisibility', 'off')
+text(12.5, 2, 'power production', 'horizontalalignment', 'center');
+text(33, 2, 'parked', 'horizontalalignment', 'center');
 lw = 1;
 plot(IFORM.v, IFORM.hs, '-k', 'linewidth', lw);
 plot(HDC.v, HDC.hs, ':k', 'linewidth', lw);
 sz = 25;
 scatter(IFORM.v, IFORM.hs, sz, IFORM.r / x50_am, 'filled', 'MarkerEdgeColor', 'black')
 scatter(HDC.v, HDC.hs, sz, HDC.r / x50_am, 'filled', 'MarkerEdgeColor', 'black')
-plot([25, 25], [0 16], 'color', [0.5 0.5 0.5]);
 xticks([0 10 20 25 30 40]);
-xlabel('1-hr wind speed (m/s)') 
+xlabel('1-hour wind speed (m/s)') 
 ylabel('Significant wave height (m)');
 xlim([0 40]);
 ylim([0 16]);
@@ -123,6 +128,7 @@ text(IFORM.v(maxi), IFORM.hs(maxi), txt);
 [max_hdc, maxi] = max(HDC.r / x50_am);
 txt = [num2str(max_hdc, '%4.3f') ' \rightarrow'];
 text(HDC.v(maxi), HDC.hs(maxi), txt, 'HorizontalAlignment','right')
+set(gca, 'Layer', 'top')
 
 exportgraphics(gcf, 'gfx/ResponseAtContourDeterministic.jpg') 
 exportgraphics(gcf, 'gfx/ResponseAtContourDeterministic.pdf') 
