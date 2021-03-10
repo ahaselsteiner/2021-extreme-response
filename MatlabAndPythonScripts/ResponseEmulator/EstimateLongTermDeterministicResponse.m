@@ -14,14 +14,15 @@ p = zeros(n, 1) + 0.5; % Median response
 r = R.ICDF1hr(v1hr(1:n), hs(1:n), tp(1:n), p);
 
 
-figure('Position', [100 100 900 800])
-subplot(4, 2, 1:2);
+figure('Position', [100 100 1200 800])
+layout = tiledlayout(4,3);
+nexttile([1 3])
 yyaxis left 
 plot(t(1:n), r);
 ylabel('Overturning moment (Nm)')
 yyaxis right 
 plot(t(1:n), v1hr(1:n));
-ylabel('1-hr wind speed (m/s)')
+ylabel('1-hour wind speed (m/s)')
 xlim([t(1) t(n)]);
 box off
 
@@ -42,7 +43,7 @@ for i = 1 : full_years
     block_max_i(i) = maxid + (i - 1) * block_length;
 end
 
-subplot(4, 2, 3:4)
+nexttile([1 3])
 hold on
 yyaxis left 
 plot(t(1:n), r);
@@ -50,11 +51,23 @@ plot(t(block_max_i), r(block_max_i), 'xr');
 ylabel('Overturning moment (Nm)')
 yyaxis right 
 plot(t(1:n), v1hr(1:n));
-ylabel('1-hr wind speed (m/s)') 
+ylabel('1-hour wind speed (m/s)') 
 xlabel('Time (s)');
-subplot(4, 2, [5 7])
+
+nexttile([2 1])
 hold on
-%plot(v1hr(block_max_i), hs(block_max_i), 'xr');
+scatter(v1hr, hs, 2, [0.5 0.5 0.5])
+scatter(v1hr(block_max_i), hs(block_max_i), 30, block_maxima, 'filled', 'MarkerEdgeColor', 'k');
+c = colorbar;
+c.Label.String = 'Overturning moment of annual extreme (Nm)';
+box off
+set(gca, 'XLim', [0, get(gca, 'XLim') * [0; 1]])
+set(gca, 'YLim', [0, get(gca, 'YLim') * [0; 1]])
+xlabel('1-hour wind speed (m/s)') 
+ylabel('Significant wave height (m)')
+
+nexttile([2 1])
+hold on
 sp = (2 * pi * hs(block_max_i)) ./ (9.81 * tp(block_max_i).^2);
 scatter(v1hr, hs, 2, [0.5 0.5 0.5])
 scatter(v1hr(block_max_i), hs(block_max_i), 30, sp, 'filled', 'MarkerEdgeColor', 'k');
@@ -62,21 +75,27 @@ c = colorbar;
 caxis([1/40 1/25])
 c.Ticks = [1/40 1/30 1/25];
 c.TickLabels = {'1/40', '1/30', '1/25'};  
-c.Label.String = 'Steepness at maximum (-)';
+c.Label.String = 'Steepness of annual extreme (-)';
 box off
 set(gca, 'XLim', [0, get(gca, 'XLim') * [0; 1]])
 set(gca, 'YLim', [0, get(gca, 'YLim') * [0; 1]])
-xlabel('1-hr wind speed at maximum (m/s)') 
-ylabel('Significant wave height at maximum (m)')
-subplot(4, 2, [6 8])
+xlabel('1-hour wind speed (m/s)') 
+ylabel('Significant wave height (m)')
+
+nexttile([2 1])
 pd = fitdist(block_maxima, 'GeneralizedExtremeValue');
 h = qqplot(block_maxima, pd);
 set(h(1), 'Marker', 'x')
 set(h(1), 'MarkerEdgeColor', 'r')
 set(h(2), 'Color', 'k')
 set(h(3), 'Color', 'k')
-exportgraphics(gcf, 'gfx/ResponseTimeSeriesDeterministic.jpg') 
-exportgraphics(gcf, 'gfx/ResponseTimeSeriesDeterministic.pdf') 
+title('');
+xlabel('Quantiles of GEV distribution (Nm)');
+ylabel('Quantiles of sample (Nm)');
+
+layout.Padding = 'compact';
+exportgraphics(layout, 'gfx/ResponseTimeSeriesDeterministic.jpg') 
+exportgraphics(layout, 'gfx/ResponseTimeSeriesDeterministic.pdf') 
 
 x1_am = pd.icdf(exp(-1));
 x50_am = pd.icdf(1 - 1/50);

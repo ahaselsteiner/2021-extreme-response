@@ -97,13 +97,13 @@ h = plot(fitted_curve);
 set(h, 'linewidth', 2)
 set(h, 'linestyle', '--')
 fit_string = [num2str(round(fitted_curve.a)) ' * v^2'];
-legend({'Simulation seed', 'Average over seeds', fit_string}, 'location', 'southeast');
+legend({'Random realization', 'Average over realizations', fit_string}, 'location', 'southeast');
 legend box off
 xlabel('');
 ylabel('');
 linkaxes([ax1 ax2],'xy')
-xlabel(t, '1-hr wind speed (m/s)');
-ylabel(t, 'Max 1-hr overturning moment (Nm)');
+xlabel(t, '1-hour wind speed (m/s)');
+ylabel(t, 'Max 1-hour overturning moment (Nm)');
 t.TileSpacing = 'compact';
 title('Statistical response emulator, h_s = 0 m');
 exportgraphics(gcf, 'gfx/ResponseAtCalmSea.jpg') 
@@ -135,8 +135,8 @@ legend box off
 xlabel('');
 ylabel('');
 linkaxes([ax1 ax2],'xy')
-xlabel(t, '1-hr wind speed (m/s)');
-ylabel(t, 'Max 1-hr overturning moment (Nm)');
+xlabel(t, '1-hour wind speed (m/s)');
+ylabel(t, 'Max 1-hour overturning moment (Nm)');
 t.TileSpacing = 'compact';
 legend({'Aeroelastic simulation', 'Response emulator seed', 'Response emulator mean'}, 'location', 'southeast');
 legend box off
@@ -186,7 +186,7 @@ for tpid = 1 : 4
     r50 = R.ICDF1hr(vmesh, hmesh, tp(hmesh, tpid), 0.5);
     r50(isnan(robserved)) = NaN;
     contourf(vmesh, hmesh, robserved - r50, 10)
-    colormap(ax3, gray)
+    colormap(ax3, redblue)
     caxis([-5 * 10^7, 5 * 10^7]);
     if tpid == 1
         title('Difference');
@@ -262,7 +262,7 @@ contourf(vmesh, hmesh, rmedian, 10)
 hold on
 caxis([clower cupper]);
 c = colorbar;
-c.Label.String = 'Median maximum 1-hr oveturning moment (Nm) ';
+c.Label.String = 'Median maximum 1-hour oveturning moment (Nm) ';
 c.Layout.Tile = 'east';
 xlabel('1-hour wind speed (m/s)');
 ylabel('Significant wave height (m)');
