@@ -1,6 +1,10 @@
 R = ResponseEmulator;
 FormatConventionForMomentTimeSeries % to get the variables: v, hs, tp(hs, idx)
 
+%load('OvrDataEmulator');
+Ovr(1,:,:,:) = NaN;
+Ovr(:,9,4,:) = NaN;
+
 tp_temp = [3:1:20];
 v_temp = [0:1:50];
 hs_temp = [0:0.5:9];
@@ -185,7 +189,8 @@ for tpid = 1 : 4
     [vmesh, hmesh] = meshgrid(v, hs);
     r50 = R.ICDF1hr(vmesh, hmesh, tp(hmesh, tpid), 0.5);
     r50(isnan(robserved)) = NaN;
-    contourf(vmesh, hmesh, robserved - r50, 10)
+    [M,h] = contourf(vmesh, hmesh, r50 - robserved, 15);
+    set(h,'LineColor','none')
     colormap(ax3, redblue)
     caxis([-5 * 10^7, 5 * 10^7]);
     if tpid == 1
@@ -193,7 +198,7 @@ for tpid = 1 : 4
     end
     if tpid == 4
         c2 = colorbar;
-        c2.Label.String = 'Difference (Nm) ';
+        c2.Label.String = 'Difference (emulator - aeroelastic; Nm) ';
         c2.Layout.Tile = 'south';
     end
 end

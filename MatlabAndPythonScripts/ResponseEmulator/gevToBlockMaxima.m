@@ -1,4 +1,4 @@
-function [pd, block_maxima] = gevToBlockMaxima(x, nBlocks, fixedK)
+function [pd, block_maxima, block_max_i] = gevToBlockMaxima(x, nBlocks, fixedK)
 %gevToBlockmaxima Fits a GEV to blockmaxima
 %   x = time series
 %   nBLocks = number of block the time series shall be divided into
