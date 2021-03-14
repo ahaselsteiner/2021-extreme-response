@@ -31,7 +31,7 @@ function vHsTzStruct2Csv(Data, fileName)
     
     % Print the header
     fprintf(fid, '%s; ', 'time (YYYY-MM-DD-HH)'); % Time
-    fprintf(fid, '%s; ', '1-h mean wind speed at hub height (m/s)'); % Hs
+    fprintf(fid, '%s; ', '1-hour mean wind speed at hub height (m/s)'); % Hs
     fprintf(fid, '%s; ', 'Significant wave height (m)'); % Hs
     fprintf(fid, '%s\n', 'Zero-up-crossing period (s)'); % Tz
       

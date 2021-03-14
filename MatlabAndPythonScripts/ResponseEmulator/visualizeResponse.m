@@ -58,13 +58,13 @@ for i = 1 : 6
         set(h, 'HandleVisibility', 'off')
     end
 end
-for tpi = 1 : 4
-    h = scatter(v(1:14), squeeze(max(Ovr(1:14, 1, tpi, :), [], 4)), ms, 'MarkerFaceColor', [0 0 0.5], ...
-    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
-    if i > 1 
-        set(h, 'HandleVisibility', 'off')
-    end
-end
+% for tpi = 1 : 4
+%     h = scatter(v(1:14), squeeze(max(Ovr(1:14, 1, tpi, :), [], 4)), ms, 'MarkerFaceColor', [0 0 0.5], ...
+%     'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
+%     if i > 1 
+%         set(h, 'HandleVisibility', 'off')
+%     end
+% end
 meanOvr = mean(OvrAllSeeds);
 plot(vv, meanOvr, '-k', 'linewidth', 2);
 FT = fittype('a * x.^2');
@@ -77,7 +77,7 @@ legend({'Simulation seed', 'Average over seeds', fit_string}, 'location', 'south
 legend box off
 xlabel('');
 ylabel('');
-title('Aeroelastic simulation, h_s = 0 m');
+title('Multiphysics simulation, h_s = 0 m');
 % Plot results from emulator
 ax2 = nexttile
 hold on
@@ -142,7 +142,7 @@ linkaxes([ax1 ax2],'xy')
 xlabel(t, '1-hour wind speed (m/s)');
 ylabel(t, 'Max 1-hour overturning moment (Nm)');
 t.TileSpacing = 'compact';
-legend({'Aeroelastic simulation', 'Response emulator seed', 'Response emulator mean'}, 'location', 'southeast');
+legend({'Multiphysics simulation', 'Response emulator seed', 'Response emulator mean'}, 'location', 'southeast');
 legend box off
 title(['Statistical response emulator, h_s = 3 m, t_p = ' num2str(tp(3, tpi))]);
 
@@ -160,7 +160,7 @@ for tpid = 1 : 4
     cupper = 3.8 * 10^8;
     caxis([clower cupper]);
     if tpid == 1
-        title(['Aeroelastic simulation, t_{p' num2str(tpid) '}']);
+        title(['Multiphysics simulation, t_{p' num2str(tpid) '}']);
     else
         title(['t_{p' num2str(tpid) '}']);
     end
@@ -198,7 +198,7 @@ for tpid = 1 : 4
     end
     if tpid == 4
         c2 = colorbar;
-        c2.Label.String = 'Difference (emulator - aeroelastic; Nm) ';
+        c2.Label.String = 'Difference (emulator - multiphysics; Nm) ';
         c2.Layout.Tile = 'south';
     end
 end
@@ -232,7 +232,7 @@ scatter(robserved_all, r50_all, ms, 'ok');
 hold on
 plot([0, max(r50_all)], [0, max(r50_all)], '--r'); 
 title('All simulated conditions');
-xlabel(t, '1-hour maximum in aeroelastic simulation (Nm)');
+xlabel(t, '1-hour maximum in multiphysics simulation (Nm)');
 ylabel(t, 'Emulator median 1-hour maximum (Nm)');
 exportgraphics(fig, 'gfx/CompareResponseScatter.jpg') 
 exportgraphics(fig, 'gfx/CompareResponseScatter.pdf') 
