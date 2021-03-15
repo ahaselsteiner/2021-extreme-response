@@ -100,12 +100,12 @@ x1_am = pd.icdf(exp(-1));
 x50_am = pd.icdf(1 - 1/50);
 
 
-figure('Position', [100 100 900 250])
-tiledlayout(1,3);
-
+figure('Position', [100 100 900 500])
+tiledlayout(2,3);
+axs = gobjects(6,1);
 response_quantiles = [0.5 0.90 0.95];
 for i = 1 : 3
-    nexttile
+    axs(i) = nexttile(i)
     response_quantile = response_quantiles(i);
 
     HDC.v = [3 : 2 : 37];
@@ -121,6 +121,21 @@ for i = 1 : 3
     IFORM.tp = R.tpbreaking(IFORM.hs);
     IFORM.r = R.ICDF1hr(IFORM.v, IFORM.hs, IFORM.tp, response_quantile);
 
+    HDC3d.v = [zeros(1, 5) + 10, zeros(1, 7) + 15, zeros(1, 9) + 20, zeros(1, 11) + 25, ...
+        zeros(1, 11) + 30, zeros(1, 10) + 35, zeros(1,3) + 40];
+    HDC3d.tp = [4:1:8, 4:1:10, 4:1:12, 5:1:15, 6:1:16, 8:1:17, 13:1:15];
+    HDC3d.hs = [2.53173368 3.19510417 3.91335884 4.52937104 ...
+     5.01602721, 2.60282609 3.48992959 4.3083047  5.04892388 ...
+     5.73193509 6.24995537 6.59457612, 2.50906735 3.55482679 4.56478178 5.55231783 6.47480862 ...
+     7.30803931 7.9784241  8.48790181 8.74751375, 3.10204817  4.38187789  ...
+     5.60762783  6.81088122  7.97538425  9.04264091 ...
+     9.97726028 10.73933716 11.2496693  11.44413393 11.11084557, 3.57574695 ...
+     4.97246684  6.50169525  7.94746561  9.33996798 10.65420517 ...
+     11.86345709 12.91004791 13.72360281 14.20768759 14.1814108 5.2 ...
+     6.6668862   8.52965439 10.19484159 11.76382308 13.19914032 ...
+     14.49034801 15.53561057 16.21090588 16.12669259, 10.4 12.64255248 13.94488443];
+    HDC3d.r = R.ICDF1hr(HDC3d.v, HDC3d.hs, HDC3d.tp, response_quantile);
+    
     hold on
     x = [0 25 25 0];
     y = [0 0 16 16];
@@ -139,8 +154,6 @@ for i = 1 : 3
     if i == 1
         ylabel('Significant wave height (m)');
     end
-    xlim([0 40]);
-    ylim([0 16]);
     caxis([0.4 1])
     if i == 1
         legend('IFORM', 'Highest density', 'location', 'northwest', 'box', 'off');
@@ -161,7 +174,26 @@ for i = 1 : 3
     
     title([num2str(response_quantile) '-quantile']);
     set(gca, 'Layer', 'top')
+    
+    axs(3 + i) = nexttile(3 + i);
+    hold on
+    patch(x,y, pp_color, 'EdgeColor', 'none', 'HandleVisibility', 'off')
+    text(12.5, text_y, 'power production', 'horizontalalignment', 'center');
+    text(33, text_y, 'parked', 'horizontalalignment', 'center');
+    lw = 1;
+    sz = 25;
+    scatter(HDC3d.v, HDC3d.hs, sz, HDC3d.r / x50_am, 'filled', 'MarkerEdgeColor', 'black')
+    [max_hdc3, maxi] = max(HDC3d.r / x50_am);
+    txt = [num2str(max_hdc3, '%4.3f') ' \rightarrow'];
+    text(HDC3d.v(maxi), HDC3d.hs(maxi), txt, 'HorizontalAlignment','right')
+    xticks([0 10 20 25 30 40]);
+    xlabel(layout, '1-hour wind speed (m s^{-1})') 
+    ylabel(layout, 'Significant wave height (m)');
+    caxis([0.4 1])
+    set(gca, 'Layer', 'top')
 end
+linkaxes(axs,'xy')
+
 exportgraphics(gcf, 'gfx/ResponseAtContour.jpg') 
 exportgraphics(gcf, 'gfx/ResponseAtContour.pdf') 
 

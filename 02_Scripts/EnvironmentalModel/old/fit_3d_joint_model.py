@@ -392,7 +392,7 @@ ax.spines['top'].set_visible(False)
 ax.set_xlabel(tp_label)
 ax.set_ylabel(hs_label)
 
-contours_at_v = [1, 5, 10, 15, 20, 25, 30, 35]
+contours_at_v = [5, 10, 15, 20, 25, 30, 35, 40]
 c = sns.color_palette(None, len(contours_at_v))
 
 fig4, axs = plt.subplots(2, 4, sharex=True, sharey=True, 
@@ -426,7 +426,7 @@ for i, axi in enumerate(axs):
             # Get the frontier interval and sort it.
             contour_tp = contour_coords[:,0]
             contour_hs = contour_coords[:,1]   
-            mask = (contour_hs / np.power(contour_tp, 1.2) > 0.4)
+            mask = ((contour_hs > 2) & (contour_hs / np.power(contour_tp, 1.2) > 0.4)) 
             contour_hs_upper = contour_hs[mask]
             contour_tp_upper = contour_tp[mask]
 
@@ -442,6 +442,8 @@ for i, axi in enumerate(axs):
             subax.plot(dc_tp, dc_hs, 'og', ms=5)
 
             # Write contour coordinates into a CSV file
+            print(f'v={filter_v}')
+            print(dc_hs[:])
             csv_name = f'3D_contour_slice_at_{filter_v}mps'
             write_contour(dc_tp[:], dc_hs[:], csv_name, 
                 label_x=tp_label, label_y=hs_label)
