@@ -101,7 +101,7 @@ x50_am = pd.icdf(1 - 1/50);
 
 
 figure('Position', [100 100 900 500])
-tiledlayout(2,3);
+layout = tiledlayout(2,3);
 axs = gobjects(6,1);
 response_quantiles = [0.5 0.90 0.95];
 for i = 1 : 3
@@ -138,11 +138,12 @@ for i = 1 : 3
     
     hold on
     x = [0 25 25 0];
-    y = [0 0 16 16];
+    y = [0 0 20 20];
     pp_color = [0.8 0.8 0.8];
+    text_y = 1.5;
     patch(x,y, pp_color, 'EdgeColor', 'none', 'HandleVisibility', 'off')
-    text(12.5, 2, 'power production', 'horizontalalignment', 'center');
-    text(33, 2, 'parked', 'horizontalalignment', 'center');
+    text(12.5, text_y, 'power production', 'horizontalalignment', 'center');
+    text(33, text_y, 'parked', 'horizontalalignment', 'center');
     lw = 1;
     plot(IFORM.v, IFORM.hs, '-k', 'linewidth', lw);
     plot(HDC.v, HDC.hs, ':k', 'linewidth', lw);
@@ -150,10 +151,6 @@ for i = 1 : 3
     scatter(IFORM.v, IFORM.hs, sz, IFORM.r / x50_am, 'filled', 'MarkerEdgeColor', 'black')
     scatter(HDC.v, HDC.hs, sz, HDC.r / x50_am, 'filled', 'MarkerEdgeColor', 'black')
     xticks([0 10 20 25 30 40]);
-    xlabel('1-hour wind speed (m/s)') 
-    if i == 1
-        ylabel('Significant wave height (m)');
-    end
     caxis([0.4 1])
     if i == 1
         legend('IFORM', 'Highest density', 'location', 'northwest', 'box', 'off');
@@ -186,14 +183,17 @@ for i = 1 : 3
     [max_hdc3, maxi] = max(HDC3d.r / x50_am);
     txt = [num2str(max_hdc3, '%4.3f') ' \rightarrow'];
     text(HDC3d.v(maxi), HDC3d.hs(maxi), txt, 'HorizontalAlignment','right')
+    if i == 1
+        text(2, 18, '3D contour');
+    end
     xticks([0 10 20 25 30 40]);
-    xlabel(layout, '1-hour wind speed (m s^{-1})') 
-    ylabel(layout, 'Significant wave height (m)');
+
     caxis([0.4 1])
     set(gca, 'Layer', 'top')
 end
+xlabel(layout, '1-hour wind speed (m s^{-1})') 
+ylabel(layout, 'Significant wave height (m)');
 linkaxes(axs,'xy')
 
-exportgraphics(gcf, 'gfx/ResponseAtContour.jpg') 
-exportgraphics(gcf, 'gfx/ResponseAtContour.pdf') 
-
+exportgraphics(layout, 'gfx/ResponseAtContour.jpg') 
+exportgraphics(layout, 'gfx/ResponseAtContour.pdf') 
