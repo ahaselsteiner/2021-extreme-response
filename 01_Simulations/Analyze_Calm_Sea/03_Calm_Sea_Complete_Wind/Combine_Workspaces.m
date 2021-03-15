@@ -1,7 +1,7 @@
 % Combine Workspaces
 
-x = load ('calmSeaLowWind');
-y = load ('calmSeaHighWind');
+x = load ('CalmSeaLowWind');
+y = load ('CalmSeaHighWind');
 
 vrs = fieldnames(x);
 if ~isequal(vrs,fieldnames(y))
@@ -12,6 +12,6 @@ for k = 1:length(vrs)
     x.(vrs{k}) = [x.(vrs{k}) y.(vrs{k})];
 end
 
-save ('calmSeaComplete', '-struct', 'x')
+save ('CalmSeaComplete', '-struct', 'x')
 
 clear all

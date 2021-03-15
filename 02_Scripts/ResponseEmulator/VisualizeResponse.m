@@ -44,7 +44,6 @@ figure('Position', [100 100 500 600])
 t = tiledlayout(2, 1);
 % Plot result from simulation
 ax1 = nexttile
-addpath('03_Calm_Sea_Complete_Wind')
 load 'CalmSeaComplete.mat'; % will also give variable 'vv'
 OvrAllSeeds = [Ovr_S1; Ovr_S2; Ovr_S3; Ovr_S4; Ovr_S5; Ovr_S6];
 OvrAllSeeds = OvrAllSeeds(:, 1:18);
@@ -237,40 +236,4 @@ ylabel(t, 'Emulator median 1-hour maximum (Nm)');
 exportgraphics(fig, 'gfx/CompareResponseScatter.jpg') 
 exportgraphics(fig, 'gfx/CompareResponseScatter.pdf') 
 
-
-% Plot with 3D graphic
-fig = figure('position', [100, 100, 900, 400]);
-[tmesh, vmesh, hmesh] = meshgrid(tp_temp, v_temp, hs_temp);
-clower = 7.3E6;
-cupper = max(max(max(rmedian)));
-t = tiledlayout(1, 2);
-nexttile
-vslice = [10];   
-hslice = [];
-tslice = [3 7 15];
-slice(tmesh, vmesh, hmesh, rmedian, tslice, vslice, hslice)
-caxis([clower cupper]);
-ylabel('1-hour wind speed (m/s)');
-zlabel('Significant wave height (m)');
-xlabel('Peak period (s)');
-view(3)
-
-nexttile
-vv = [0:0.5:45];
-hss = [0:0.2:15];
-[vmesh, hmesh] = meshgrid(vv, hss);
-tpbreaking = @(hs) sqrt(2 * pi * hs / (9.81 * 1/15));
-sigmas = R.sigma(vmesh, hmesh, tpbreaking(hmesh));
-mus = R.mu(vmesh, hmesh, tpbreaking(hmesh));
-rmedian = R.ICDF1hr(vmesh, hmesh, tpbreaking(hmesh), 0.5);
-contourf(vmesh, hmesh, rmedian, 10)
-hold on
-caxis([clower cupper]);
-c = colorbar;
-c.Label.String = 'Median maximum 1-hour oveturning moment (Nm) ';
-c.Layout.Tile = 'east';
-xlabel('1-hour wind speed (m/s)');
-ylabel('Significant wave height (m)');
-exportgraphics(fig, 'gfx/MedianResponseFullField.jpg') 
-exportgraphics(fig, 'gfx/MedianResponseFullField.pdf') 
 
