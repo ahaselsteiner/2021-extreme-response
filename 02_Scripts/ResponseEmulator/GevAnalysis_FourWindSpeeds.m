@@ -71,13 +71,13 @@ for j = 1 : length(rs)
     x1(j) = pd.icdf(1 - 1/N_BLOCKS);
     
     if j == 1
-        exportgraphics(gcf, 'gfx/GEV-9mps.jpg') 
+        %exportgraphics(gcf, 'gfx/GEV-9mps.jpg') 
     elseif j == 7
-        exportgraphics(gcf, 'gfx/GEV-15mps.jpg') 
+        %exportgraphics(gcf, 'gfx/GEV-15mps.jpg') 
     elseif j == 13
-        exportgraphics(gcf, 'gfx/GEV-21mps.jpg') 
+        %exportgraphics(gcf, 'gfx/GEV-21mps.jpg') 
     elseif j == 19
-        exportgraphics(gcf, 'gfx/GEV-30mps.jpg') 
+        %exportgraphics(gcf, 'gfx/GEV-30mps.jpg') 
     end
 end
 
