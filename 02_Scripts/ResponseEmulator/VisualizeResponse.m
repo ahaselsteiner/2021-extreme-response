@@ -237,3 +237,21 @@ exportgraphics(fig, 'gfx/CompareResponseScatter.jpg')
 exportgraphics(fig, 'gfx/CompareResponseScatter.pdf') 
 
 
+% Plot with 3D graphic
+fig = figure('position', [100, 100, 400, 400]);
+[tmesh, vmesh, hmesh] = meshgrid(tp_temp, v_temp, hs_temp);
+clower = 7.3E6;
+cupper = max(max(max(rmedian)));
+vslice = [10];   
+hslice = [];
+tslice = [3 7 15];
+slice(tmesh, vmesh, hmesh, rmedian, tslice, vslice, hslice)
+caxis([clower cupper]);
+ylabel('1-hour wind speed (m/s)');
+zlabel('Significant wave height (m)');
+xlabel('Peak period (s)');
+view(3)
+
+%exportgraphics(fig, 'gfx/MedianResponseFullField.jpg') 
+%exportgraphics(fig, 'gfx/MedianResponseFullField.pdf') 
+
