@@ -80,7 +80,7 @@ exportgraphics(layout, ['gfx/TimeSeries_Hs' num2str(hs(plot_hsid)) '_Tpid' num2s
 
 
 ks(ks == 0) = nan;
-figure('Position', [100 100 1200 450])
+figure('Position', [100 100 1200 600])
 t = tiledlayout(2, 2);
 for tpid = 1 : 4
     nexttile
@@ -95,9 +95,11 @@ for tpid = 1 : 4
         end
     end
     h = plot(v, mean(ks(:, :, tpid), 2, 'omitnan'), '--k', 'DisplayName', 'Mean');
-    xlabel('1-hour wind speed (m/s)');
-    ylabel('Shape parameter k');
+
     legend('location', 'eastoutside')
     title(['t_{p' num2str(tpid) '}'])
 end
+xlabel(t, '1-hour wind speed (m/s)');
+ylabel(t, 'Shape parameter \xi');
+
 
