@@ -84,29 +84,36 @@ P1z(2:end-1) = 2*P1z(2:end-1);
 fz = Fs*(0:(L/2))/L;% Domain frequency for the deflection in z direktion
 
 %Plot results
+fig = figure('Position', [100 100 900 260]);
+t = tiledlayout(1,4);
 % Deflection of the tower tip in x direction in m 
-subplot(2,1,1);
+nexttile([1 3])
 plot(Time,YawBrTDxp);
-title('Deflection of the tower tip in x direction in m');
-xlabel('Time in s');
-ylabel('Defelction in m');
+xlabel('Time (s)');
+ylabel('Deflection of the tower top in fore-aft (m)');
 xlim ([0 25]);
+box off
 
 % Domain frequencies in x direction
-subplot(2,1,2);
+nexttile()
 plot(fx,P1x);
 mx = find(P1x==max(P1x));
 hold on;
 plot(fx(mx),P1x(mx),'or');
 natFeqx = fx(mx);
 Tx = 1/fx(mx);
-labelx = {strcat('   Natural frequency =  ', num2str(natFeqx)); strcat('   Period =  ', num2str(Tx))};
+labelx = {['   Eigenfrequency = ' num2str(natFeqx, '%4.2f') ' s^{-1}']; ['   Eigenperiod = ', num2str(Tx, '%4.2f') ' s']};
 text(fx(mx),P1x(mx),labelx,'HorizontalAlignment','left');
-title('Domain frequencies - translational deflection in x direction');
-xlabel('Frequency in Hz');
-ylabel('Amplitude');
-xlim ([0 3]);
-ylim ([0 1.5]);
+%title('Domain frequencies - translational deflection in x direction');
+xlabel('Frequency (s^{-1})');
+ylabel('P1(f)')
+xlim ([0 1]);
+ylim ([0 1]);
+box off
+t.Padding = 'compact';
+
+exportgraphics(t,'Eigenfrequency.pdf') 
+
 
 % % Domain frequencies in y direction
 % subplot(3,1,3);
