@@ -1,5 +1,5 @@
 % Load file
-filename = ''; %File path
+filename = 'SimNaturalFrequency.out'; %File path
 startRow = 6;
 endRow = 290406;
 
