@@ -1,13 +1,64 @@
-% Plot Diagrams Simulation Tz
+r = nan(8,6);
+for i = 1 : 6
+    fileName = ['Hs1_S' num2str(i) '.mat'];
+    load(fileName);
+    r(:, i) = Ovr;
+end
+Tp = 1.2796 * Tz; % Assuming a JONSWAP spectrum with gamma = 3.3
 
-figOvrTz = figure ('Position', [25 25 1500 750])
-subplot (2,2,1)
-title('Windspeed 11.4 m/s, Significant wave height 1 m')
-xlabel('Peak-spectral period [s]','FontSize',10);
-ylabel('Overturning-Moment [Nm]','FontSize',10);
-grid on
+figOvrTz = figure ('Position', [150 150 1050 350])
+t = tiledlayout(1,3);
+nexttile;
 hold on
+ms = 50;
+for i = 1 : 6
+    h = scatter(Tp, r(:,i), ms, 'MarkerFaceColor', [0.5 0.5 0.5], ...
+    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
+    if i > 1 
+        set(h, 'HandleVisibility', 'off')
+    end
+end
+plot(Tp, mean(r'), '--k', 'Displayname', 'Average')
+title('V = 11.4 m s^{-1}, H_s = 1 m')
+
+r = nan(7,6);
+for i = 1 : 6
+    fileName = ['Hs5_S' num2str(i) '.mat'];
+    load(fileName);
+    r(:, i) = Ovr;
+end
+Tp = 1.2796 * Tz; % Assuming a JONSWAP spectrum with gamma = 3.3
+nexttile;
+hold on
+for i = 1 : 6
+    h = scatter(Tp, r(:,i), ms, 'MarkerFaceColor', [0.5 0.5 0.5], ...
+    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
+    if i > 1 
+        set(h, 'HandleVisibility', 'off')
+    end
+end
+plot(Tp, mean(r'), '--k', 'Displayname', 'Average')
+title('V = 11.4 m s^{-1}, H_s = 5 m')
+
+
+
+xlabel(t, 'Peak spectral period (s)');
+ylabel(t, 'Overturning-Moment (Nm)');
+lg = legend({'Random realization', 'Average over realizations'}, 'NumColumns', 2);
+lg.Layout.Tile = 'North';
+
+nexttile
+title('V = 35 m s^{-1}, H_s = 10 m')
+
+t.Padding = 'compact';
+exportgraphics(t, 'EigenfrequencyInfluenceTp.pdf') 
+
 load 'Hs1_S1.mat';
+figure
+subplot(2,2,1);
+title('Windspeed 11.4 m/s, Significant wave height 1 m')
+xlabel('Peak spectral period (s)');
+ylabel('Overturning-Moment (Nm)');
 Ovr_Tz2 = Ovr(1);
 Ovr_Tz3 = Ovr(2);
 Ovr_Tz4 = Ovr(3);
