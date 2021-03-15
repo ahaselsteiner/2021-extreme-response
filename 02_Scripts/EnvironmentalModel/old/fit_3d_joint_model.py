@@ -18,7 +18,7 @@ hs = list()
 tz = list()
 tp = list()
 
-path = 'DForNREL.txt'
+path = '../DForNREL.txt'
 with open(path, newline='') as csv_file:
     reader = csv.reader(csv_file, delimiter=';')
     idx = 0
@@ -377,9 +377,20 @@ iso_val = HDC.fm
 # %%
 # Plot some slices
 import seaborn as sns
+from viroconcom.read_write import write_contour
 
 fig3 = plt.figure()
 ax = fig3.add_subplot(111)
+ax.scatter(tp, hs,c='black', s=5, alpha=0.5, zorder=-2, rasterized=True)
+ax.plot([3, 3], [0, hs_axlim], '--k')
+ax.text(2.5, 10, 'Eigenfrequency', fontsize=8, rotation=90,
+    verticalalignment='center')
+ax.set_ylim([0, hs_axlim])
+ax.set_xlim([0, tp_axlim])
+ax.spines['right'].set_visible(False)
+ax.spines['top'].set_visible(False)
+ax.set_xlabel(tp_label)
+ax.set_ylabel(hs_label)
 
 contours_at_v = [1, 5, 10, 15, 20, 25, 30, 35]
 c = sns.color_palette(None, len(contours_at_v))
@@ -387,39 +398,63 @@ c = sns.color_palette(None, len(contours_at_v))
 fig4, axs = plt.subplots(2, 4, sharex=True, sharey=True, 
     figsize=(8.5,5), dpi=300)
  
-hs_axlim = 21
+hs_axlim = 17
+tp_axlim = 18
 for i, axi in enumerate(axs):
     for j, subax in enumerate(axi):
+        # Plot contour
         idx = i * 4 + j
         filter_v = contours_at_v[idx]
         v_ind = np.where(v1d == filter_v)
         v_ind = v_ind[0].astype(int)[0]
         CS = ax.contour(t[v_ind,:,:], h[v_ind,:,:], f[v_ind,:,:], 
             [iso_val], colors=[c[idx]])
+        contour_coords = CS.allsegs[0][0]
         CSsub = subax.contour(t[v_ind,:,:], h[v_ind,:,:], f[v_ind,:,:], 
-            [iso_val], colors=[c[idx]])
+            [iso_val], colors=['green'])
+        
         fmt = {}
         strs = [f'{filter_v} m/s']
         for l, s in zip(CS.levels, strs):
             fmt[l] = s
         ax.clabel(CS, CS.levels, fmt=fmt, inline=True, fontsize=8)
-        subax.clabel(CSsub, CS.levels, fmt=fmt, inline=True, fontsize=8)
+        #subax.clabel(CSsub, CS.levels, fmt=fmt, inline=True, fontsize=8)
+        subax.title.set_text(f'{filter_v} m/s')
+
+        # Plot design conditions
+        if filter_v > 5:
+            # Get the frontier interval and sort it.
+            contour_tp = contour_coords[:,0]
+            contour_hs = contour_coords[:,1]   
+            mask = (contour_hs / np.power(contour_tp, 1.2) > 0.4)
+            contour_hs_upper = contour_hs[mask]
+            contour_tp_upper = contour_tp[mask]
+
+            p = contour_tp_upper.argsort()
+            contour_hs_upper = contour_hs_upper[p]
+            contour_tp_upper = contour_tp_upper[p]
+
+            # Select and plot design conditons along the frontier interval, 
+            # one condition per 1 s Tp.
+            dc_tp = np.array(np.arange(np.rint(np.min(contour_tp_upper)), np.max(contour_tp_upper), 1))
+            dc_hs = np.empty(dc_tp.shape)
+            dc_hs[:] = np.interp(dc_tp[:], contour_tp_upper, contour_hs_upper)
+            subax.plot(dc_tp, dc_hs, 'og', ms=5)
+
+            # Write contour coordinates into a CSV file
+            csv_name = f'3D_contour_slice_at_{filter_v}mps'
+            write_contour(dc_tp[:], dc_hs[:], csv_name, 
+                label_x=tp_label, label_y=hs_label)
+    
+
+        # Plot environmental data
         v_threshold = 0.5
         mask = (v > filter_v - v_threshold) & (v < filter_v + v_threshold)
         subax.scatter(tp[mask], hs[mask], c='black', s=5, alpha=0.5, 
             zorder=-2, rasterized=True)
         subax.spines['right'].set_visible(False)
         subax.spines['top'].set_visible(False)
-ax.scatter(tp, hs,c='black', s=5, alpha=0.5, zorder=-2, rasterized=True)
-ax.plot([3, 3], [0, hs_axlim], '--k')
-ax.text(2.5, 10, 'Eigenfrequency', fontsize=8, rotation=90,
-    verticalalignment='center')
-ax.set_ylim([0, hs_axlim])
-ax.set_xlim([0, 20])
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
-ax.set_xlabel(tp_label)
-ax.set_ylabel(hs_label)
+plt.setp(axs, xlim=(0, tp_axlim), ylim=(0, hs_axlim))
 
 fs = 10
 fig4.tight_layout(rect=(0.075,0.1,1,1))
@@ -434,10 +469,12 @@ fig4.text(0.04, 0.56, hs_label,
          weight='bold')
 
 
+
 fig3.tight_layout()
-fig3.savefig('gfx/DensityAlmost0AtDifferentWindSpeeds.pdf', 
+fig3.savefig('gfx/3DContour_SinglePlot.pdf', 
 bbox_inches='tight')
-fig4.savefig('gfx/DensityAlmost0AtDifferentWindSpeedsSubplots.pdf', 
+
+fig4.savefig('gfx/3DContour_SubPlots.pdf', 
     bbox_inches='tight')
 
 # %%
