@@ -59,8 +59,6 @@ for i = 1 : 4
     box off
 end
 
-exportgraphics(gcf, 'gfx/ValidtyCheckHs1.jpg') 
-
 
 [vgrid, hgrid] = meshgrid(v, hs);
 
