@@ -22,8 +22,8 @@ vv = [0:0.05:45];
 hss = 0;
 tpp = 10;
 nexttile
-plot(vv, R.k(vv, hss));
-ylabel('k (-)');
+plot(vv, R.xi(vv, hss));
+ylabel('\xi (-)');
 box off
 nexttile
 plot(vv, R.mu(vv, hss, tpp));

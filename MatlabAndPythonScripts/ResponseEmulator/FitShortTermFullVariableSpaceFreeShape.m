@@ -47,8 +47,8 @@ end
 legend('box', 'off', 'location', 'eastoutside')
 limsy=get(gca,'YLim');
 set(gca,'Ylim',[0 limsy(2)]);
-xlabel('1-hr wind speed (m/s)');
-ylabel('Max 1-hr overturning moment (Nm)');
+xlabel('1-hour wind speed (m/s)');
+ylabel('Max 1-hour overturning moment (Nm)');
 
 for i = 1 : 4
     subplot(6, 1, 3 + (i-1));
@@ -65,7 +65,7 @@ exportgraphics(gcf, 'gfx/ValidtyCheckHs1.jpg')
 [vgrid, hgrid] = meshgrid(v, hs);
 
 % GEV parameters
-ks = nan([size(vgrid), 4]);
+xis = nan([size(vgrid), 4]);
 sigmas = nan([size(vgrid), 4]);
 mus = nan([size(vgrid), 4]);
 
@@ -76,11 +76,11 @@ for i = 1 : gridSize(1)
             if maxr(i, j, k) > 0 
                 r = Ovr(i, j, k, :);
                 pd = gevToBlockMaxima(r, N_BLOCKS, SHAPE);
-                ks(j, i, k) = pd.k;
+                xis(j, i, k) = pd.k;
                 sigmas(j, i, k) = pd.sigma;
                 mus(j, i, k) = pd.mu;
             else
-                ks(j, i, k) = NaN;
+                xis(j, i, k) = NaN;
                 sigmas(j, i, k) = NaN;
                 mus(j, i, k) = NaN;
             end
@@ -92,17 +92,17 @@ end
 for i = 1 : 4
     t2d = squeeze(tp(hgrid, i));
     temp = [vgrid(:), hgrid(:), t2d(:)];
-    k2d = squeeze(ks(:,:,i));
+    xi2d = squeeze(xis(:,:,i));
     sigma2d = squeeze(sigmas(:,:,i));
     mu2d = squeeze(mus(:,:,i));
     if i == 1
         X = temp;
-        yk = k2d(:);
+        yk = xi2d(:);
         ysigma = sigma2d(:);
         ymu = mu2d(:);
     else
         X = [X; temp];
-        yk = [yk; k2d(:)];
+        yk = [yk; xi2d(:)];
         ysigma = [ysigma; sigma2d(:)];
         ymu = [ymu; mu2d(:)];
     end
@@ -110,12 +110,12 @@ end
 
 % See: https://de.mathworks.com/help/stats/fitnlm.html
 % x(:, 1) = v, x(:, 2) = hs, x(:, 3) = tp
-modelfunK = @(b, x) (x(:,1) <= 25) .* (-0.1 - 0.65 ./ (1 + 0.3 .* (x(:,1) - 12).^2) + 0.3 ./ (1 + 0.3 .* (x(:,1) - 18).^2) + ...
+modelfunXi = @(b, x) (x(:,1) <= 25) .* (-0.1 - 0.65 ./ (1 + 0.3 .* (x(:,1) - 12).^2) + 0.3 ./ (1 + 0.3 .* (x(:,1) - 18).^2) + ...
     x(:,2).^(1/3) .* ((b(1) -         (-0.1 - 0.65 ./ (1 + 0.3 .* (x(:,1) - 12).^2) + 0.3 ./ (1 + 0.3 .* (x(:,1) - 18).^2))) ./ 15^(1/3))) + ...
     (x(:,1) > 25) .* (-0.2622 +  x(:,2).^(1/3) .* (b(1) - -0.2622) / 15.^(1/3))
 beta0 = [-0.1];
-mdlK = fitnlm(X, yk, modelfunK, beta0, 'ErrorModel', 'proportional')
-kHat = predict(mdlK, X);
+mdlXi = fitnlm(X, yk, modelfunXi, beta0, 'ErrorModel', 'proportional')
+xiHat = predict(mdlXi, X);
 
 modelfunSigma = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
     ((((x(:,1) <= 25) .* (b(1) .* x(:,1) + b(2) ./ (1 + 0.064 * (x(:,1) - 11.6).^2) +  b(3) ./ (1 + 0.2 * (x(:,1) - 11.6).^2)) + ...
@@ -133,7 +133,7 @@ beta0 = [10^6 10^6 0.02 10^6 10^6];
 mdlMu = fitnlm(X, ymu, modelfunMu, beta0, 'ErrorModel', 'proportional')
 muHat = predict(mdlMu, X);
 
-% k, sigma, mu over wind speed
+% xi, sigma, mu over wind speed
 figure('Position', [100 100 900 900])
 t = tiledlayout(4, 4);
 for tpid = 1 : 4
@@ -144,14 +144,14 @@ for tpid = 1 : 4
     for i = [1, 2, 3, 5]
         X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
         hold on
-        labelhs = ['H_s = ' num2str(hs(i)) ' m, from 1-hr simulation'];
-        plot(v, ks(i, :, tpid), 'o', 'color', colorsHs{countI}, 'DisplayName', labelhs);
+        labelhs = ['H_s = ' num2str(hs(i)) ' m, from 1-hour simulation'];
+        plot(v, xis(i, :, tpid), 'o', 'color', colorsHs{countI}, 'DisplayName', labelhs);
         labelhs = ['H_s = ' num2str(hs(i)) ' m, predicted'];
-        plot(vv, predict(mdlK, X), 'color', colorsHs{countI}, 'DisplayName', labelhs);
+        plot(vv, predict(mdlXi, X), 'color', colorsHs{countI}, 'DisplayName', labelhs);
         countI = countI + 1;
     end
-    xlabel('1-hr wind speed (m/s)');
-    ylabel('k (-)');
+    xlabel('1-hour wind speed (m/s)');
+    ylabel('\xi (-)');
     title(['t_{p' num2str(tpid) '}']);
     if tpid == 1
         lh = legend('box', 'off', 'Location','NorthOutside', ...
@@ -168,13 +168,13 @@ for tpid = 1 : 4
     for i = [1, 2, 3, 5]
         X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
         hold on
-        labelhs = ['H_s = ' num2str(hs(i)) ' m, from 1-hr simulation'];
+        labelhs = ['H_s = ' num2str(hs(i)) ' m, from 1-hour simulation'];
         plot(v, sigmas(i, :, tpid), 'o', 'color', colorsHs{countI}, 'DisplayName', labelhs);
         labelhs = ['H_s = ' num2str(hs(i)) ' m, predicted'];
         plot(vv, predict(mdlSigma, X), 'color', colorsHs{countI}, 'DisplayName', labelhs);
         countI = countI + 1;
     end
-    xlabel('1-hr wind speed (m/s)');
+    xlabel('1-hour wind speed (m/s)');
     ylabel('\sigma (Nm)');
     title(['t_{p' num2str(tpid) '}']);
 end
@@ -192,7 +192,7 @@ for tpid = 1 : 4
         plot(vv, predict(mdlMu, X), 'color', colorsHs{countI}, 'DisplayName', labelhs);
         countI = countI + 1;
     end
-    xlabel('1-hr wind speed (m/s)');
+    xlabel('1-hour wind speed (m/s)');
     ylabel('\mu (Nm)');
     title(['t_{p' num2str(tpid) '}']);
 end
@@ -208,8 +208,8 @@ for tpid = 1 : 4
         labelhs = ['H_s = ' num2str(hs(i)) ' m'];
         %plot(vv, predict(mdlMu, X), 'color', colors{i}, 'DisplayName', labelhs);
     end
-    xlabel('1-hr wind speed (m/s)');
-    ylabel('1-hr maximum moment (Nm)');
+    xlabel('1-hour wind speed (m/s)');
+    ylabel('1-hour maximum moment (Nm)');
     title(['t_{p' num2str(tpid) '}']);
 end
 
@@ -218,19 +218,19 @@ figure
 t = tiledlayout(1, 2);
 ax1 = nexttile;
 hold on
-plot([v(1:14), v(1:14), v(1:14), v(1:14)], [ks(1, 1:14, 1), ks(1, 1:14, 2), ks(1, 1:14, 3), ks(1, 1:14, 4)], 'o', 'color', 'k');
+plot([v(1:14), v(1:14), v(1:14), v(1:14)], [xis(1, 1:14, 1), xis(1, 1:14, 2), xis(1, 1:14, 3), xis(1, 1:14, 4)], 'o', 'color', 'k');
 hold on
-plot(v(1:14), mean([ks(1, 1:14, 1); ks(1, 1:14, 2); ks(1, 1:14, 3); ks(1, 1:14, 4)]), '-k');
+plot(v(1:14), mean([xis(1, 1:14, 1); xis(1, 1:14, 2); xis(1, 1:14, 3); xis(1, 1:14, 4)]), '-k');
 vv = [0:0.1:25];
 k = -0.1 - 0.65 ./ (1 + 0.3 .* (vv - 12).^2) + 0.3 ./ (1 + 0.1 .* (vv - 18).^2);
 plot(vv, k)
 ax2 = nexttile;
-plot([v(15:19), v(15:19), v(15:19), v(15:19)], [ks(1, 15:19, 1), ks(1, 15:19, 2), ks(1, 15:19, 3), ks(1, 15:19, 4)], 'o', 'color', 'k');
+plot([v(15:19), v(15:19), v(15:19), v(15:19)], [xis(1, 15:19, 1), xis(1, 15:19, 2), xis(1, 15:19, 3), xis(1, 15:19, 4)], 'o', 'color', 'k');
 hold on
 plot([26, 45], [-0.2622, -0.2622]);
 linkaxes([ax1 ax2],'y')
-t.XLabel.String = '1-hr wind speed (m/s)';
-t.YLabel.String = 'k (-)';
+t.XLabel.String = '1-hour wind speed (m s^{-1})';
+t.YLabel.String = '\xi (-)';
 
 figure
 t = tiledlayout(1, 2);
@@ -244,7 +244,7 @@ ax2 = nexttile;
 plot([v(15:19), v(15:19), v(15:19), v(15:19)], [mus(1, 15:19, 1), mus(1, 15:19, 2), mus(1, 15:19, 3), mus(1, 15:19, 4)], 'o', 'color', 'k');
 hold on
 linkaxes([ax1 ax2],'y')
-t.XLabel.String = '1-hr wind speed (m/s)';
+t.XLabel.String = '1-hour wind speed (m s^{-1})';
 t.YLabel.String = '\mu (Nm)';
 
 
@@ -260,7 +260,7 @@ ax2 = nexttile;
 plot([v(15:19), v(15:19), v(15:19), v(15:19)], [sigmas(1, 15:19, 1), sigmas(1, 15:19, 2), sigmas(1, 15:19, 3), sigmas(1, 15:19, 4)], 'o', 'color', 'k');
 hold on
 linkaxes([ax1 ax2],'y')
-t.XLabel.String = '1-hr wind speed (m/s)';
+t.XLabel.String = '1-hour wind speed (m s^{-1})';
 t.YLabel.String = '\sigma (Nm)';
 
 % Sigma, mu over hs
@@ -274,9 +274,9 @@ for tpid = 1 : 4
     for i = [1, 8 15]
         X = [zeros(length(hss), 1) + v(i), hss, tp(hss, tpid)];
         hold on
-        labelv = ['V = ' num2str(v(i)) ' m/s, from 1-hr simulation'];
+        labelv = ['V = ' num2str(v(i)) ' m s^{-1}, from 1-hour simulation'];
         plot(hs, sigmas(:, i, tpid), 'o', 'color', colors{countI}, 'DisplayName', labelv);
-        labelv = ['V = ' num2str(v(i)) ' m/s, predicted'];
+        labelv = ['V = ' num2str(v(i)) ' m s^{-1}, predicted'];
         plot(hss, predict(mdlSigma, X), 'color', colors{countI}, 'DisplayName', labelv);
         countI = countI + 1;
     end
@@ -298,7 +298,7 @@ for tpid = 1 : 4
     for i = [1, 8 15]
         X = [zeros(length(hss), 1) + v(i), hss, tp(hss, tpid)];
         hold on
-        labelv = ['V = ' num2str(v(i)) ' m/s, from 1-hr simulation'];
+        labelv = ['V = ' num2str(v(i)) ' m/s, from 1-hour simulation'];
         plot(hs, mus(:, i, tpid), 'o', 'color', colors{countI}, 'DisplayName', labelv);
         labelv = ['V = ' num2str(v(i)) ' m/s, predicted'];
         plot(hss, predict(mdlMu, X), 'color', colors{countI}, 'DisplayName', labelv);
@@ -317,34 +317,34 @@ for tpid = 1 : 4
     for i = [1, 8 15]
         X = [zeros(length(hss), 1) + v(i), hss, tp(hss, tpid)];
         hold on
-        labelv = ['V = ' num2str(v(i)) ' m/s, from 1-hr simulation'];
+        labelv = ['V = ' num2str(v(i)) ' m/s, from 1-hour simulation'];
         plot(hs, maxr(i, :, tpid), 'o', 'color', colors{countI}, 'DisplayName', labelv);
         %labelv = ['V = ' num2str(v(i)) ' m/s, predicted'];
         %plot(hss, predict(mdlMu, X), 'color', colors{countI}, 'DisplayName', labelv);
         countI = countI + 1;
     end
     xlabel('Significant wave height (m)');
-    ylabel('1-hr maximum moment (Nm)');
+    ylabel('1-hour maximum moment (Nm)');
     title(['t_{p' num2str(tpid) '}']);
 end
 
 
-% Ks contour plot
+% Xi contour plot
 figure('Position', [100 100 500 800])
 t = tiledlayout(4, 2);
 clower = -0.6;
 cupper = 0.3;
 for ii = 1 : 4
     nexttile
-    contourf(vgrid, hgrid, squeeze(ks(:, :, ii)), 10)
-    title(['t_{tp' num2str(ii) '} surface'])
+    contourf(vgrid, hgrid, squeeze(xis(:, :, ii)), 10)
+    title(['multiphysics, t_{tp' num2str(ii) '} surface'])
     caxis([clower cupper])
     nexttile
     ktp1 = nan(size(vgrid));
     for i = 1 : size(vgrid, 1)
         for j = 1 : size(vgrid, 2)
             Xtemp = [vgrid(i, j), hgrid(i, j), tp(hgrid(i, j), ii)];
-            ktp1(i, j) = predict(mdlK, Xtemp);
+            ktp1(i, j) = predict(mdlXi, Xtemp);
         end
     end
     contourf(vgrid, hgrid, ktp1, 10);
@@ -353,14 +353,14 @@ for ii = 1 : 4
 end
 
 c = colorbar;
-c.Label.String = 'k (-) ';
+c.Label.String = '\xi (-) ';
 c.Layout.Tile = 'east';
-t.XLabel.String = '1-hr wind speed (m/s)';
+t.XLabel.String = '1-hour wind speed (m s^{-1})';
 t.YLabel.String = 'Significant wave height (m)';
 exportgraphics(gcf, 'gfx/EmulatorFitKFree_k.jpg') 
 exportgraphics(gcf, 'gfx/EmulatorFitKFree_k.pdf') 
 
-% Sigmas contour plot
+% Sigma contour plot
 figure('Position', [100 100 500 800])
 t = tiledlayout(4, 2);
 clower = min(sigmas(:));
@@ -368,7 +368,7 @@ cupper = max(sigmas(:)) * 0.95;
 for ii = 1 : 4
     nexttile
     contourf(vgrid, hgrid, squeeze(sigmas(:, :, ii)), 10)
-    title(['t_{tp' num2str(ii) '} surface'])
+    title(['multiphysics, t_{tp' num2str(ii) '} surface'])
     caxis([clower cupper])
     nexttile
     sigmatp1 = nan(size(vgrid));
@@ -386,13 +386,13 @@ end
 c = colorbar;
 c.Label.String = '\sigma (Nm) ';
 c.Layout.Tile = 'east';
-t.XLabel.String = '1-hr wind speed (m/s)';
+t.XLabel.String = '1-hour wind speed (m s^{-1})';
 t.YLabel.String = 'Significant wave height (m)';
 exportgraphics(gcf, 'gfx/EmulatorFitKFree_Sigma.jpg') 
 exportgraphics(gcf, 'gfx/EmulatorFitKFree_Sigma.pdf') 
 
 
-% Mus contour plot
+% Mu contour plot
 figure('Position', [100 100 500 800])
 t = tiledlayout(4, 2);
 clower = min(mus(:));
@@ -400,7 +400,7 @@ cupper = 2 * 10^8;
 for ii = 1 : 4
     nexttile
     contourf(vgrid, hgrid, squeeze(mus(:, :, ii)), [clower : (cupper - clower) / 10 : cupper])
-    title(['t_{tp' num2str(ii) '} surface'])
+    title(['multiphysics, t_{tp' num2str(ii) '} surface'])
     caxis([clower cupper]);
     nexttile
     mutp1 = nan(size(vgrid));
@@ -418,7 +418,7 @@ end
 c = colorbar;
 c.Label.String = '\mu (Nm) ';
 c.Layout.Tile = 'east';
-t.XLabel.String = '1-hr wind speed (m/s)';
+t.XLabel.String = '1-hour wind speed (m s^{-1})';
 t.YLabel.String = 'Significant wave height (m)';
 exportgraphics(gcf, 'gfx/EmulatorFitKFree_Mu.jpg') 
 exportgraphics(gcf, 'gfx/EmulatorFitKFree_Mu.pdf') 

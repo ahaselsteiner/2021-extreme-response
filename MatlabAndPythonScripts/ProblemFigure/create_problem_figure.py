@@ -68,6 +68,6 @@ axs[1].set_ylabel(hs_label)
 axs[1].set_xlim([0, 40])
 axs[1].set_ylim([0, 13])
 
-
+fig.savefig('ProblemFigure.svg', bbox_inches='tight')
 fig.savefig('ProblemFigure.pdf', bbox_inches='tight')
 plt.show()
