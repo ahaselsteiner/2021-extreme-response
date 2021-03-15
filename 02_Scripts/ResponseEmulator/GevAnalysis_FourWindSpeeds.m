@@ -27,7 +27,7 @@ t = minutes(V9.t/60);
 block_length = floor(length(t) / N_BLOCKS);
 
 n_seeds = 6;
-ks = [];
+xis = [];
 sigmas = [];
 mus = [];
 npeaks = [];
@@ -59,13 +59,13 @@ for j = 1 : length(rs)
     subplot(1, 4, 4)
     pd = fitdist(block_maxima(j,:)', 'GeneralizedExtremeValue');
     h = qqplot(block_maxima(j,:), pd);
-    set(h(1), 'Marker', 'x')
-    set(h(1), 'MarkerEdgeColor', 'r')
-    set(h(2), 'Color', 'k')
-    set(h(3), 'Color', 'k')
+    set(h(1), 'Marker', 'x');
+    set(h(1), 'MarkerEdgeColor', 'r');
+    set(h(2), 'Color', 'k');
+    set(h(3), 'Color', 'k');
 
     pds = [pds; pd];
-    ks = [ks; pd.k];
+    xis = [xis; pd.k]; % shape parameter
     sigmas = [sigmas; pd.sigma];
     mus = [mus; pd.mu];
     x1(j) = pd.icdf(1 - 1/N_BLOCKS);
@@ -111,7 +111,7 @@ barcolors = [repmat(c1,6,1);
     darker_colors];
 
 nexttile([1 1])
-hbar1 = bar(1, [ks; 0; pds_6hr(1).k; pds_6hr(2).k; pds_6hr(3).k; pds_6hr(4).k]);
+hbar1 = bar(1, [xis; 0; pds_6hr(1).k; pds_6hr(2).k; pds_6hr(3).k; pds_6hr(4).k]);
 text(1.35, 0.05, 'pooled', 'fontsize', 6, 'horizontalalignment', 'center');
 box off
 set(gca, 'XTick', [1,])
@@ -191,6 +191,6 @@ layout.Padding = 'compact';
 exportgraphics(gcf, 'gfx/GEV.jpg') 
 exportgraphics(gcf, 'gfx/GEV.pdf') 
 
-kgrouped = [ks(1:6), ks(7:12), ks(13:18), ks(19:24)];
-mean(kgrouped)
-std(kgrouped)
+xi_grouped = [xis(1:6), xis(7:12), xis(13:18), xis(19:24)];
+disp(['Mean values of xi at the four wind speeds: ' num2str(mean(xi_grouped))]);
+disp(['Std values of xi at the four wind speeds: ' num2str(std(xi_grouped))]);
