@@ -143,6 +143,7 @@ dmypy.json
 
 # TurbSim .bts wind files
 *.bts
+TurbSim_x64.exe
 
 # OpenFAST .out output files (too big)
 *.out
