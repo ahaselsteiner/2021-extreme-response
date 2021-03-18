@@ -2,6 +2,8 @@ Ovr = sqrt(ReactMXss.^2 +ReactMYss.^2);
 
 Ovr1 = sqrt(ReactMXss1.^2 +ReactMYss1.^2);
 
+OvrB = sqrt(ReactMXssB.^2 +ReactMYssB.^2);
+
 subplot (3,1,1)
 plot(Time, Ovr);
 hold on
@@ -11,7 +13,7 @@ ylabel('Ovr [Nm]','FontSize',10);
 axis([0 3630 0 17*10^7]);
 
 subplot (3,1,2)
-plot(Time, Ovr1);
+plot(Time, OvrB);
 hold on
 title ('Simulation without InflowWind, AeroDyn and Blade-BeamDyn');
 xlabel('Wind Speed [m/s]','FontSize',10);
@@ -19,7 +21,7 @@ ylabel('Ovr [Nm]','FontSize',10);
 axis([0 3630 0 17*10^7]);
 
 
-OvrDiff = Ovr1 - Ovr;
+OvrDiff = OvrB - Ovr;
 
 subplot (3,1,3)
 plot(Time, OvrDiff);

@@ -20,9 +20,9 @@ tp = @(hs, idx) (idx == 1) .* tp1(hs) + (idx == 2) .* tp2(hs) + (idx ==3) .* tp3
 % ** End of explanation. **
 
 
-filename = '45_0_1.out';
-windspeed = 45;
-waveheight =0;
+filename = '11_7_8-2.out';
+windspeed = 11;
+waveheight =7;
 index = 1;
 
 a= find(v==windspeed);
@@ -94,6 +94,6 @@ ovrM=single(ovrM);
 
 Ovr(a,b,c,:)= ovrM;
 
-save('D:\Uni_Bremen\01_Arbeit\Veroeffentlichung\01_Git\NREL-design-loads\02_Scripts\ResponseEmulator\Data\OvrDataEmulatorDiffSeed.mat','Ovr', 'Time');
+save('D:\Uni_Bremen\01_Arbeit\Veroeffentlichung\NREL-design-loads\02_Scripts\ResponseEmulator\Data\OvrDataEmulatorDiffSeed.mat','Ovr', 'Time');
 
 msgbox('Ready');
