@@ -151,3 +151,6 @@ TurbSim_x64.exe
 
 # zip-files
 *.zip
+
+#Excel-Files
+*.xlsx
