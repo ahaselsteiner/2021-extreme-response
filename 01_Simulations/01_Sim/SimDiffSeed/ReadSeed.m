@@ -3,7 +3,7 @@ hs = [0 1:2:15];
 tp = [1:1:4];
 
 windspeed =    45
-waveheight =   1;
+waveheight =   15;
 Tp =           3;
 
 a= find(v==windspeed);
