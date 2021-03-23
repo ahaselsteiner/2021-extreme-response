@@ -2,8 +2,8 @@ SHAPE = 'free';
 N_BLOCKS = 60;
 
 %load('OvrDataEmulator');
-Ovr(1,:,:,:) = NaN;
-Ovr(:,9,4,:) = NaN;
+%Ovr(1,:,:,:) = NaN;
+%Ovr(:,9,4,:) = NaN;
 maxr = max(Ovr,[],4);
 gridSize = size(maxr);
 maxr(maxr==0)=NaN;

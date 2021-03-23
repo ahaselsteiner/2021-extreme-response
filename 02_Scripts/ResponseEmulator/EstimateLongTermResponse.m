@@ -1,12 +1,33 @@
-D = importDatasetDFromCSV();
-
-half_year = 365/2 * 24;
-
-t = D.t(half_year : end);
-v1hr = D.V(half_year : end);
-hs = D.Hs(half_year : end);
-tz = D.Tz(half_year : end);
+suffix = '_artificial500';
+load('ArtificialTimeSeries508years.mat');
+n = 365.24 * 24 * 500;
+%n = length(A.t);
+t = A.t(1:n);
+v1hr = A.V(1:n);
+hs = A.Hs(1:n);
+s = A.S(1:n);
+tz = sqrt((2 .* pi .* hs) ./ (9.81 .* s));
 tp = 1.2796 * tz; % Assuming a JONSWAP spectrum with gamma = 3.3
+
+% suffix = '_artificial50';
+% load('ArtificialTimeSeries51years.mat');
+% n = 365.24 * 24 * 50;
+% %n = length(A.t);
+% t = A.t(1:n);
+% v1hr = A.V(1:n);
+% hs = A.Hs(1:n);
+% s = A.S(1:n);
+% tz = sqrt((2 .* pi .* hs) ./ (9.81 .* s));
+% tp = 1.2796 * tz; % Assuming a JONSWAP spectrum with gamma = 3.3
+
+% suffix = '_coastDat2';
+% D = importDatasetDFromCSV();
+% half_year = 365/2 * 24;
+% t = D.t(half_year : end);
+% v1hr = D.V(half_year : end);
+% hs = D.Hs(half_year : end);
+% tz = D.Tz(half_year : end);
+% tp = 1.2796 * tz; % Assuming a JONSWAP spectrum with gamma = 3.3
 
 R = ResponseEmulator;
 n = 1000;
@@ -93,8 +114,9 @@ xlabel('Quantiles of GEV distribution (Nm)');
 ylabel('Quantiles of sample (Nm)');
 
 layout.Padding = 'compact';
-exportgraphics(layout, 'gfx/ResponseTimeSeries.jpg') 
-exportgraphics(layout, 'gfx/ResponseTimeSeries.pdf') 
+
+exportgraphics(layout, ['gfx/ResponseTimeSeries' suffix '.jpg']) 
+exportgraphics(layout, ['gfx/ResponseTimeSeries' suffix '.pdf']) 
 
 x1_am = pd.icdf(exp(-1));
 x50_am = pd.icdf(1 - 1/50);
@@ -195,5 +217,5 @@ xlabel(layout, '1-hour wind speed (m s^{-1})')
 ylabel(layout, 'Significant wave height (m)');
 linkaxes(axs,'xy')
 
-exportgraphics(layout, 'gfx/ResponseAtContour.jpg') 
-exportgraphics(layout, 'gfx/ResponseAtContour.pdf') 
+exportgraphics(layout, ['gfx/ResponseAtContour' suffix '.jpg']) 
+exportgraphics(layout, ['gfx/ResponseAtContour' suffix '.pdf']) 
