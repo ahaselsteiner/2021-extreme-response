@@ -1,4 +1,8 @@
 OvrDataEmulator.mat
+OvrDataEmulatorDiffSeed.mat
+OvrDataEmulatorOneSeed.mat
+OvrDataEmulatorOneSeed.zip
+OvrDataEmulatorDiffSeed.zip
 OvrDataEmulatorOneSeed.mat
 OvrDataEmulatorDiffSeed.mat
 artificial_time_series_*
@@ -143,6 +147,13 @@ dmypy.json
 
 # TurbSim .bts wind files
 *.bts
+TurbSim_x64.exe
 
 # OpenFAST .out output files (too big)
 *.out
+
+# zip-files
+*.zip
+
+#Excel-Files
+*.xlsx
