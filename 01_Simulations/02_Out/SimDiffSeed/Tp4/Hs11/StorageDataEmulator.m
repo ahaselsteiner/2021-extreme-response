@@ -20,10 +20,10 @@ tp = @(hs, idx) (idx == 1) .* tp1(hs) + (idx == 2) .* tp2(hs) + (idx ==3) .* tp3
 % ** End of explanation. **
 
 
-filename = '45_1_6-5.out';
-windspeed = 45;
-waveheight =1;
-index = 3;
+filename = '30_11_16-2.out';
+windspeed = 30;
+waveheight =11;
+index = 4;
 
 a= find(v==windspeed);
 b= find(hs==waveheight);
