@@ -45,7 +45,7 @@ figure('Position', [100 100 1200 600])
 layout = tiledlayout(2,4);
 windI = round([20 40 60 80 100 120 140 160] / combineN);
 for i = windI
-    nexttile
+    ax = nexttile;
     hold on
     slice = squeeze(countC(i,:,:)); 
     nanSlice = slice;
@@ -70,13 +70,15 @@ figure('Position', [100 100 1200 600])
 layout = tiledlayout(2,4);
 windI = round([20 40 60 80 100 120 140 160] / combineN);
 for i = windI
-    nexttile
+    ax = nexttile;
     hold on
     slice = squeeze(countC(i,:,:)); 
     nanSlice = slice;
     nanSlice(slice==0) = nan;
-    handle = pcolor(S, H, nanSlice);
-    handle.EdgeColor = 'none';
+    %handle = pcolor(S, H, nanSlice);
+    %handle.EdgeColor = 'none';
+    nanimage(S(1,:), H(:,1), nanSlice);
+    set(gca, 'YDir', 'normal')
     contour(S, H, slice, [threshold, threshold], 'r', 'linewidth', 2);
     title([num2str(wC(i)) ' m s^{-1}']);
     caxis([0 10000000]);

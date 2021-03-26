@@ -43,13 +43,13 @@ exportgraphics(gcf, 'gfx/ResponseParametersHs0.pdf')
 figure('Position', [100 100 500 600])
 t = tiledlayout(2, 1);
 % Plot result from simulation
-ax1 = nexttile
+ax1 = nexttile;
 load 'CalmSeaComplete.mat'; % will also give variable 'vv'
 OvrAllSeeds = [Ovr_S1; Ovr_S2; Ovr_S3; Ovr_S4; Ovr_S5; Ovr_S6];
 OvrAllSeeds = OvrAllSeeds(:, 1:18);
 vv = vv(1:18);
 hold on
-ms = 50;
+ms = 30;
 for i = 1 : 6
     h = scatter(vv, OvrAllSeeds(i,:), ms, 'MarkerFaceColor', [0.5 0.5 0.5], ...
     'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
@@ -57,13 +57,13 @@ for i = 1 : 6
         set(h, 'HandleVisibility', 'off')
     end
 end
-% for tpi = 1 : 4
-%     h = scatter(v(1:14), squeeze(max(Ovr(1:14, 1, tpi, :), [], 4)), ms, 'MarkerFaceColor', [0 0 0.5], ...
-%     'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
-%     if i > 1 
-%         set(h, 'HandleVisibility', 'off')
-%     end
-% end
+for tpi = 1 : 4
+    h = scatter(v(1:14), squeeze(max(Ovr(1:14, 1, tpi, :), [], 4)), ms, 'MarkerFaceColor', [0 0 0.5], ...
+    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
+    if i > 1 
+        set(h, 'HandleVisibility', 'off')
+    end
+end
 meanOvr = mean(OvrAllSeeds);
 plot(vv, meanOvr, '-k', 'linewidth', 2);
 FT = fittype('a * x.^2');
@@ -81,10 +81,25 @@ title('Multiphysics simulation, h_s = 0 m');
 ax2 = nexttile
 hold on
 n = 6;
+vv = [1, vv];
 r = nan(length(vv), n);
 for i = 1 : length(vv)
     r(i, :) = R.randomSample1hr(vv(i), 0, 0, n);
 end
+% for i = 1 : 6
+%     h = scatter(vv, OvrAllSeeds(i,:), ms, 'MarkerFaceColor', [0.5 0.5 0.5], ...
+%     'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
+%     if i > 1 
+%         set(h, 'HandleVisibility', 'off')
+%     end
+% end
+% for tpi = 1 : 4
+%     h = scatter(v(1:14), squeeze(max(Ovr(1:14, 1, tpi, :), [], 4)), ms, 'MarkerFaceColor', [0 0 0.5], ...
+%     'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
+%     if i > 1 
+%         set(h, 'HandleVisibility', 'off')
+%     end
+% end
 for i = 1 : n
     h = scatter(vv, r(:, i), ms, 'MarkerFaceColor', [0.5 0.5 0.5], ...
     'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
@@ -92,15 +107,22 @@ for i = 1 : n
         set(h, 'HandleVisibility', 'off')
     end
 end
-meanR = mean(r');
-plot(vv, meanR, '-k', 'linewidth', 2);
+%meanR = mean(r');
+vvv = 0:0.01:50;
+medianR = R.ICDF1hr(vvv, zeros(size(vvv)), zeros(size(vvv)), 0.5);
+plot(vvv, medianR, '-k', 'linewidth', 2);
+lowerR = R.ICDF1hr(vvv, zeros(size(vvv)), zeros(size(vvv)), 0.025);
+upperR = R.ICDF1hr(vvv, zeros(size(vvv)), zeros(size(vvv)), 0.975);
+plot(vvv, lowerR, '--k');
+h = plot(vvv, upperR, '--k');
+set(h, 'HandleVisibility', 'off')
 FT = fittype('a * x.^2');
-fitted_curve = fit(vv(vv > 25)', meanR(vv > 25)', FT);
+fitted_curve = fit(vvv(vvv > 25)', medianR(vvv > 25)', FT);
 h = plot(fitted_curve);
 set(h, 'linewidth', 2)
 set(h, 'linestyle', '--')
 fit_string = [num2str(round(fitted_curve.a)) ' * v^2'];
-legend({'Random realization', 'Average over realizations', fit_string}, 'location', 'southeast');
+legend({'Random realization', 'Median short-term response', '95% confidence interval', fit_string}, 'location', 'southeast');
 legend box off
 xlabel('');
 ylabel('');
@@ -184,24 +206,43 @@ for tpid = 1 : 4
     %linkaxes([ax1 ax2],'xy')
 
 
-    ax3 = nexttile;
+%     ax3 = nexttile;
+%     [vmesh, hmesh] = meshgrid(v, hs);
+%     r50 = R.ICDF1hr(vmesh, hmesh, tp(hmesh, tpid), 0.5);
+%     r50(isnan(robserved)) = NaN;
+%     [M,h] = contourf(vmesh, hmesh, r50 - robserved, 15);
+%     set(h,'LineColor','none')
+%     colormap(ax3, redblue)
+%     caxis([-5 * 10^7, 5 * 10^7]);
+%     if tpid == 1
+%         title('Absolute difference');
+%     end
+%     if tpid == 4
+%         c2 = colorbar;
+%         c2.Label.String = 'Absolute difference (emulator - multiphysics; Nm) ';
+%         c2.Layout.Tile = 'south';
+%     end
+    
+    ax4 = nexttile;
     [vmesh, hmesh] = meshgrid(v, hs);
     r50 = R.ICDF1hr(vmesh, hmesh, tp(hmesh, tpid), 0.5);
     r50(isnan(robserved)) = NaN;
-    [M,h] = contourf(vmesh, hmesh, r50 - robserved, 15);
-    set(h,'LineColor','none')
-    colormap(ax3, redblue)
-    caxis([-5 * 10^7, 5 * 10^7]);
+    %[M,h] = contourf(vmesh, hmesh, (r50 - robserved) ./ robserved * 100, 15);
+    %set(h,'LineColor','none')
+    imagesc(vmesh(1,:), hmesh(:,1), (r50 - robserved) ./ robserved * 100, 'AlphaData',~isnan(r50));
+    set(gca, 'YDir', 'normal')
+    colormap(ax4, redblue)
+    caxis([-30, 30]);
     if tpid == 1
         title('Difference');
     end
     if tpid == 4
-        c2 = colorbar;
-        c2.Label.String = 'Difference (emulator - multiphysics; Nm) ';
-        c2.Layout.Tile = 'south';
+        c3 = colorbar;
+        c3.Label.String = 'Difference (emulator - multiphyisics; %) ';
+        c3.Layout.Tile = 'south';
     end
 end
-xlabel(t, '1-hour wind speed (m/s)');
+xlabel(t, '1-hour wind speed (m s^{-1})');
 ylabel(t, 'Significant wave height (m)');
     
 exportgraphics(fig, 'gfx/CompareResponse2D.jpg') 
