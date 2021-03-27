@@ -1,9 +1,7 @@
 SHAPE = 'free';
 N_BLOCKS = 60;
 
-%load('OvrDataEmulator');
-%Ovr(1,:,:,:) = NaN;
-%Ovr(:,9,4,:) = NaN;
+%load('OvrDataEmulatorDiffSeed');
 maxr = max(Ovr,[],4);
 gridSize = size(maxr);
 maxr(maxr==0)=NaN;
@@ -108,15 +106,15 @@ end
 
 % See: https://de.mathworks.com/help/stats/fitnlm.html
 % x(:, 1) = v, x(:, 2) = hs, x(:, 3) = tp
-modelfunXi = @(b, x) (x(:,1) <= 25) .* (-0.1 - 0.65 ./ (1 + 0.15 .* (x(:,1) - 12).^2) + 0.3 ./ (1 + 0.05 .* (x(:,1) - 18).^2) + ...
-    x(:,2).^(1/3) .* ((b(1) -          (-0.1 - 0.65 ./ (1 + 0.15 .* (x(:,1) - 12).^2) + 0.3 ./ (1 + 0.05 .* (x(:,1) - 18).^2))) ./ 15^(1/3))) + ...
-    (x(:,1) > 25) .* (-0.22 +  x(:,2).^(1/3) .* (b(1) - -0.22) / 15.^(1/3))
+modelfunXi = @(b, x) (x(:,1) <= 25) .* (-0.1 - 0.5 ./ (1 + 0.15 .* (x(:,1) - 12.5).^2) + 0.23 ./ (1 + 0.05 .* (x(:,1) - 18.5).^2) + ...
+    x(:,2).^(1/3) .* ((-0.05 -         (-0.1 - 0.5 ./ (1 + 0.15 .* (x(:,1) - 12.5).^2) + 0.23 ./ (1 + 0.05 .* (x(:,1) - 18.5).^2))) ./ 15^(1/3))) + ...
+    (x(:,1) > 25) .* (-0.2 +  x(:,2).^(1/3) .* (-0.05 - -0.2) / 15.^(1/3))
 beta0 = [-0.1];
 mdlXi = fitnlm(X, yk, modelfunXi, beta0, 'ErrorModel', 'proportional')
 xiHat = predict(mdlXi, X);
 
 modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
-    ((((x(:,1) <= 25) .* (3.2616e+06 .* x(:,1) + 7.0845e+07  ./ (1 + 0.041221 * (x(:,1) - 11.6).^2) - 7.0845e+07  ./ (1 + 0.041221 * (0 - 11.6).^2)) + ... % third term is used to force v(0) = 0
+    ((((x(:,1) <= 25) .* (3.2586e+06 .* x(:,1) + 7.1014e+07  ./ (1 + 0.040792 * (x(:,1) - 11.6).^2) - 7.0845e+07  ./ (1 + 0.041221 * (0 - 11.6).^2)) + ... % third term is used to force v(0) = 0
     (x(:,1) > 25 ) .* (3.9 * 10^4 .* x(:,1).^2)).^2.0 + ...
     ((1 + (x(:,1) > 25) * 0.2) .* b(4) .* x(:,2).^1.0 .* (1 + (2 + (x(:,1) > 25) * 2) ./ (1 + 2.0 .* (x(:,3) - 3).^2))).^2.0).^(1/2.0));
 beta0 = [10^6 10^6 0.02 10^6];
@@ -314,7 +312,6 @@ t = tiledlayout(1, 2);
 ax1 = nexttile;
 hold on
 plot([v(1:14), v(1:14), v(1:14), v(1:14)], [sigmas(1, 1:14, 1), sigmas(1, 1:14, 2), sigmas(1, 1:14, 3), sigmas(1, 1:14, 4)], 'o', 'color', 'k');
-hold on
 plot(v(1:14), mean([sigmas(1, 1:14, 1); sigmas(1, 1:14, 2); sigmas(1, 1:14, 3); sigmas(1, 1:14, 4)]), '-k');
 plot(vv, predict(mdlSigma, X))
 ax2 = nexttile;
@@ -329,12 +326,15 @@ t.Title.String = 'Hs = 0 m';
 % 1-hour extreme
 figure;
 hold on
-plot([v(1:14), v(1:14), v(1:14), v(1:14)], [maxr(1:14, 1, 1)', maxr(1:14, 1, 2)', maxr(1:14, 1, 3)', maxr(1:14, 1, 4)'], 'o', 'color', 'k');
+plot([v, v, v, v], [maxr(:, 1, 1)', maxr(:, 1, 2)', maxr(:, 1, 3)', maxr(:, 1, 4)'], 'o', 'color', 'k');
+vv = [0:0.2:45]';
 X = [vv zeros(length(vv), 2)];
 muHs0 = predict(mdlMu, X);
 sigmaHs0 = predict(mdlSigma, X);
 kHs0 =  predict(mdlXi, X);
 maxrPredicted = nan(length(vv), 1);
+maxrPredictedL = nan(length(vv), 1);
+maxrPredictedU = nan(length(vv), 1);
 for i = 1 : length(vv)
     pd = makedist('GeneralizedExtremeValue','k', kHs0(i), 'sigma', sigmaHs0(i), 'mu', muHs0(i));
     maxrPredicted(i) = pd.icdf(0.5.^(1/60));
@@ -345,7 +345,7 @@ plot(vv, maxrPredicted, '-b');
 plot(vv, maxrPredictedL, '--b');
 plot(vv, maxrPredictedU, '--b');
 xlabel('1-hour wind speed (m s^{-1})');
-ylabel('\sigma (Nm)');
+ylabel('1-hour overturning moment (Nm)');
 title('Hs = 0 m');
 
 % Sigma, mu over hs
@@ -417,8 +417,8 @@ end
 % Xi contour plot
 figure('Position', [100 100 500 800]);
 t = tiledlayout(4, 2);
-clower = -0.6;
-cupper = 0.3;
+clower = -0.5;
+cupper = 0.2;
 for ii = 1 : 4
     nexttile
     contourf(vgrid, hgrid, squeeze(xis(:, :, ii)), 10)

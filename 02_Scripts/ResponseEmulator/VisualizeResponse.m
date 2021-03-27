@@ -1,9 +1,7 @@
 R = ResponseEmulator;
 FormatConventionForMomentTimeSeries % to get the variables: v, hs, tp(hs, idx)
 
-%load('OvrDataEmulator');
-Ovr(1,:,:,:) = NaN;
-Ovr(:,9,4,:) = NaN;
+%load('OvrDataEmulatorDiffSeed');
 
 tp_temp = [3:1:20];
 v_temp = [0:1:50];
@@ -51,43 +49,44 @@ vv = vv(1:18);
 hold on
 ms = 30;
 for i = 1 : 6
-    h = scatter(vv, OvrAllSeeds(i,:), ms, 'MarkerFaceColor', [0.5 0.5 0.5], ...
+    h = scatter(vv, OvrAllSeeds(i,:), ms, 'MarkerFaceColor', [0. 0. 0.5], ...
     'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
     if i > 1 
         set(h, 'HandleVisibility', 'off')
     end
 end
 for tpi = 1 : 4
-    h = scatter(v(1:14), squeeze(max(Ovr(1:14, 1, tpi, :), [], 4)), ms, 'MarkerFaceColor', [0 0 0.5], ...
+    h = scatter(v(2:end), squeeze(max(Ovr(2:end, 1, tpi, :), [], 4)), ms, 'MarkerFaceColor', [0 0 0.5], ...
     'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
     if i > 1 
         set(h, 'HandleVisibility', 'off')
     end
 end
 meanOvr = mean(OvrAllSeeds);
-plot(vv, meanOvr, '-k', 'linewidth', 2);
+%plot(vv, meanOvr, '-k', 'linewidth', 2);
 FT = fittype('a * x.^2');
 fitted_curve = fit(vv(vv > 25)', meanOvr(vv > 25)', FT);
 h = plot(fitted_curve);
 set(h, 'linewidth', 2)
 set(h, 'linestyle', '--')
 fit_string = [num2str(round(fitted_curve.a)) ' * v^2'];
-legend({'Simulation seed', 'Average over seeds', fit_string}, 'location', 'southeast');
+legend({'Simulation seed', fit_string}, 'location', 'southeast');
 legend box off
+xlim([0 45])
 xlabel('');
 ylabel('');
 title('Multiphysics simulation, h_s = 0 m');
 % Plot results from emulator
 ax2 = nexttile
 hold on
-n = 6;
+n = 10;
 vv = [1, vv];
 r = nan(length(vv), n);
 for i = 1 : length(vv)
     r(i, :) = R.randomSample1hr(vv(i), 0, 0, n);
 end
 % for i = 1 : 6
-%     h = scatter(vv, OvrAllSeeds(i,:), ms, 'MarkerFaceColor', [0.5 0.5 0.5], ...
+%     h = scatter(vv, OvrAllSeeds(i,:), ms, 'MarkerFaceColor', [0. 0. 0.5], ...
 %     'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
 %     if i > 1 
 %         set(h, 'HandleVisibility', 'off')
@@ -109,21 +108,20 @@ for i = 1 : n
 end
 %meanR = mean(r');
 vvv = 0:0.01:50;
-medianR = R.ICDF1hr(vvv, zeros(size(vvv)), zeros(size(vvv)), 0.5);
-plot(vvv, medianR, '-k', 'linewidth', 2);
-lowerR = R.ICDF1hr(vvv, zeros(size(vvv)), zeros(size(vvv)), 0.025);
-upperR = R.ICDF1hr(vvv, zeros(size(vvv)), zeros(size(vvv)), 0.975);
-plot(vvv, lowerR, '--k');
-h = plot(vvv, upperR, '--k');
+% medianR = R.ICDF1hr(vvv, zeros(size(vvv)), zeros(size(vvv)), 0.5);
+% plot(vvv, medianR, '-k', 'linewidth', 2);
+% lowerR = R.ICDF1hr(vvv, zeros(size(vvv)), zeros(size(vvv)), 0.025);
+% upperR = R.ICDF1hr(vvv, zeros(size(vvv)), zeros(size(vvv)), 0.975);
+% plot(vvv, lowerR, '--k');
+% h = plot(vvv, upperR, '--k');
 set(h, 'HandleVisibility', 'off')
-FT = fittype('a * x.^2');
-fitted_curve = fit(vvv(vvv > 25)', medianR(vvv > 25)', FT);
 h = plot(fitted_curve);
 set(h, 'linewidth', 2)
 set(h, 'linestyle', '--')
 fit_string = [num2str(round(fitted_curve.a)) ' * v^2'];
-legend({'Random realization', 'Median short-term response', '95% confidence interval', fit_string}, 'location', 'southeast');
+legend({'Random realization', fit_string}, 'location', 'southeast');
 legend box off
+xlim([0 45])
 xlabel('');
 ylabel('');
 linkaxes([ax1 ax2],'xy')
@@ -134,38 +132,6 @@ title('Statistical response emulator, h_s = 0 m');
 exportgraphics(gcf, 'gfx/ResponseAtCalmSea.jpg') 
 exportgraphics(gcf, 'gfx/ResponseAtCalmSea.pdf') 
 
-fig = figure('position', [100, 100, 900, 400]);
-t = tiledlayout(1,1);
-ax1 = nexttile
-hold on
-for tpi = 3
-    h = scatter(v, squeeze(max(Ovr(:, 1, tpi, :), [], 4)), ms, 'MarkerFaceColor', [0 0 0.5], ...
-    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
-end
-n = 6;
-r = nan(length(vv), n);
-for i = 1 : length(vv)
-    r(i, :) = R.randomSample1hr(vv(i), 3, tp(3, tpi), n);
-end
-for i = 1 : n
-    h = scatter(vv, r(:, i), ms, 'MarkerFaceColor', [0.5 0.5 0.5], ...
-    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k');
-    if i > 1 
-        set(h, 'HandleVisibility', 'off')
-    end
-end
-meanR = mean(r');
-plot(vv, meanR, '-k', 'linewidth', 2);
-legend box off
-xlabel('');
-ylabel('');
-linkaxes([ax1 ax2],'xy')
-xlabel(t, '1-hour wind speed (m/s)');
-ylabel(t, 'Max 1-hour overturning moment (Nm)');
-t.TileSpacing = 'compact';
-legend({'Multiphysics simulation', 'Response emulator seed', 'Response emulator mean'}, 'location', 'southeast');
-legend box off
-title(['Statistical response emulator, h_s = 3 m, t_p = ' num2str(tp(3, tpi))]);
 
 
 % Plot response contours
