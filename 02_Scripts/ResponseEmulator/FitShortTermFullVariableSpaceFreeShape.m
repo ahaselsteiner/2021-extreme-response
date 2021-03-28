@@ -116,7 +116,7 @@ xiHat = predict(mdlXi, X);
 modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
     ((((x(:,1) <= 25) .* (3.2586e+06 .* x(:,1) + 7.1014e+07  ./ (1 + 0.040792 * (x(:,1) - 11.6).^2) - 7.0845e+07  ./ (1 + 0.041221 * (0 - 11.6).^2)) + ... % third term is used to force v(0) = 0
     (x(:,1) > 25 ) .* (3.9 * 10^4 .* x(:,1).^2)).^2.0 + ...
-    ((1 + (x(:,1) > 25) * 0.2) .* b(4) .* x(:,2).^1.0 .* (1 + (2 + (x(:,1) > 25) * 2) ./ (1 + 2.0 .* (x(:,3) - 3).^2))).^2.0).^(1/2.0));
+    ((1 + (x(:,1) > 25) * 0.2) .* b(4) .* x(:,2).^1.0 .* (1 + 7 .* exp(-0.55 * ((x(:,3) - 3).^2).^(1/3))) ).^2.0).^(1/2.0));
 beta0 = [10^6 10^6 0.02 10^6];
 mdlMu = fitnlm(X, ymu, modelfunMu, beta0, 'ErrorModel', 'proportional')
 muHat = predict(mdlMu, X);
@@ -124,7 +124,7 @@ muHat = predict(mdlMu, X);
 modelfunSigma = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
     ((((x(:,1) <= 25) .* (b(1) .* x(:,1) + b(2) ./ (1 + 0.064 * (x(:,1) - 11.6).^2) +  b(3) ./ (1 + 0.2 * (x(:,1) - 11.6).^2)) + ... %- b(2) ./ (1 + 0.064 * (0      - 11.6).^2) -  b(3) ./ (1 + 0.2 * (0      - 11.6).^2)) + ... % these terms force v(0) = 0
     (x(:,1) > 25) .* 4700 .* x(:,1).^2).^2.0 + ...
-    ((1 + (x(:,1) > 25) * 0.2) .* b(4) .* x(:,2).^1.0 .* (1 + (2 + (x(:,1) > 25) * 2) ./ (1 + 2.0 .* (x(:,3) - 3).^2))).^2.0).^(1/2.0));
+    ((1 + (x(:,1) > 25) * 0.2) .* b(4) .* x(:,2).^1.0 .* (1 + (2 + (x(:,1) > 25) * 2) ./ (1 + 2 .* (x(:,3) - 3).^2)) ).^2.0).^(1/2.0));
 beta0 = [10^5 10^5 10^5 10^5];
 mdlSigma = fitnlm(X, ysigma, modelfunSigma, beta0, 'ErrorModel', 'proportional')
 sigmaHat = predict(mdlSigma, X);
@@ -218,44 +218,42 @@ end
 linkaxes(axs,'xy')
 
 % Figure focusing on Tp
-fig = figure('Position', [100 100 560 300]);
-t = tiledlayout(1,2);
-nexttile
-hold on
-for tpid = 1 : 4
-    vv = [0 : 0.1 : 45];
-    countI = 1;
-    for i = [2]
-        X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
+for hsid = [2, 3, 4, 6, 9]
+    fig = figure('Position', [100 100 560 300]);
+    t = tiledlayout(1,2);
+    nexttile
+    hold on
+    for tpid = 1 : 4
+        vv = [0 : 0.1 : 45];
+        countI = 1;
+        X = [vv', zeros(length(vv), 1) + hs(hsid), zeros(length(vv), 1) + tp(hs(hsid), tpid)];
         hold on
-        labelhs = ['H_s = ' num2str(hs(i)) ' m, T_p = ' num2str(tp(hs(i), tpid), '%4.2f') ' s, from 1-hour simulation'];
-        plot(v, sigmas(i, :, tpid), 'o', 'markerfacecolor', colorsTp{tpid}, 'markeredgecolor', 'k', 'DisplayName', labelhs);
-        labelhs = ['H_s = ' num2str(hs(i)) ' m,  T_p = ' num2str(tp(hs(i), tpid), '%4.2f') ' s, predicted'];
+        labelhs = ['H_s = ' num2str(hs(hsid)) ' m, T_p = ' num2str(tp(hs(hsid), tpid), '%4.2f') ' s, from 1-hour simulation'];
+        plot(v, sigmas(hsid, :, tpid), 'o', 'markerfacecolor', colorsTp{tpid}, 'markeredgecolor', 'k', 'DisplayName', labelhs);
+        labelhs = ['H_s = ' num2str(hs(hsid)) ' m,  T_p = ' num2str(tp(hs(hsid), tpid), '%4.2f') ' s, predicted'];
         plot(vv, predict(mdlSigma, X), 'color', colorsTp{tpid},  'DisplayName', labelhs);
         countI = countI + 1;
     end
-end
-xlabel('1-hour wind speed (m/s)');
-ylabel('\sigma (Nm)');
-lh = legend('box', 'off', 'Location','NorthOutside', ...
-    'Orientation', 'Horizontal', 'NumColumns', 2);
-lh.Layout.Tile = 'North';
+    xlabel('1-hour wind speed (m/s)');
+    ylabel('\sigma (Nm)');
+    lh = legend('box', 'off', 'Location','NorthOutside', ...
+        'Orientation', 'Horizontal', 'NumColumns', 2);
+    lh.Layout.Tile = 'North';
 
-nexttile
-hold on
-for tpid = 1 : 4
-    vv = [0 : 0.1 : 45];
-    countI = 1;
-    for i = [2]
-        X = [vv', zeros(length(vv), 1) + hs(i), zeros(length(vv), 1) + tp(hs(i), tpid)];
+    nexttile
+    hold on
+    for tpid = 1 : 4
+        vv = [0 : 0.1 : 45];
+        countI = 1;
+        X = [vv', zeros(length(vv), 1) + hs(hsid), zeros(length(vv), 1) + tp(hs(hsid), tpid)];
         hold on
-        plot(v, mus(i, :, tpid), 'o', 'markerfacecolor', colorsTp{tpid}, 'markeredgecolor', 'k');
+        plot(v, mus(hsid, :, tpid), 'o', 'markerfacecolor', colorsTp{tpid}, 'markeredgecolor', 'k');
         plot(vv, predict(mdlMu, X), 'color', colorsTp{tpid});
         countI = countI + 1;
     end
+    xlabel('1-hour wind speed (m/s)');
+    ylabel('\mu (Nm)');
 end
-xlabel('1-hour wind speed (m/s)');
-ylabel('\mu (Nm)');
 exportgraphics(gcf, 'gfx/ModelFocusTp.jpg') 
 exportgraphics(gcf, 'gfx/ModelFocusTp.pdf') 
 
@@ -349,14 +347,15 @@ ylabel('1-hour overturning moment (Nm)');
 title('Hs = 0 m');
 
 % Sigma, mu over hs
+vids = [8 15 16 17];
 figure('Position', [100 100 900 500]);
 t = tiledlayout(3, 4);
 for tpid = 1 : 4
     nexttile
     hss = [0 : 0.1 : 15]';
-    colors = {'red', 'blue', 'black'};
+    colors = {'red', 'blue', 'black', 'green'};
     countI = 1;
-    for i = [1, 8 15]
+    for i = vids
         X = [zeros(length(hss), 1) + v(i), hss, tp(hss, tpid)];
         hold on
         labelv = ['V = ' num2str(v(i)) ' m s^{-1}, from 1-hour simulation'];
@@ -378,9 +377,9 @@ end
 for tpid = 1 : 4
     nexttile
     hss = [0 : 0.1 : 15]';
-    colors = {'red', 'blue', 'black'};
+    colors = {'red', 'blue', 'black', 'green'};
     countI = 1;
-    for i = [1, 8 15]
+    for i = vids
         X = [zeros(length(hss), 1) + v(i), hss, tp(hss, tpid)];
         hold on
         labelv = ['V = ' num2str(v(i)) ' m/s, from 1-hour simulation'];
@@ -397,9 +396,9 @@ end
 for tpid = 1 : 4
     nexttile
     hss = [0 : 0.1 : 15]';
-    colors = {'red', 'blue', 'black'};
+    colors = {'red', 'blue', 'black', 'green'};
     countI = 1;
-    for i = [1, 8 15]
+    for i = vids
         X = [zeros(length(hss), 1) + v(i), hss, tp(hss, tpid)];
         hold on
         labelv = ['V = ' num2str(v(i)) ' m/s, from 1-hour simulation'];
