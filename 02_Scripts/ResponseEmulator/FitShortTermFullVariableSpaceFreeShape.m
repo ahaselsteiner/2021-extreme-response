@@ -107,8 +107,8 @@ end
 % See: https://de.mathworks.com/help/stats/fitnlm.html
 % x(:, 1) = v, x(:, 2) = hs, x(:, 3) = tp
 modelfunXi = @(b, x) (x(:,1) <= 25) .* (-0.1 - 0.5 ./ (1 + 0.15 .* (x(:,1) - 12.5).^2) + 0.23 ./ (1 + 0.05 .* (x(:,1) - 18.5).^2) + ...
-    x(:,2).^(1/3) .* ((-0.05 -         (-0.1 - 0.5 ./ (1 + 0.15 .* (x(:,1) - 12.5).^2) + 0.23 ./ (1 + 0.05 .* (x(:,1) - 18.5).^2))) ./ 15^(1/3))) + ...
-    (x(:,1) > 25) .* (-0.2 +  x(:,2).^(1/3) .* (-0.05 - -0.2) / 15.^(1/3))
+    x(:,2).^(1/3) .* ((-0.01 -         (-0.1 - 0.5 ./ (1 + 0.15 .* (x(:,1) - 12.5).^2) + 0.23 ./ (1 + 0.05 .* (x(:,1) - 18.5).^2))) ./ 15^(1/3))) + ...
+    (x(:,1) > 25) .* (-0.2 +  x(:,2).^(1/3) .* (-0.01 - -0.2) / 15.^(1/3))
 beta0 = [-0.1];
 mdlXi = fitnlm(X, yk, modelfunXi, beta0, 'ErrorModel', 'proportional')
 xiHat = predict(mdlXi, X);
@@ -116,16 +116,16 @@ xiHat = predict(mdlXi, X);
 modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
     ((((x(:,1) <= 25) .* (3.2586e+06 .* x(:,1) + 7.1014e+07  ./ (1 + 0.040792 * (x(:,1) - 11.6).^2) - 7.0845e+07  ./ (1 + 0.041221 * (0 - 11.6).^2)) + ... % third term is used to force v(0) = 0
     (x(:,1) > 25 ) .* (3.9 * 10^4 .* x(:,1).^2)).^2.0 + ...
-    ((1 + (x(:,1) > 25) * 0.2) .* b(4) .* x(:,2).^1.0 .* (1 + 7 .* exp(-0.55 * ((x(:,3) - 3).^2).^(1/3))) ).^2.0).^(1/2.0));
-beta0 = [10^6 10^6 0.02 10^6];
+    ((1 + (x(:,1) > 25) * 0.3) .* b(4) .* x(:,2).^1.0 .* (1 + b(5) .* exp(b(6) * ((x(:,3) - 3).^2).^(1/2))) ).^2.0).^(1/2.0));
+beta0 = [10^6 10^6 0.02 10^6 10 -1];
 mdlMu = fitnlm(X, ymu, modelfunMu, beta0, 'ErrorModel', 'proportional')
 muHat = predict(mdlMu, X);
 
 modelfunSigma = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
     ((((x(:,1) <= 25) .* (b(1) .* x(:,1) + b(2) ./ (1 + 0.064 * (x(:,1) - 11.6).^2) +  b(3) ./ (1 + 0.2 * (x(:,1) - 11.6).^2)) + ... %- b(2) ./ (1 + 0.064 * (0      - 11.6).^2) -  b(3) ./ (1 + 0.2 * (0      - 11.6).^2)) + ... % these terms force v(0) = 0
     (x(:,1) > 25) .* 4700 .* x(:,1).^2).^2.0 + ...
-    ((1 + (x(:,1) > 25) * 0.2) .* b(4) .* x(:,2).^1.0 .* (1 + (2 + (x(:,1) > 25) * 2) ./ (1 + 2 .* (x(:,3) - 3).^2)) ).^2.0).^(1/2.0));
-beta0 = [10^5 10^5 10^5 10^5];
+    ((1 + (x(:,1) > 25) * 0.3) .* b(4) .* x(:,2).^(1.5) .* (1 + b(5) .* exp(b(6) * ((x(:,3) - 3).^2).^(1/2))) ).^2.0).^(1/2.0));
+beta0 = [10^5 10^5 10^5 10^5 10 -1];
 mdlSigma = fitnlm(X, ysigma, modelfunSigma, beta0, 'ErrorModel', 'proportional')
 sigmaHat = predict(mdlSigma, X);
 
@@ -507,4 +507,59 @@ t.YLabel.String = 'Significant wave height (m)';
 exportgraphics(gcf, 'gfx/EmulatorFitKFree_Mu.jpg') 
 exportgraphics(gcf, 'gfx/EmulatorFitKFree_Mu.pdf') 
 
-%sgtitle('mu')
+
+% 1-hr max contour plot
+figure('Position', [100 100 800 800]);
+t = tiledlayout(4, 3);
+clower = min(maxr(:));
+cupper = 3.6 * 10^8;
+for ii = 1 : 4
+    nexttile
+    robserved = squeeze(maxr(:, :, ii)');
+    contourf(vgrid, hgrid, robserved, [clower : (cupper - clower) / 10 : cupper])
+    title(['multiphysics, t_{tp' num2str(ii) '} surface'])
+    caxis([clower cupper]);
+    nexttile
+    rTpInd = nan(size(vgrid));
+    for i = 1 : size(vgrid, 1)
+        for j = 1 : size(vgrid, 2)
+            Xtemp = [vgrid(i, j), hgrid(i, j), tp(hgrid(i, j), ii)];
+            muTemp = predict(mdlMu, Xtemp);
+            sigmaTemp = predict(mdlSigma, Xtemp);
+            xiTemp = predict(mdlXi, Xtemp);
+            pd = makedist('GeneralizedExtremeValue','k', xiTemp, 'sigma', sigmaTemp, 'mu', muTemp);
+            rTpInd(i, j) = pd.icdf(0.5.^(1/60));
+        end
+    end
+    contourf(vgrid, hgrid, rTpInd, 10);
+    title(['predicted, t_{tp' num2str(ii) '} surface'])
+    caxis([clower cupper])
+    if ii == 4
+        c1 = colorbar;
+        c1.Label.String = '1-hour maximum oveturning moment (Nm) ';
+        c1.Layout.Tile = 'south';
+    end
+    
+    ax4 = nexttile;
+    rTpInd(isnan(robserved)) = NaN;
+    imagesc(vmesh(:,1), hmesh(1,:), (rTpInd - robserved) ./ robserved * 100, 'AlphaData',~isnan(rTpInd));
+    set(gca, 'YDir', 'normal')
+    colormap(ax4, redblue)
+    caxis([-30, 30]);
+    if ii == 1
+        title('Difference');
+    end
+    if ii == 4
+        c3 = colorbar;
+        c3.Label.String = 'Difference (emulator - multiphyisics; %) ';
+        c3.Layout.Tile = 'south';
+    end
+    
+end
+
+
+
+t.XLabel.String = '1-hour wind speed (m s^{-1})';
+t.YLabel.String = 'Significant wave height (m)';
+exportgraphics(gcf, 'gfx/EmulatorFitKFree_response.jpg') 
+exportgraphics(gcf, 'gfx/EmulatorFitKFree_response.pdf') 

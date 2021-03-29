@@ -1,6 +1,6 @@
-suffix = '_artificial500';
-load('ArtificialTimeSeries508years.mat');
-n = 365.24 * 24 * 500;
+suffix = '_artificial50';
+load('ArtificialTimeSeries51years.mat');
+n = 365.24 * 24 * 50;
 %n = length(A.t);
 t = A.t(1:n);
 v1hr = A.V(1:n);
