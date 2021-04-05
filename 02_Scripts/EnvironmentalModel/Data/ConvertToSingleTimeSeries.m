@@ -7,10 +7,10 @@ A.S = [];
 A.Tp = [];
 
 % Check length of dataset
-Nstorm=length(STORMSrnd);
+Nstorm = length(STORMSrnd);
 n=0;
-for i=1:Nstorm
-    n=n+length(STORMSrnd{i}.data);
+for i = 1 : Nstorm
+    n = n + length(STORMSrnd{i}.data);
 end
 
 % Recompile data
@@ -28,6 +28,8 @@ end
 A.V = data(:,1);
 A.Hs = data(:,2);
 A.S = data(:,3);
+Tz = sqrt((2 .* pi .* A.Hs) ./ (9.81 .* A.S));
+A.Tp = 1.2796 * Tz; % Assuming a JONSWAP spectrum with gamma = 3.3
 n = length(A.V);
 A.t = 0 : years(1/(365.25*24)) : (n - 1) * years(1/(365.25*24));
 disp(['Converted ' num2str(year(A.t(end))) ' years']);

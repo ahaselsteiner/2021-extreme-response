@@ -116,10 +116,14 @@ IFORM.hs = [ 4.1813075   4.31982528  4.45515316  4.63534418  4.91139501  5.31650
 IFORM.tp = R.tpSteepness(IFORM.hs, steepness);
 IFORM.r = R.ICDF1hr(IFORM.v, IFORM.hs, IFORM.tp, response_quantile);
 
-HDC.v = [3 : 2 : 37];
-HDC.hs = [5. 5. 5. 5.15 5.4 5.75 6.35 7.05 7.9 8.85 9.95 11.1 ...
- 12.2 13.25 14.15 14.85 15.1 14.55];
-HDC.tp = R.tpSteepness(HDC.hs, steepness);
+% HDC.v = [3 : 2 : 37];
+% HDC.hs = [5. 5. 5. 5.15 5.4 5.75 6.35 7.05 7.9 8.85 9.95 11.1 ...
+%  12.2 13.25 14.15 14.85 15.1 14.55];
+% HDC.tp = R.tpSteepness(HDC.hs, steepness);
+load('hdc_2d.csv')
+HDC.v = hdc_2d(:,1);
+HDC.hs = hdc_2d(:,2);
+HDC.tp = hdc_2d(:,3);
 HDC.r = R.ICDF1hr(HDC.v, HDC.hs, HDC.tp, response_quantile);
 
 HDC3d.v = [zeros(1, 5) + 10, zeros(1, 7) + 15, zeros(1, 9) + 20, zeros(1, 11) + 25, ...
