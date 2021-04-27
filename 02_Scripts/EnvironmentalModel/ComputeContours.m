@@ -1,6 +1,7 @@
 load('count');
 alpha = 1 / (50 * 365.25 * 24);
 threshold = findThreshold(count, alpha)
+contour_lw = 1;
 
 [T, H] = meshgrid(t, h);
 
@@ -18,7 +19,7 @@ for i = windI
     nanSlice(slice==0) = nan;
     nanimage(T(1,:), H(:,1), nanSlice);
     set(gca, 'YDir', 'normal')
-    M = contour(T, H, slice, [threshold, threshold], 'r', 'linewidth', 2);
+    M = contour(T, H, slice, [threshold, threshold], 'r', 'linewidth', contour_lw);
     M = M(:,M(1,:) <= 25);
     dcs_tp = [];
     dcs_hs = [];
@@ -36,10 +37,11 @@ for i = windI
     Cv = [Cv; dcs_v];
     Chs = [Chs; dcs_hs'];
     Ctp1 = [Ctp1; dcs_tp'];
-    plot(dcs_tp, dcs_hs, 'xk', 'linewidth', 2);
+    plot(dcs_tp, dcs_hs, 'ok', 'markerfacecolor', 'red');
     deltaw = w(2) - w(1);
     title([num2str(w(i) - deltaw / 2) ' m s^{-1} < v < ' num2str(w(i) + deltaw / 2) ' m s^{-1}']);
-    caxis([0 10000000]);
+    caxis([1 10000000]);
+    set(gca,'ColorScale','log')
 end
 cb = colorbar();
 cb.Layout.Tile = 'east';
@@ -47,6 +49,8 @@ cb.Label.String = 'Count (-)';
 xlabel(layout, 'Spectral peak period (s)');
 ylabel(layout, 'Significant wave height (m)')
 sgtitle(['3D contour, \alpha = ' num2str(alpha, '%2.2e')]);
+
+%layout.Padding = 'compact';
 exportgraphics(layout, 'gfx/3DcontourTp.jpg') 
 exportgraphics(layout, 'gfx/3DcontourTp.pdf') 
 writematrix([Cv Chs Ctp1],'Data/hdc_3d.csv') 
@@ -55,7 +59,48 @@ writematrix([Cv Chs Ctp1],'Data/hdc_3d.csv')
 VHsProjection = sum(count,3);
 threshold2D = findThreshold(VHsProjection, alpha);
 [W, H] = meshgrid(w, h);
+
+
+% HD
+M = contourc(W(1,:), H(:,1), VHsProjection', [threshold2D, threshold2D]);
+Ctop = M(:,45:end);
+Ctopv = wrev(Ctop(1,:));
+Ctophs = wrev(Ctop(2,:));
+[Ctopv, ia] = unique(Ctopv);
+Ctophs = Ctophs(ia);
+Cv_HD = 3:2:max(Ctop(1,:));
+Chs_HD = interp1(Ctopv, Ctophs, Cv_HD);
+C_HD_Sp_SMax = maxSteepnessAtV(Cv_HD);
+Ctp1 = sqrt(2 * pi * Chs_HD ./ (9.81 * C_HD_Sp_SMax));
+C_HD_Sz_SMedian = medianSteepnessAtV(Cv_HD);
+Ctp2 = sqrt(2 * pi * Chs_HD ./ (9.81 * C_HD_Sz_SMedian));
+writematrix([Cv_HD' Chs_HD' Ctp1'],'Data/hdc_2d_maxsteepness.csv') 
+writematrix([Cv_HD' Chs_HD' Ctp2'],'Data/hdc_2d_mediansteepness.csv') 
+
+%IFORM contour
 [iform_w, iform_h] = count2iform(w, h, VHsProjection', alpha, 5);
+Cv_IFORM = wrev(iform_w(1:25));
+Chs_IFORM = wrev(iform_h(1:25));
+C_iform_v = 3:2:max(Cv_IFORM);
+C_iform_hs = interp1(Cv_IFORM, Chs_IFORM, C_iform_v);
+
+C_Sp_SMax = maxSteepnessAtV(C_iform_v);
+C_iform_tp1 = sqrt(2 * pi * C_iform_hs ./ (9.81 * C_Sp_SMax));
+C_Sz_SMedian = medianSteepnessAtV(C_iform_v);
+C_iform_tp2 = sqrt(2 * pi * C_iform_hs ./ (9.81 * C_Sz_SMedian));
+
+writematrix([C_iform_v' C_iform_hs' C_iform_tp1'],'Data/iform_2d_maxsteepness.csv') 
+writematrix([C_iform_v' C_iform_hs' C_iform_tp2'],'Data/iform_2d_mediansteepness.csv') 
+
+% IFORM contour with a return period of 1 year
+[iform_w_1year, iform_h_1year] = count2iform(w, h, VHsProjection', alpha * 50, 5);
+Cv_IFORM_1year = wrev(iform_w_1year(1:25));
+Chs_IFORM_1year = wrev(iform_h_1year(1:25));
+C_iform_v_1year = 3:2:max(Cv_IFORM_1year);
+C_iform_hs_1year = interp1(Cv_IFORM_1year, Chs_IFORM_1year, C_iform_v_1year);
+C_Sz_SMedian_1year = medianSteepnessAtV(C_iform_v_1year);
+C_iform_tp2_1year = sqrt(2 * pi * C_iform_hs_1year ./ (9.81 * C_Sz_SMedian_1year));
+writematrix([C_iform_v_1year' C_iform_hs_1year' C_iform_tp2_1year'],'Data/iform_2d_mediansteepness_1year.csv') 
 
 figure('Position', [100 100 500 400])
 layout = tiledlayout(1,1);
@@ -65,41 +110,27 @@ nanSlice = VHsProjection;
 nanSlice(VHsProjection==0) = nan;
 handle = pcolor(W, H, nanSlice');
 handle.EdgeColor = 'none';
-M = contour(W, H, VHsProjection', [threshold2D, threshold2D], 'r', 'linewidth', 2);
-h_hd = plot(NaN, '-r', 'linewidth', 2);
-h_iform = plot(iform_w, iform_h, '--r', 'linewidth', 2);
-legend([h_hd, h_iform], 'Highest density', 'IFORM', 'location', 'northwest', 'box', 'off');
+M = contour(W, H, VHsProjection', [threshold2D, threshold2D], 'r', 'linewidth', contour_lw);
+h_hd = plot(NaN, '-r', 'linewidth', contour_lw);
+h_iform = plot(iform_w, iform_h, '--r', 'linewidth', contour_lw);
+h_ds = plot(Cv_HD, Chs_HD, 'ok', 'markerfacecolor', 'red');
+plot(C_iform_v, C_iform_hs, 'ok', 'markerfacecolor', 'red');
+legend([h_hd, h_iform, h_ds], 'Highest density', 'IFORM', 'Design condition', 'location', 'northwest', 'box', 'off');
 
 title(['2D projection, \alpha = ' num2str(alpha,'%2.2e')]);
-caxis([0 10000000]);
+caxis([1 100000000]);
 cb = colorbar();
 cb.Layout.Tile = 'east';
 cb.Label.String = 'Count (-)';
+set(gca,'ColorScale','log')
 xlabel('1-hour wind speed (m s^{-1})');
 ylabel('Significant wave height (m)')
 exportgraphics(layout, 'gfx/2Dcontours.jpg') 
 exportgraphics(layout, 'gfx/2Dcontours.pdf') 
 
-% HD contour
-figure
+%Scatter plot
+figure('Position', [100 100 500 400])
 hold on
-Ctop = M(:,45:end);
-Ctopv = wrev(Ctop(1,:));
-Ctophs = wrev(Ctop(2,:));
-[Ctopv, ia] = unique(Ctopv);
-Ctophs = Ctophs(ia);
-Cv = 3:2:max(Ctop(1,:));
-Chs = interp1(Ctopv, Ctophs, Cv);
-%steepnessMax = @(v) 0.02 + (0.08 - 0.02) * v / 35;
-steepnessMax = @(v) (v <= 19) .* (0.035 + (0.088 - 0.035) / 19 * v) + (v > 19) .* 0.088;
-medianSteepness = @(v) 0.071 - 0.06 * exp(-0.11 * v);
-CsTz1 = steepnessMax(Cv);
-CTz1 = sqrt(2 * pi * Chs ./ (9.81 * CsTz1));
-Ctp1 = 1.2796 * CTz1;
-CsTz2 = medianSteepness(Cv);
-CTz2 = sqrt(2 * pi * Chs ./ (9.81 * CsTz2));
-Ctp2 = 1.2796 * CTz2;
-
 load('ArtificialTimeSeries50years.mat');
 n = 365.24 * 24 * 50;
 t = A.t(1:n);
@@ -111,32 +142,14 @@ tp = 1.2796 * tz; % Assuming a JONSWAP spectrum with gamma = 3.
 ms = 20;
 scatter(v1hr, hs, ms, s, 'filled', 'markeredgecolor', 'k');
 
-plot(Cv, Chs, '-k');
-scatter(Cv, Chs, 50, CsTz1, 'filled', 'markeredgecolor', 'k');
+plot(Cv_HD, Chs_HD, '-k');
+scatter(Cv_HD, Chs_HD, 50, C_HD_Sp_SMax, 'filled', 'markeredgecolor', 'k');
 c = colorbar;
 c.Label.String = 'Steepness (-)';
 xlabel('1-hour wind speed (m s^{-1})');
 ylabel('Significant wave height (m)')
 
-writematrix([Cv' Chs' Ctp1'],'Data/hdc_2d_maxsteepness.csv') 
-writematrix([Cv' Chs' Ctp2'],'Data/hdc_2d_mediansteepness.csv') 
 
-%IFORM contour
-Ctop = M(:,45:end);
-Cv = wrev(iform_w(1:25));
-Chs = wrev(iform_h(1:25));
-C_iform_v = 3:2:max(Cv);
-C_iform_hs = interp1(Cv, Chs, C_iform_v);
-
-CsTz1 = steepnessMax(C_iform_v);
-CTz1 = sqrt(2 * pi * C_iform_hs ./ (9.81 * CsTz1));
-C_iform_tp1 = 1.2796 * CTz1;
-CsTz2 = medianSteepness(C_iform_v);
-CTz2 = sqrt(2 * pi * C_iform_hs ./ (9.81 * CsTz2));
-C_iform_tp2 = 1.2796 * CTz2;
-
-writematrix([C_iform_v' C_iform_hs' C_iform_tp1'],'Data/iform_2d_maxsteepness.csv') 
-writematrix([C_iform_v' C_iform_hs' C_iform_tp2'],'Data/iform_2d_mediansteepness.csv') 
 
 function threshold =  findThreshold(count, alpha)
     totCount =  sum(sum(sum(count)));

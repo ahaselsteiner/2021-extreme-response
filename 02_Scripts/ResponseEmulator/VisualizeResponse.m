@@ -241,7 +241,7 @@ title('All simulated conditions');
 xlabel(t, '1-hour maximum in multiphysics simulation (Nm)');
 ylabel(t, 'Emulator median 1-hour maximum (Nm)');
 exportgraphics(fig, 'gfx/CompareResponseScatter.jpg') 
-exportgraphics(fig, 'gfx/CompareResponseScatter.pdf') 
+exportgraphics(fig, 'gfx/CompareResponseScatter.pdf')
 
 
 % Plot with 3D graphic

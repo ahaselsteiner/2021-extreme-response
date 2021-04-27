@@ -1,13 +1,7 @@
-OvrDataEmulator.mat
-OvrDataEmulatorDiffSeed.mat
-OvrDataEmulatorOneSeed.mat
-OvrDataEmulatorOneSeed.zip
-OvrDataEmulatorDiffSeed.zip
-OvrDataEmulatorOneSeed.mat
-OvrDataEmulatorDiffSeed.mat
+*.mat
+*.zip
 artificial_time_series_*
 ArtificialTimeSeries*
-STORMS_RANDOM.mat
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

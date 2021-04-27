@@ -116,7 +116,7 @@ xiHat = predict(mdlXi, X);
 modelfunMu = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
     ((((x(:,1) <= 25) .* (3.2586e+06 .* x(:,1) + 7.1014e+07  ./ (1 + 0.040792 * (x(:,1) - 11.6).^2) - 7.0845e+07  ./ (1 + 0.041221 * (0 - 11.6).^2)) + ... % third term is used to force v(0) = 0
     (x(:,1) > 25 ) .* (3.9 * 10^4 .* x(:,1).^2)).^2.0 + ...
-    ((1 + (x(:,1) > 25) * 0.3) .* b(4) .* x(:,2).^1.0 .* (1 + b(5) .* exp(b(6) * ((x(:,3) - 3).^2).^(1/2))) ).^2.0).^(1/2.0));
+    ((1 + (x(:,1) > 25) * 0.3) .* b(4) .* x(:,2) .* (1 + b(5) .* exp(b(6) * abs(x(:,3) - 3))) ).^2.0).^(1/2.0));
 beta0 = [10^6 10^6 0.02 10^6 10 -1];
 mdlMu = fitnlm(X, ymu, modelfunMu, beta0, 'ErrorModel', 'proportional')
 muHat = predict(mdlMu, X);
@@ -124,7 +124,7 @@ muHat = predict(mdlMu, X);
 modelfunSigma = @(b, x) (x(:,3) >= sqrt(2 * pi .* x(:,2) ./ (9.81 .* 1/14.99))) .* ...
     ((((x(:,1) <= 25) .* (b(1) .* x(:,1) + b(2) ./ (1 + 0.064 * (x(:,1) - 11.6).^2) +  b(3) ./ (1 + 0.2 * (x(:,1) - 11.6).^2)) + ... %- b(2) ./ (1 + 0.064 * (0      - 11.6).^2) -  b(3) ./ (1 + 0.2 * (0      - 11.6).^2)) + ... % these terms force v(0) = 0
     (x(:,1) > 25) .* 4700 .* x(:,1).^2).^2.0 + ...
-    ((1 + (x(:,1) > 25) * 0.3) .* b(4) .* x(:,2).^(1.5) .* (1 + b(5) .* exp(b(6) * ((x(:,3) - 3).^2).^(1/2))) ).^2.0).^(1/2.0));
+    ((1 + (x(:,1) > 25) * 0.3) .* b(4) .* x(:,2).^(1.5) .* (1 + b(5) .* exp(b(6) * abs(x(:,3) - 3))) ).^2.0).^(1/2.0));
 beta0 = [10^5 10^5 10^5 10^5 10 -1];
 mdlSigma = fitnlm(X, ysigma, modelfunSigma, beta0, 'ErrorModel', 'proportional')
 sigmaHat = predict(mdlSigma, X);
@@ -509,57 +509,137 @@ exportgraphics(gcf, 'gfx/EmulatorFitKFree_Mu.pdf')
 
 
 % 1-hr max contour plot
-figure('Position', [100 100 800 800]);
-t = tiledlayout(4, 3);
+fig = figure('Position', [100 100 1500 800]);
+t = tiledlayout(4, 6);
 clower = min(maxr(:));
 cupper = 3.6 * 10^8;
+rGlobalGEV = nan([size(vgrid), 4]);
+rLocalGEV = nan([size(vgrid), 4]);
 for ii = 1 : 4
     nexttile
     robserved = squeeze(maxr(:, :, ii)');
     contourf(vgrid, hgrid, robserved, [clower : (cupper - clower) / 10 : cupper])
-    title(['multiphysics, t_{tp' num2str(ii) '} surface'])
+    title(['multiphysics realization, t_{tp' num2str(ii) '} surface'])
     caxis([clower cupper]);
-    nexttile
-    rTpInd = nan(size(vgrid));
+    
     for i = 1 : size(vgrid, 1)
         for j = 1 : size(vgrid, 2)
             Xtemp = [vgrid(i, j), hgrid(i, j), tp(hgrid(i, j), ii)];
+            if ~isnan(xis(i, j, ii))
+                pd = makedist('GeneralizedExtremeValue','k', xis(i, j, ii), ...
+                    'sigma', sigmas(i, j, ii), 'mu', mus(i, j, ii));
+                rLocalGEV(i, j, ii) = pd.icdf(0.5.^(1/60));
+            end
             muTemp = predict(mdlMu, Xtemp);
             sigmaTemp = predict(mdlSigma, Xtemp);
             xiTemp = predict(mdlXi, Xtemp);
             pd = makedist('GeneralizedExtremeValue','k', xiTemp, 'sigma', sigmaTemp, 'mu', muTemp);
-            rTpInd(i, j) = pd.icdf(0.5.^(1/60));
+            rGlobalGEV(i, j, ii) = pd.icdf(0.5.^(1/60));
         end
     end
-    contourf(vgrid, hgrid, rTpInd, 10);
-    title(['predicted, t_{tp' num2str(ii) '} surface'])
+    nexttile
+    contourf(vgrid, hgrid, rLocalGEV(:,:,ii), 10);
+    title(['local GEV, t_{tp' num2str(ii) '} surface'])
+    nexttile
+    contourf(vgrid, hgrid, rGlobalGEV(:,:,ii), 10);
+    title(['response emulator, t_{tp' num2str(ii) '} surface'])
     caxis([clower cupper])
     if ii == 4
         c1 = colorbar;
         c1.Label.String = '1-hour maximum oveturning moment (Nm) ';
         c1.Layout.Tile = 'south';
     end
-    
+   
     ax4 = nexttile;
-    rTpInd(isnan(robserved)) = NaN;
-    imagesc(vmesh(:,1), hmesh(1,:), (rTpInd - robserved) ./ robserved * 100, 'AlphaData',~isnan(rTpInd));
+    imagesc(vgrid(:,1), hgrid(1,:), (rLocalGEV(:,:,ii) - robserved) ./ robserved * 100, 'AlphaData',~isnan(robserved));
     set(gca, 'YDir', 'normal')
     colormap(ax4, redblue)
     caxis([-30, 30]);
     if ii == 1
-        title('Difference');
+        title('local GEV - multiphysics realization');
+    end
+    
+    ax5 = nexttile;
+    imagesc(vgrid(:,1), hgrid(1,:), (rGlobalGEV(:,:,ii) - rLocalGEV(:,:,ii)) ./ rLocalGEV(:,:,ii) * 100, 'AlphaData',~isnan(robserved));
+    set(gca, 'YDir', 'normal')
+    colormap(ax5, redblue)
+    caxis([-30, 30]);
+    if ii == 1
+        title('emulator - local GEV');
+    end
+
+    
+    ax5 = nexttile;
+    imagesc(vgrid(:,1), hgrid(1,:), (rGlobalGEV(:,:,ii) - robserved) ./ robserved * 100, 'AlphaData',~isnan(robserved));
+    set(gca, 'YDir', 'normal')
+    colormap(ax5, redblue)
+    caxis([-30, 30]);
+    if ii == 1
+        title('emulator - multiphysics realization');
     end
     if ii == 4
         c3 = colorbar;
-        c3.Label.String = 'Difference (emulator - multiphyisics; %) ';
+        c3.Label.String = 'Difference (%) ';
         c3.Layout.Tile = 'south';
     end
-    
 end
-
-
 
 t.XLabel.String = '1-hour wind speed (m s^{-1})';
 t.YLabel.String = 'Significant wave height (m)';
-exportgraphics(gcf, 'gfx/EmulatorFitKFree_response.jpg') 
-exportgraphics(gcf, 'gfx/EmulatorFitKFree_response.pdf') 
+exportgraphics(gcf, 'gfx/EmulatorFitKFree_response_all_panels.jpg') 
+exportgraphics(gcf, 'gfx/EmulatorFitKFree_response_all_panels.pdf') 
+
+% Plot response comparision as scatter
+fig = figure('position', [100, 100, 1400, 700]);
+tOut = tiledlayout(fig,2,1, 'TileSpacing','compact','Padding','compact');
+hAx = nexttile(tOut, 1); hAx.Visible = 'off';
+hP = uipanel(fig, 'Position', hAx.OuterPosition, 'BorderWidth', 0);
+tupper = tiledlayout(hP, 1, 5, 'TileSpacing','compact','Padding','compact');
+robserved_all = [];
+ms = 5;
+axs = gobjects(2, 5);
+for tpid = 1 : 4
+    robserved  = squeeze(max(Ovr(:, :, tpid, :), [], 4))';
+    robserved(robserved == 0) = NaN;
+    robserved_all = [robserved_all; robserved(:)];
+    rGlobalGEVSlice = rGlobalGEV(:,:,tpid);
+    axs(1, tpid + 1) = nexttile(tupper, tpid + 1);
+    hold on
+    scatter(robserved(:), rGlobalGEVSlice(:), ms, 'ok');
+    plot([0, max(rGlobalGEVSlice(:))], [0, max(rGlobalGEVSlice(:))], '--r'); 
+    title(['t_{p' num2str(tpid) '}']);
+end
+axs(1, 1) = nexttile(tupper, 1);
+scatter(robserved_all, rGlobalGEV(:), ms, 'ok');
+hold on
+plot([0, max(rGlobalGEV(:))], [0, max(rGlobalGEV(:))], '--r');
+xlabel(tupper, '1-hour maximum in multiphysics simulation (Nm)');
+ylabel(tupper, 'Emulator median 1-hour maximum (Nm)');
+title('All simulated conditions');
+linkaxes(axs, 'xy');
+exportgraphics(tupper, 'gfx/CompareResponseScatter_Realization.jpg') 
+exportgraphics(tupper, 'gfx/CompareResponseScatter_Realization.pdf')
+
+hAx = nexttile(tOut);
+hP = uipanel(fig, 'Position', hAx.OuterPosition, 'BorderWidth', 0);
+tlower = tiledlayout(hP, 1, 5, 'TileSpacing','compact','Padding','compact');
+for tpid = 1 : 4
+    axs(2, tpid + 1) = nexttile(tlower, tpid + 1);
+    rLocalGEVSlice = rLocalGEV(:,:,tpid);
+    rGlobalGEVSlice = rGlobalGEV(:,:,tpid);
+    hold on
+    scatter(rLocalGEVSlice(:), rGlobalGEVSlice(:), ms, 'ok');
+    plot([0, max(rGlobalGEVSlice(:))], [0, max(rGlobalGEVSlice(:))], '--r'); 
+    title(['t_{p' num2str(tpid) '}']);
+end
+axs(2, 1) = nexttile(tlower, 1);
+scatter(rLocalGEV(:), rGlobalGEV(:), ms, 'ok');
+hold on
+plot([0, max(rGlobalGEV(:))], [0, max(rGlobalGEV(:))], '--r'); 
+xlabel(tlower, 'Local GEV median 1-hour maximum (Nm)');
+ylabel(tlower, 'Emulator median 1-hour maximum (Nm)');
+title('All simulated conditions');
+linkaxes(axs, 'xy');
+
+exportgraphics(tlower, 'gfx/CompareResponseScatter_LocalGEV.jpg') 
+exportgraphics(tlower, 'gfx/CompareResponseScatter_LocalGEV.pdf')

@@ -7,7 +7,7 @@ A.S = [];
 A.Tp = [];
 
 % Check length of dataset
-Nstorm = length(STORMSrnd);
+Nstorm = length(STORMSrnd) / 100;
 n=0;
 for i = 1 : Nstorm
     n = n + length(STORMSrnd{i}.data);
@@ -28,8 +28,8 @@ end
 A.V = data(:,1);
 A.Hs = data(:,2);
 A.S = data(:,3);
-Tz = sqrt((2 .* pi .* A.Hs) ./ (9.81 .* A.S));
-A.Tp = 1.2796 * Tz; % Assuming a JONSWAP spectrum with gamma = 3.3
+A.Tz = sqrt((2 .* pi .* A.Hs) ./ (9.81 .* A.S));
+A.Tp = 1.2796 * A.Tz; % Assuming a JONSWAP spectrum with gamma = 3.3
 n = length(A.V);
 A.t = 0 : years(1/(365.25*24)) : (n - 1) * years(1/(365.25*24));
 disp(['Converted ' num2str(year(A.t(end))) ' years']);
@@ -57,8 +57,10 @@ function vHsSStruct2Csv(Data, fileName)
     
     % Print the header
     fprintf(fid, '%s; ', 'time (YYYY-MM-DD-HH)'); % Time
-    fprintf(fid, '%s; ', '1-hour mean wind speed at 90 m (m/s)'); % Hs
+    fprintf(fid, '%s; ', '1-hour mean wind speed at 90 m (m/s)'); % V
     fprintf(fid, '%s; ', 'Significant wave height (m)'); % Hs
+    fprintf(fid, '%s; ', 'Zero-up-crossing period (s)'); % Tz
+    fprintf(fid, '%s; ', 'Spectral peak period (s)'); % Tz
     fprintf(fid, '%s\n', 'Steepness (-)'); % S
       
     for iLine = 1:length(time) % Loop through each time/value row
@@ -69,7 +71,9 @@ function vHsSStruct2Csv(Data, fileName)
        fprintf(fid, '%s; ', strTime); % Print the time string
        fprintf(fid, '%3.4f; ', Data.V(iLine)); % Print V
        fprintf(fid, '%3.4f; ', Data.Hs(iLine)); % Print Hs
-       fprintf(fid, '%3.4f\n', Data.S(iLine)); % Print Tz
+       fprintf(fid, '%3.4f; ', Data.Tz(iLine)); % Print Tz
+       fprintf(fid, '%3.4f; ', Data.Tp(iLine)); % Print Tp
+       fprintf(fid, '%3.4f\n', Data.S(iLine)); % Print S
     end
     fclose(fid) ;
 end
