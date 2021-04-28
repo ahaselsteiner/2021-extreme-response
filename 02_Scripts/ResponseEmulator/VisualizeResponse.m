@@ -30,7 +30,7 @@ box off
 nexttile
 plot(vv, R.sigma(vv, hss, tpp));
 ylabel('\sigma (Nm)');
-xlabel('v_{1hr} (m/s)');
+xlabel('Wind speed (m s^{-1})');
 box off
 %sgtitle(['hs = ' num2str(hss) ', tp = ' num2str(tpp)]);
 %sgtitle('Parameter values at h_s = 0 m');
