@@ -13,7 +13,7 @@ False          Echo            - Echo input data to <RootName>.ech (flag)
           1   CompElast       - Compute structural dynamics (switch) {1=ElastoDyn; 2=ElastoDyn + BeamDyn for blades}
           0   CompInflow      - Compute inflow wind velocities (switch) {0=still air; 1=InflowWind; 2=external from OpenFOAM}
           0   CompAero        - Compute aerodynamic loads (switch) {0=None; 1=AeroDyn v14; 2=AeroDyn v15}
-          1   CompServo       - Compute control and electrical-drive dynamics (switch) {0=None; 1=ServoDyn}
+          0   CompServo       - Compute control and electrical-drive dynamics (switch) {0=None; 1=ServoDyn}
           1   CompHydro       - Compute hydrodynamic loads (switch) {0=None; 1=HydroDyn}
           1   CompSub         - Compute sub-structural dynamics (switch) {0=None; 1=SubDyn; 2=External Platform MCKF}
           0   CompMooring     - Compute mooring system (switch) {0=None; 1=MAP++; 2=FEAMooring; 3=MoorDyn; 4=OrcaFlex}
@@ -26,7 +26,7 @@ False          Echo            - Echo input data to <RootName>.ech (flag)
 "../../Wind/Tp2/Hs5/0_5_8_IW.dat"    InflowFile      - Name of file containing inflow wind input parameters (quoted string)
 "../../Parked_AeroDyn15_WD30m.dat"    AeroFile        - Name of file containing aerodynamic input parameters (quoted string)
 "../../Parked_ServoDyn.dat"    ServoFile       - Name of file containing control and electrical-drive input parameters (quoted string)
-"../../HydroDyn/Tp2/Hs5/5_6-9_Hydro.dat"      HydroFile       - Name of file containing hydrodynamic input parameters (quoted string)
+"../../HydroDyn/Tp2/Hs5/0_5_8_HD.dat"      HydroFile       - Name of file containing hydrodynamic input parameters (quoted string)
 "../../SubDyn_Monopile_WaterDepth30m.dat"      SubFile         - Name of file containing sub-structural input parameters (quoted string)
 "unused"      MooringFile     - Name of file containing mooring system input parameters (quoted string)
 "unused"      IceFile         - Name of file containing ice input parameters (quoted string)

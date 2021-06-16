@@ -1,5 +1,5 @@
 ------- OpenFAST INPUT FILE -------------------------------------------
-Simulation: Tp2	Wind Velocity: 0mps 	Height of referenz velocity: 90m	AnalysisTime: 3630s;	Wave: Significant wave heigth: 11m     Sepctral peak period: 11.9s
+Simulation: Tp2	Wind Velocity: 0mps 	Height of referenz velocity: 90m	AnalysisTime: 3630s;	Wave: Significant wave heigth: 13m     Sepctral peak period: 12.9s
 ---------------------- SIMULATION CONTROL --------------------------------------
 False          Echo            - Echo input data to <RootName>.ech (flag)
 "FATAL"       AbortLevel      - Error level when simulation should abort (string) {"WARNING", "SEVERE", "FATAL"}
@@ -23,10 +23,10 @@ False          Echo            - Echo input data to <RootName>.ech (flag)
 "../../NRELOffshrBsline5MW_BeamDyn_Blade.dat"      BDBldFile(1)    - Name of file containing BeamDyn input parameters for blade 1 (quoted string)
 "../../NRELOffshrBsline5MW_BeamDyn_Blade.dat"      BDBldFile(2)    - Name of file containing BeamDyn input parameters for blade 2 (quoted string)
 "../../NRELOffshrBsline5MW_BeamDyn_Blade.dat"      BDBldFile(3)    - Name of file containing BeamDyn input parameters for blade 3 (quoted string)
-"../../Wind/Tp2/Hs11/0_11_11-9_IW.dat"    InflowFile      - Name of file containing inflow wind input parameters (quoted string)
+"../../Wind/Tp2/Hs13/0_13_12-9_IW.dat"    InflowFile      - Name of file containing inflow wind input parameters (quoted string)
 "../../Parked_AeroDyn15_WD30m.dat"    AeroFile        - Name of file containing aerodynamic input parameters (quoted string)
 "../../Parked_ServoDyn.dat"    ServoFile       - Name of file containing control and electrical-drive input parameters (quoted string)
-"../../HydroDyn/Tp2/Hs11/0_11_11-9_HD.dat"      HydroFile       - Name of file containing hydrodynamic input parameters (quoted string)
+"../../HydroDyn/Tp2/Hs13/0_13_12-9_HD.dat"      HydroFile       - Name of file containing hydrodynamic input parameters (quoted string)
 "../../SubDyn_Monopile_WaterDepth30m.dat"      SubFile         - Name of file containing sub-structural input parameters (quoted string)
 "unused"      MooringFile     - Name of file containing mooring system input parameters (quoted string)
 "unused"      IceFile         - Name of file containing ice input parameters (quoted string)
