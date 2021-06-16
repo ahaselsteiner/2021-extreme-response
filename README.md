@@ -10,5 +10,5 @@ figures. Due to GitHub's file size restriction two datasets are available at a d
 data repository: The simulation results and the artificial time series used in this study.
 The data repository is available at XXX.
 
-Note that we are aware that htis repository is not fully self-explanatory
-Reach out by email or by openening an issue in case you have any questions.
+We are aware that this repository is not fully self-explanatory
+Please reach out by email or by openening an issue in case you have any questions.
