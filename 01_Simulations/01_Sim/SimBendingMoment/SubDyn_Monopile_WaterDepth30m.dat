@@ -75,4 +75,14 @@ MemberID   NOutCnt    NodeCnt [NOutCnt=how many nodes to get output for [< 10]; 
 "M1N7MMxe, M1N7MMye"
 "M1N8MMxe, M1N8MMye"
 "M1N9MMxe, M1N9MMye"
+
+"M1N1MKxe, M1N1MKye"
+"M1N2MKxe, M1N2MKye"
+"M1N3MKxe, M1N3MKye"
+"M1N4MKxe, M1N4MKye"
+"M1N5MKxe, M1N5MKye"
+"M1N6MKxe, M1N6MKye"
+"M1N7MKxe, M1N7MKye"
+"M1N8MKxe, M1N8MKye"
+"M1N9MKxe, M1N9MKye"
 END of output channels and end of file. (the word "END" must appear in the first 3 columns of this line)

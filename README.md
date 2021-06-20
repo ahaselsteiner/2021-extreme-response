@@ -9,3 +9,6 @@ analysis of the study (folder "02_Scripts"), structural properties of the turbin
 figures. Due to GitHub's file size restriction two datasets are available at a dedicated 
 data repository: The simulation results and the artificial time series used in this study.
 The data repository is available at XXX.
+
+We are aware that this repository is not fully self-explanatory
+Please reach out by email or by openening an issue in case you have any questions.
