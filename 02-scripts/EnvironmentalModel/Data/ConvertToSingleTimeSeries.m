@@ -1,4 +1,4 @@
-%load('STORMS_RANDOM.mat');
+load('STORMS_RANDOM.mat');
 
 A.t = [];
 A.V = [];
