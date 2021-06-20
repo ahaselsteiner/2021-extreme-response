@@ -14,5 +14,6 @@ Due to GitHub's file size restriction two datasets are available at a dedicated
 data repository: openfast's results and time series of environmental conditions.
 The data repository is available at XXX.
 
-We are aware that this repository is not fully self-explanatory
+We are aware that this repository is not fully self-explanatory.
+
 Please reach out by email or by openening an issue in case you have any questions.
