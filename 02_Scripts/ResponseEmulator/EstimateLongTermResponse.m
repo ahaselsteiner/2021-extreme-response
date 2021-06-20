@@ -1,5 +1,7 @@
 DO_1D = false;
 DO_10M_WATER = false;
+DO_VARIOUS_QUANTILES = false;
+
 
 
 suffix = '_artificial1000';
@@ -13,22 +15,13 @@ s = A.S(1:n);
 tz = sqrt((2 .* pi .* hs) ./ (9.81 .* s));
 tp = 1.2796 * tz; % Assuming a JONSWAP spectrum with gamma = 3.3
 
-% suffix = '_coastDat2';
-% D = importDatasetDFromCSV();
-% half_year = 365/2 * 24;
-% t = D.t(half_year : end);
-% v1hr = D.V(half_year : end);
-% hs = D.Hs(half_year : end);
-% tz = D.Tz(half_year : end);
-% tp = 1.2796 * tz; % Assuming a JONSWAP spectrum with gamma = 3.3
-
 if DO_10M_WATER
     R = ResponseEmulator10mWaterDepth;
     suffix = [suffix '_10m'];
-    moment_label = 'Stochastic 10 m moment (Nm)';
+    moment_label = 'Stochastic 10-m moment (Nm)';
 else
     R = ResponseEmulator;
-    moment_label = 'Stochastic 30 m moment (Nm)';
+    moment_label = 'Stochastic 30-m moment (Nm)';
 end
 
 n_short = 1000;
@@ -161,38 +154,62 @@ xlabel('1-hour wind speed (m s^{-1})')
 ylabel('Significant wave height (m)')
 
 axs(5) = nexttile([2 1]);
-hold on
-[F, x] = ecdf(block_maxima);
-plot(x50_am_emp, 1/50, 'ob','markersize', 10, 'LineWidth',2);
+axs(5) = exceedancePlot(block_maxima, 1, '-k.', axs(5));
 if DO_10M_WATER
-    temp = 'b_{50}';
+    temp = '50-year extreme, b_{50}';
 else
-    temp = 'r_{50}';
+    temp = '50-year extreme, r_{50}';
 end
-text(x50_am_emp, 1/35, temp, 'color', 'blue');
-plot([min(block_maxima), x50_am_emp], [1 / 50, 1 / 50], '--k');
-plot(x, 1 - F, '.-k');
-set(gca, 'YScale', 'log')
+plot(x50_am_emp, 1/50, 'ob','markersize', 10, 'LineWidth',2, 'displayname', temp);
 current_xlims = xlim;
 xlim([min(block_maxima), current_xlims(2)]);
 ylim([0.5*10^(-3), 1]);
 xlabel(moment_label);
-ylabel('Annual exceedance probability');
+ylabel('Annual exceedance probability (-)');
 
 layout.Padding = 'compact';
 exportgraphics(layout, ['gfx/ResponseTimeSeries' suffix '.jpg']) 
-exportgraphics(layout, ['gfx/ResponseTimeSeries' suffix '.pdf']) 
 
-for i = 1 : length(axs)
-    exportgraphics(axs(i), ['gfx/ResponseTimeSeries' suffix '_axs' num2str(i) '.pdf']) 
+for i = 1 : 2
+    exportgraphics(axs(i), ['gfx/ResponseTimeSeries' suffix '_axs' ...
+        num2str(i) '.jpg'], 'resolution', 300) 
 end
 
+% Export ax3 and ax5 as own figure to control size better.
+figure('Position', [100 100 300 300])
+ax = nexttile();
+hold on
+ms_am = 15;
+scatter(v1hr, hs, 2, [0.5 0.5 0.5])
+scatter(v1hr(block_max_i), hs(block_max_i), ms_am, block_maxima, 'filled');
+c = colorbar;
+c.Label.String = [moment_label(1:end-5) ' of annual maxima (Nm)'];
+box off
+set(gca, 'XLim', [0, get(gca, 'XLim') * [0; 1]])
+set(gca, 'YLim', [0, get(gca, 'YLim') * [0; 1]])
+xlabel('1-hour wind speed (m s^{-1})') 
+ylabel('Significant wave height (m)')
+exportgraphics(ax, ['gfx/ResponseTimeSeries' suffix '_axs3.jpg'], 'Resolution', 300) 
+
+figure('Position', [100 100 300 300])
+ax = nexttile();
+ax = exceedancePlot(block_maxima, 1, '-k.', ax);
+plot(x50_am_emp, 1/50, 'ob','markersize', 8, 'LineWidth',2, 'displayname', temp);
+current_xlims = xlim;
+xlim([min(block_maxima), current_xlims(2)]);
+ylim([0.5*10^(-3), 1]);
+xlabel(moment_label);
+ylabel('Annual exceedance probability (-)');
+exportgraphics(ax, ['gfx/ResponseTimeSeries' suffix '_axs5.pdf']) 
 
 %x1_am = pd.icdf(exp(-1));
 
 
-
-response_quantiles = [0.5 0.8 0.9 0.99];
+if DO_VARIOUS_QUANTILES
+    response_quantiles = [0.5 0.8 0.9 0.99];
+else
+    response_quantiles = [0.5];
+end
 load('hdc_2d_maxsteepness.csv')
 HDC2d_maxsteep.v = hdc_2d_maxsteepness(:,1);
 HDC2d_maxsteep.hs = hdc_2d_maxsteepness(:,2);
@@ -236,13 +253,13 @@ for i = 1 : size(V, 1)
     end
 end
 
-if DO_10M_WATER
+if DO_VARIOUS_QUANTILES
     figure('Position', [100 100 1400 800])
     layout = tiledlayout(3, length(response_quantiles));
 else
-    figure('Position', [100 100 1200 350])
+    figure('Position', [80 50 350 950])
     response_quantiles = response_quantiles(1);
-    layout = tiledlayout(1, 3);
+    layout = tiledlayout(3, 1);
 end
 axs = gobjects(6,1);
 caxislim = [0.4 1.1];
@@ -297,7 +314,12 @@ for i = 1 : length(response_quantiles)
         title([num2str(response_quantile) '-quantile']);
     end
     set(gca, 'Layer', 'top')    
-    
+    if DO_10M_WATER
+        title('10-m moment');
+    else
+        title('30-m moment');
+    end
+
     axs(length(response_quantiles) + i) = nexttile(length(response_quantiles) + i);
     hold on
     x = [0 25 25 0];

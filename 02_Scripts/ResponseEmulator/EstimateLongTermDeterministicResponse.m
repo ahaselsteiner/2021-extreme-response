@@ -24,10 +24,10 @@ tp = 1.2796 * tz; % Assuming a JONSWAP spectrum with gamma = 3.3
 if DO_10M_WATER
     R = ResponseEmulator10mWaterDepth;
     suffix = [suffix '_10m'];
-    moment_label = 'Deterministic 10 m moment(Nm)';
+    moment_label = 'Deterministic 10-m moment (Nm)';
 else
     R = ResponseEmulator;
-    moment_label = 'Deterministic 30 m moment (Nm)';
+    moment_label = 'Deterministic 30-m moment (Nm)';
 end
 
 n_short = 1000;
@@ -194,7 +194,7 @@ ms_am = 25;
 scatter(v1hr, hs, 2, [0.5 0.5 0.5])
 scatter(v1hr(block_max_i), hs(block_max_i), ms_am, block_maxima, 'filled');
 c = colorbar;
-c.Label.String = [moment_label(1:end-5) ' of annual extreme (Nm)'];
+c.Label.String = [moment_label(1:end-5) ' of annual maxima (Nm)'];
 box off
 set(gca, 'XLim', [0, get(gca, 'XLim') * [0; 1]])
 set(gca, 'YLim', [0, get(gca, 'YLim') * [0; 1]])
@@ -207,7 +207,7 @@ sp = (2 * pi * hs(block_max_i)) ./ (9.81 * tp(block_max_i).^2);
 scatter(v1hr, hs, 2, [0.5 0.5 0.5])
 scatter(v1hr(block_max_i), hs(block_max_i), ms_am, sp, 'filled');
 c = colorbar;
-c.Label.String = 'Steepness of annual extreme (-)';
+c.Label.String = 'Steepness of annual maxima (-)';
 box off
 set(gca, 'XLim', [0, get(gca, 'XLim') * [0; 1]])
 set(gca, 'YLim', [0, get(gca, 'YLim') * [0; 1]])
@@ -215,31 +215,54 @@ xlabel('1-hour wind speed (m s^{-1})')
 ylabel('Significant wave height (m)')
 
 axs(5) = nexttile([2 1]);
-hold on
-[F, x] = ecdf(block_maxima);
-plot(x50_am_emp, 1/50, 'ob','markersize', 10, 'LineWidth',2);
+axs(5) = exceedancePlot(block_maxima, 1, '-k.', axs(5));
 if DO_10M_WATER
-    temp = 'b_{50}';
+    temp = '50-year extreme, b_{50}';
 else
-    temp = 'r_{50}';
+    temp = '50-year extreme, r_{50}';
 end
-text(x50_am_emp, 1/35, temp, 'color', 'blue');
-plot([min(block_maxima), x50_am_emp], [1 / 50, 1 / 50], '--k');
-plot(x, 1 - F, '.-k');
-set(gca, 'YScale', 'log')
+plot(x50_am_emp, 1/50, 'ob','markersize', 10, 'LineWidth',2, 'displayname', temp);
 current_xlims = xlim;
 xlim([min(block_maxima), current_xlims(2)]);
 ylim([0.5*10^(-3), 1]);
 xlabel(moment_label);
-ylabel('Annual exceedance probability');
+ylabel('Annual exceedance probability (-)');
 
 layout.Padding = 'compact';
 exportgraphics(layout, ['gfx/ResponseTimeSeriesDeterministic' suffix '.jpg']) 
-exportgraphics(layout, ['gfx/ResponseTimeSeriesDeterministic' suffix '.pdf']) 
 
-for i = 1 : length(axs)
-    exportgraphics(axs(i), ['gfx/ResponseTimeSeriesDeterministic' suffix '_axs' num2str(i) '.pdf']) 
+file_types = {'.jpg', '.jpg'};
+for i = 1 : 2
+    exportgraphics(axs(i), ['gfx/ResponseTimeSeriesDeterministic' suffix ...
+        '_axs' num2str(i) file_types{i}], 'Resolution', 300) 
 end
+
+% Export ax3 and ax5 as own figure to control size better.
+figure('Position', [100 100 300 300])
+ax = nexttile();
+hold on
+ms_am = 15;
+scatter(v1hr, hs, 2, [0.5 0.5 0.5])
+scatter(v1hr(block_max_i), hs(block_max_i), ms_am, block_maxima, 'filled');
+c = colorbar;
+c.Label.String = [moment_label(1:end-5) ' of annual maxima (Nm)'];
+box off
+set(gca, 'XLim', [0, get(gca, 'XLim') * [0; 1]])
+set(gca, 'YLim', [0, get(gca, 'YLim') * [0; 1]])
+xlabel('1-hour wind speed (m s^{-1})') 
+ylabel('Significant wave height (m)')
+exportgraphics(ax, ['gfx/ResponseTimeSeriesDeterministic' suffix '_axs3.jpg'], 'Resolution', 300) 
+
+figure('Position', [100 100 300 300])
+ax = nexttile();
+ax = exceedancePlot(block_maxima, 1, '-k.', ax);
+plot(x50_am_emp, 1/50, 'ob','markersize', 8, 'LineWidth',2, 'displayname', temp);
+current_xlims = xlim;
+xlim([min(block_maxima), current_xlims(2)]);
+ylim([0.5*10^(-3), 1]);
+xlabel(moment_label);
+ylabel('Annual exceedance probability (-)');
+exportgraphics(ax, ['gfx/ResponseTimeSeriesDeterministic' suffix '_axs5.pdf']) 
 
 
 load('hdc_2d_maxsteepness.csv')
@@ -287,8 +310,8 @@ for i = 1 : size(V, 1)
 end
 
 
-figure('Position', [100 100 1200 350])
-layout = tiledlayout(1, 3);
+figure('Position', [80 50 350 950])
+layout = tiledlayout(3, 1);
 caxlimits = [0.4 1.1];
 ax1 = nexttile;
 hold on
@@ -322,6 +345,12 @@ text(IFORM_median.v(maxi), IFORM_median.hs(maxi), txt);
 txt = [num2str(max_hdc, '%4.3f') ' \rightarrow'];
 text(HDC2d_median.v(maxi), HDC2d_median.hs(maxi), txt, 'HorizontalAlignment','right')
 set(gca, 'Layer', 'top')
+%ylabel('2D, median steepness')
+if strcmp(moment_label, 'Stochastic 10 m moment (Nm)')
+    title('10-m moment');
+elseif strcmp(moment_label, 'Stochastic 30 m moment (Nm)')
+    title('30-m moment');
+end
 
 ax2 = nexttile;
 hold on
@@ -350,7 +379,7 @@ text(IFORM_maxsteep.v(maxi), IFORM_maxsteep.hs(maxi), txt);
 txt = [num2str(max_hdc, '%4.3f') ' \rightarrow'];
 text(HDC2d_maxsteep.v(maxi), HDC2d_maxsteep.hs(maxi), txt, 'HorizontalAlignment','right')
 set(gca, 'Layer', 'top')
-
+%ylabel('2D, high steepness')
 
 ax3 = nexttile;
 hold on
@@ -373,6 +402,7 @@ cb.Label.String = [moment_label(15:end-5) ' / ' num2str(x50_am_emp, '%.3G') ' Nm
 cb.Layout.Tile = 'east';
 linkaxes([ax1 ax2 ax3],'xy')
 %layout.Padding = 'tight';
+%ylabel('3D contour')
 
 exportgraphics(layout, ['gfx/ResponseAtContourDeterministic' suffix '.jpg']) 
 exportgraphics(layout, ['gfx/ResponseAtContourDeterministic' suffix '.pdf']) 

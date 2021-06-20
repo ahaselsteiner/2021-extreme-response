@@ -15,7 +15,7 @@ load('hdc_2d_maxsteepness.csv')
 HDC.v = hdc_2d_maxsteepness(:,1);
 HDC.hs = hdc_2d_maxsteepness(:,2);
 
-figure('Position', [100 100 760 350])
+fig = figure('Position', [100 100 760 350])
 sz = 40;
 layout = tiledlayout(1,2);
 nexttile
@@ -94,6 +94,7 @@ ylabel('Steepness at highest 1% h_s (-)');
 
 layout.Padding = 'compact';
 
+fig.Renderer='Painters';
 exportgraphics(layout, 'gfx/SteepnessAt2dContour.jpg') 
 exportgraphics(layout, 'gfx/SteepnessAt2dContour.pdf') 
 

@@ -5,7 +5,7 @@ contour_lw = 1;
 
 [T, H] = meshgrid(t, h);
 
-figure('Position', [100 100 1200 600])
+fig = figure('Position', [100 100 1200 600]);
 layout = tiledlayout(2,4);
 windI = [12 16 20 25 26 31 36 41] ;
 Cv = [];
@@ -51,6 +51,7 @@ ylabel(layout, 'Significant wave height (m)')
 sgtitle(['3D contour, \alpha = ' num2str(alpha, '%2.2e')]);
 
 %layout.Padding = 'compact';
+fig.Renderer='Painters';
 exportgraphics(layout, 'gfx/3DcontourTp.jpg') 
 exportgraphics(layout, 'gfx/3DcontourTp.pdf') 
 writematrix([Cv Chs Ctp1],'Data/hdc_3d.csv') 
@@ -102,7 +103,7 @@ C_Sz_SMedian_1year = medianSteepnessAtV(C_iform_v_1year);
 C_iform_tp2_1year = sqrt(2 * pi * C_iform_hs_1year ./ (9.81 * C_Sz_SMedian_1year));
 writematrix([C_iform_v_1year' C_iform_hs_1year' C_iform_tp2_1year'],'Data/iform_2d_mediansteepness_1year.csv') 
 
-figure('Position', [100 100 500 400])
+figure('Position', [100 100 400 360])
 layout = tiledlayout(1,1);
 nexttile
 hold on
@@ -123,6 +124,8 @@ cb = colorbar();
 cb.Layout.Tile = 'east';
 cb.Label.String = 'Count (-)';
 set(gca,'ColorScale','log')
+xlim([0 45]);
+ylim([0 20]);
 xlabel('1-hour wind speed (m s^{-1})');
 ylabel('Significant wave height (m)')
 exportgraphics(layout, 'gfx/2Dcontours.jpg') 

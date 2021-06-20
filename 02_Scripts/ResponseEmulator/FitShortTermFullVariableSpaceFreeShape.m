@@ -1,12 +1,11 @@
 SHAPE = 'free';
 N_BLOCKS = 60;
 
-%load('OvrDataEmulatorDiffSeed');
+load('OvrDataEmulatorDiffSeed');
 maxr = max(Ovr,[],4);
 gridSize = size(maxr);
 maxr(maxr==0)=NaN;
 currentNrEntries = sum(sum(sum(maxr>0)))
-load 'CalmSeaComplete.mat'; % its variable v will be overwritten in next call
 FormatConventionForMomentTimeSeries % to get the variables: v, hs, tp(hs, idx)
 
 
@@ -19,24 +18,12 @@ colorsTp = {c1, c2, c3, c4};
 darker = 0.6;
 darker_colors = [c1; c2; c3; c4] * darker;
 vid = 16;
-hsid = 2;
+hsid = 1;
+
 figure('Position', [100 100 900 900])
 subplot(6, 1, 1:2);
-
-OvrAllSeeds = [Ovr_S1; Ovr_S2; Ovr_S3; Ovr_S4; Ovr_S5; Ovr_S6];
-OvrAllSeeds = OvrAllSeeds(:, 1:18);
 hold on
 ms = 50;
-vv = [3:2:25 26 30 35 40 45 50];
-for i = 1 : 6
-    h = scatter(vv, OvrAllSeeds(i,:), ms, 'MarkerFaceColor', [0.5 0.5 0.5], ...
-    'MarkerFaceAlpha', 0.5, 'MarkerEdgeColor', 'k', 'DisplayName', 'Hs = 0 m');
-    if i > 1 
-        set(h, 'HandleVisibility', 'off')
-    end
-end
-hold on
-
 
 for i = 1 : 4
     h = scatter(v, maxr(:, hsid, i), ms, 'MarkerFaceColor', colorsTp{i}, ...
@@ -260,19 +247,21 @@ exportgraphics(gcf, 'gfx/ModelFocusTp.pdf')
 
 
 figure;
+id_highest_pp = 13;
+id_lowest_parked = 14;
 t = tiledlayout(1, 2);
 ax1 = nexttile;
 hold on
-plot([v(1:14), v(1:14), v(1:14), v(1:14)], [xis(1, 1:14, 1), xis(1, 1:14, 2), xis(1, 1:14, 3), xis(1, 1:14, 4)], 'o', 'color', 'k');
+plot([v(1:id_highest_pp), v(1:id_highest_pp), v(1:id_highest_pp), v(1:id_highest_pp)], [xis(1, 1:id_highest_pp, 1), xis(1, 1:id_highest_pp, 2), xis(1, 1:id_highest_pp, 3), xis(1, 1:id_highest_pp, 4)], 'o', 'color', 'k');
 hold on
-plot(v(1:14), mean([xis(1, 1:14, 1); xis(1, 1:14, 2); xis(1, 1:14, 3); xis(1, 1:14, 4)]), '-k');
+plot(v(1:id_highest_pp), mean([xis(1, 1:id_highest_pp, 1); xis(1, 1:id_highest_pp, 2); xis(1, 1:id_highest_pp, 3); xis(1, 1:id_highest_pp, 4)]), '-k');
 vv = [0:0.1:25];
 %k = -0.1 - 0.65 ./ (1 + 0.3 .* (vv - 12).^2) + 0.3 ./ (1 + 0.1 .* (vv - 18).^2);
 %plot(vv, k)
 X = [vv', zeros(length(vv), 2)];
 plot(vv, predict(mdlXi, X))
 ax2 = nexttile;
-plot([v(15:19), v(15:19), v(15:19), v(15:19)], [xis(1, 15:19, 1), xis(1, 15:19, 2), xis(1, 15:19, 3), xis(1, 15:19, 4)], 'o', 'color', 'k');
+plot([v(id_lowest_parked:end), v(id_lowest_parked:end), v(id_lowest_parked:end), v(id_lowest_parked:end)], [xis(1, id_lowest_parked:end, 1), xis(1, id_lowest_parked:end, 2), xis(1, id_lowest_parked:end, 3), xis(1, id_lowest_parked:end, 4)], 'o', 'color', 'k');
 hold on
 plot([26, 45], [-0.22, -0.22]);
 linkaxes([ax1 ax2],'y')
@@ -285,11 +274,11 @@ figure;
 t = tiledlayout(1, 2);
 ax1 = nexttile;
 hold on
-plot([v(1:14), v(1:14), v(1:14), v(1:14)], [mus(1, 1:14, 1), mus(1, 1:14, 2), mus(1, 1:14, 3), mus(1, 1:14, 4)], 'o', 'color', 'k');
+plot([v(1:id_highest_pp), v(1:id_highest_pp), v(1:id_highest_pp), v(1:id_highest_pp)], [mus(1, 1:id_highest_pp, 1), mus(1, 1:id_highest_pp, 2), mus(1, 1:id_highest_pp, 3), mus(1, 1:id_highest_pp, 4)], 'o', 'color', 'k');
 hold on
-plot(v(1:14), mean([mus(1, 1:14, 1); mus(1, 1:14, 2); mus(1, 1:14, 3); mus(1, 1:14, 4)]), '-k');
-X = [v(2:14)', zeros(13, 2)];
-ymuHs0 = mean([mus(1, 2:14, 1); mus(1, 2:14, 2); mus(1, 2:14, 3); mus(1, 2:14, 4)], 'omitnan');
+plot(v(1:id_highest_pp), mean([mus(1, 1:id_highest_pp, 1); mus(1, 1:id_highest_pp, 2); mus(1, 1:id_highest_pp, 3); mus(1, 1:id_highest_pp, 4)]), '-k');
+X = [v(1:id_highest_pp)', zeros(id_highest_pp, 2)];
+ymuHs0 = mean([mus(1, 1:id_highest_pp, 1); mus(1, 1:id_highest_pp, 2); mus(1, 1:id_highest_pp, 3); mus(1, 1:id_highest_pp, 4)], 'omitnan');
 modelfunMuHs0 = @(b, x) b(1) .* x(:,1) + b(2) ./ (1 + b(3) * (x(:,1) - 11.6).^2) - b(2) ./ (1 + b(3) * (0 - 11.6).^2)
 beta0 = [10^6 10^6 0.02];
 mdlMuHs0 = fitnlm(X, ymuHs0, modelfunMuHs0, beta0)
@@ -297,9 +286,9 @@ vv = [0:0.1:25]';
 X = [vv, zeros(length(vv), 2)];
 plot(vv, predict(mdlMuHs0, X))
 ax2 = nexttile;
-plot([v(15:19), v(15:19), v(15:19), v(15:19)], [mus(1, 15:19, 1), mus(1, 15:19, 2), mus(1, 15:19, 3), mus(1, 15:19, 4)], 'o', 'color', 'k');
+plot([v(id_lowest_parked:end), v(id_lowest_parked:end), v(id_lowest_parked:end), v(id_lowest_parked:end)], [mus(1, id_lowest_parked:end, 1), mus(1, id_lowest_parked:end, 2), mus(1, id_lowest_parked:end, 3), mus(1, id_lowest_parked:end, 4)], 'o', 'color', 'k');
 hold on
-plot(v(15:19)', predict(mdlMu, [v(15:19)', zeros(5, 2)]))
+plot(v(id_lowest_parked:end)', predict(mdlMu, [v(id_lowest_parked:end)', zeros((length(v) - id_lowest_parked + 1), 2)]))
 linkaxes([ax1 ax2],'y')
 t.XLabel.String = '1-hour wind speed (m s^{-1})';
 t.YLabel.String = '\mu (Nm)';
@@ -309,13 +298,13 @@ figure;
 t = tiledlayout(1, 2);
 ax1 = nexttile;
 hold on
-plot([v(1:14), v(1:14), v(1:14), v(1:14)], [sigmas(1, 1:14, 1), sigmas(1, 1:14, 2), sigmas(1, 1:14, 3), sigmas(1, 1:14, 4)], 'o', 'color', 'k');
-plot(v(1:14), mean([sigmas(1, 1:14, 1); sigmas(1, 1:14, 2); sigmas(1, 1:14, 3); sigmas(1, 1:14, 4)]), '-k');
+plot([v(1:id_highest_pp), v(1:id_highest_pp), v(1:id_highest_pp), v(1:id_highest_pp)], [sigmas(1, 1:id_highest_pp, 1), sigmas(1, 1:id_highest_pp, 2), sigmas(1, 1:id_highest_pp, 3), sigmas(1, 1:id_highest_pp, 4)], 'o', 'color', 'k');
+plot(v(1:id_highest_pp), mean([sigmas(1, 1:id_highest_pp, 1); sigmas(1, 1:id_highest_pp, 2); sigmas(1, 1:id_highest_pp, 3); sigmas(1, 1:id_highest_pp, 4)]), '-k');
 plot(vv, predict(mdlSigma, X))
 ax2 = nexttile;
-plot([v(15:19), v(15:19), v(15:19), v(15:19)], [sigmas(1, 15:19, 1), sigmas(1, 15:19, 2), sigmas(1, 15:19, 3), sigmas(1, 15:19, 4)], 'o', 'color', 'k');
+plot([v(id_lowest_parked:end), v(id_lowest_parked:end), v(id_lowest_parked:end), v(id_lowest_parked:end)], [sigmas(1, id_lowest_parked:end, 1), sigmas(1, id_lowest_parked:end, 2), sigmas(1, id_lowest_parked:end, 3), sigmas(1, id_lowest_parked:end, 4)], 'o', 'color', 'k');
 hold on
-plot(v(15:19)', predict(mdlSigma, [v(15:19)', zeros(5, 2)]))
+plot(v(id_lowest_parked:end)', predict(mdlSigma, [v(id_lowest_parked:end)', zeros(5, 2)]))
 linkaxes([ax1 ax2],'y')
 t.XLabel.String = '1-hour wind speed (m s^{-1})';
 t.YLabel.String = '\sigma (Nm)';
@@ -605,16 +594,16 @@ for tpid = 1 : 4
     rGlobalGEVSlice = rGlobalGEV(:,:,tpid);
     axs(1, tpid + 1) = nexttile(tupper, tpid + 1);
     hold on
-    scatter(robserved(:), rGlobalGEVSlice(:), ms, 'ok');
-    plot([0, max(rGlobalGEVSlice(:))], [0, max(rGlobalGEVSlice(:))], '--r'); 
-    title(['t_{p' num2str(tpid) '}']);
+    scatter(robserved(:) / 10^6, rGlobalGEVSlice(:) / 10^6, ms, 'ok');
+    plot([0, max(rGlobalGEVSlice(:)) / 10^6], [0, max(rGlobalGEVSlice(:)) / 10^6], '--r'); 
+    title(['{\it t_{p' num2str(tpid) '}}']);
 end
 axs(1, 1) = nexttile(tupper, 1);
-scatter(robserved_all, rGlobalGEV(:), ms, 'ok');
+scatter(robserved_all / 10^6, rGlobalGEV(:) / 10^6, ms, 'ok');
 hold on
-plot([0, max(rGlobalGEV(:))], [0, max(rGlobalGEV(:))], '--r');
-xlabel(tupper, '1-hour maximum in multiphysics simulation (Nm)');
-ylabel(tupper, 'Emulator median 1-hour maximum (Nm)');
+plot([0, max(rGlobalGEV(:)) / 10^6], [0, max(rGlobalGEV(:)) / 10^6], '--r');
+xlabel(tupper, '1-hour maximum in multiphysics simulation (MNm)');
+ylabel(tupper, 'Emulator median 1-hour max (MNm)');
 title('All simulated conditions');
 linkaxes(axs, 'xy');
 exportgraphics(tupper, 'gfx/CompareResponseScatter_Realization.jpg') 
@@ -628,16 +617,16 @@ for tpid = 1 : 4
     rLocalGEVSlice = rLocalGEV(:,:,tpid);
     rGlobalGEVSlice = rGlobalGEV(:,:,tpid);
     hold on
-    scatter(rLocalGEVSlice(:), rGlobalGEVSlice(:), ms, 'ok');
-    plot([0, max(rGlobalGEVSlice(:))], [0, max(rGlobalGEVSlice(:))], '--r'); 
-    title(['t_{p' num2str(tpid) '}']);
+    scatter(rLocalGEVSlice(:) / 10^6, rGlobalGEVSlice(:) / 10^6, ms, 'ok');
+    plot([0, max(rGlobalGEVSlice(:)) / 10^6], [0, max(rGlobalGEVSlice(:)) / 10^6], '--r'); 
+    title(['{\it t_{p' num2str(tpid) '}}']);
 end
 axs(2, 1) = nexttile(tlower, 1);
-scatter(rLocalGEV(:), rGlobalGEV(:), ms, 'ok');
+scatter(rLocalGEV(:) / 10^6, rGlobalGEV(:) / 10^6, ms, 'ok');
 hold on
-plot([0, max(rGlobalGEV(:))], [0, max(rGlobalGEV(:))], '--r'); 
-xlabel(tlower, 'Local GEV median 1-hour maximum (Nm)');
-ylabel(tlower, 'Emulator median 1-hour maximum (Nm)');
+plot([0, max(rGlobalGEV(:)) / 10^6], [0, max(rGlobalGEV(:)) / 10^6], '--r'); 
+xlabel(tlower, 'Local GEV median 1-hour maximum (MNm)');
+ylabel(tlower, 'Emulator median 1-hour max (MNm)');
 title('All simulated conditions');
 linkaxes(axs, 'xy');
 

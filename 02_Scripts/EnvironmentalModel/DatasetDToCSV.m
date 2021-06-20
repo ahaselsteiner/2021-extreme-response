@@ -17,6 +17,16 @@ alpha = 0.14; % as for normal wind speed in IEC 61400-3-1 p. 35
 V10hub = Dc.V .* (hubHeight/10)^alpha;
 Dc.V1h_hub = V10hub * 0.95; % 61400-3-1:2019 p. 34
 
+fig = figure('Position', [100 100 300 250]);
+
+plot(Dc.V1h_hub, Dc.Hs, '.k');
+xlim([0 45]);
+ylim([0 15]);
+ylabel('Significant wave height (m)');
+xlabel('1-hour mean wind speed (m/s)');
+box off
+exportgraphics(fig, 'gfx/WESC_dataset_raw.jpg') 
+
 vHsTzStruct2Csv(Dc, 'DForNREL.txt');
 
 

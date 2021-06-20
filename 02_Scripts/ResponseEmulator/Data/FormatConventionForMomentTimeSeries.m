@@ -1,4 +1,4 @@
-% ** Explanation about the file format: **
+% Explanation about the format of the .mat time series file:
 %
 % 1. dimension = wind, 2. dimension = hs, 3. dimension = tp
 % M(1,3,4,:) = 'Response time series (as a double vector)';
@@ -16,5 +16,3 @@ tp2 = @(hs) sqrt(2 * pi * hs / (9.81 * 1/20));
 tp3 = @(hs) sqrt(2 * pi * hs / (9.81 * 1/20)) + 1 ./ (1 + sqrt(hs + 2)) * 8;
 tp4 = @(hs) sqrt(2 * pi * hs / (9.81 * 1/20)) + 1 ./ (1 + sqrt(hs + 2)) * 20;
 tp = @(hs, idx) (idx == 1) .* tp1(hs) + (idx == 2) .* tp2(hs) + (idx ==3) .* tp3(hs) + (idx ==4) .* tp4(hs);
-
-% ** End of explanation. **
