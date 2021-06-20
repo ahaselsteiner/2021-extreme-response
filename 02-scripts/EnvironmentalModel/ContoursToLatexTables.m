@@ -1,4 +1,3 @@
-
 load('iform_2d_mediansteepness.csv')
 IFORM_median.v = iform_2d_mediansteepness(:,1);
 IFORM_median.hs = iform_2d_mediansteepness(:,2);
