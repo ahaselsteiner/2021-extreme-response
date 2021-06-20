@@ -1,7 +1,7 @@
 % This script was used to find the relationship for Tp|Hs,V of the 
 % 2D contours. It generats a figure that is shown in the paper.
 
-load('ArtificialTimeSeries503years.mat')
+load('ArtificialTimeSeries1000years.mat')
 
 G = 9.81;
 TZ_TO_TP = 1.2796;
