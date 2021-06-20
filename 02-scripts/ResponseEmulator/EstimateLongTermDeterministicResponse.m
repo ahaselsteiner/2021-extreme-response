@@ -2,12 +2,11 @@ DO_1D = false;
 DO_10M_WATER = true;
 
 suffix = '_artificial1000';
-load('ArtificialTimeSeries5039years.mat');
-n = 365.25 * 24 * 1000;
-t = A.t(1:n);
-v1hr = A.V(1:n);
-hs = A.Hs(1:n);
-s = A.S(1:n);
+load('ArtificialTimeSeries1000years.mat');
+t = A.t;
+v1hr = A.V;
+hs = A.Hs;
+s = A.S;
 tz = sqrt((2 .* pi .* hs) ./ (9.81 .* s));
 tp = 1.2796 * tz; % Assuming a JONSWAP spectrum with gamma = 3.3
 
