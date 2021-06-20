@@ -1,4 +1,4 @@
-The following files from the data repository should be placed in this folder:
+The following files from the data repository, which is available at XXX, should be placed in this folder:
  * artificial_time_series_50years.txt
  * artificial_time_series_1000years.txt
  * artificial_time_series_5039years.txt
