@@ -18,10 +18,10 @@ tp = 1.2796 * tz; % Assuming a JONSWAP spectrum with gamma = 3.3
 if DO_10M_WATER
     R = ResponseEmulator10mWaterDepth;
     suffix = [suffix '_10m'];
-    moment_label = 'Stochastic 10-m moment (Nm)';
+    moment_label = 'Stochastic 10 m moment (MNm)';
 else
     R = ResponseEmulator;
-    moment_label = 'Stochastic 30-m moment (Nm)';
+    moment_label = 'Stochastic 30 m moment (MNm)';
 end
 
 n_short = 1000;
@@ -92,14 +92,14 @@ rvs_am_emp = quantile(block_maxima, 1 - 1 ./ rps);
 rvs_all_emp = quantile(r, 1 - 1 ./ (rps * 365.25 * 24));
 fig = figure('Position', [100 100 350 350]);
 hold on
-plot(rps, rvs_am_emp, '-b');
-plot(rps, rvs_all_emp, '--r');
-plot(50, x50_am_emp, 'ok', 'markerfacecolor', 'blue');
-plot(50, x50_all_emp, 'ok', 'markerfacecolor', 'red');
-text(50, 1.03 * x50_all_emp, [num2str((x50_all_emp / x50_am_emp - 1) * 100, '%4.1f') '% too high'], ...
+plot(rps, rvs_am_emp / 10^6, '-b');
+plot(rps, rvs_all_emp / 10^6, '--r');
+plot(50, x50_am_emp / 10^6, 'ok', 'markerfacecolor', 'blue');
+plot(50, x50_all_emp / 10^6, 'ok', 'markerfacecolor', 'red');
+text(50, 1.03 * x50_all_emp / 10^6, [num2str((x50_all_emp / x50_am_emp - 1) * 100, '%4.1f') '% too high'], ...
     'fontsize', 8, 'horizontalalignment', 'center', 'color', 'red');
 xlabel('Return period (years)');
-ylabel('Return value (Nm)');
+ylabel('Return value (MNm)');
 legend('Annual maxima', 'Complete time series', 'box', 'off', 'location', 'southeast');
 exportgraphics(fig, 'gfx/SerialCorrelation.jpg') 
 exportgraphics(fig, 'gfx/SerialCorrelation.pdf') 
@@ -110,30 +110,31 @@ layout = tiledlayout(4,3);
 axs = gobjects(5,1); 
 axs(1) = nexttile([1 3]);
 yyaxis left 
-plot(t(1:n_short), r_short);
+plot(days(t(1:n_short)), r_short / 10^6);
 ylabel(moment_label)
-ylim([0 2*10^8])
+ylim([0 200])
 yyaxis right 
-plot(t(1:n_short), v1hr(1:n_short));
+plot(days(t(1:n_short)), v1hr(1:n_short) / 10^6);
+xlabel('Time (days)');
 ylabel('1-hour wind speed (m s^{-1})')
-xlim([t(1) t(n_short)]);
+xlim(days([t(1) t(n_short)]));
 box off
 
 axs(2) = nexttile([1 3]);
 hold on
-plot(t(1:n), r);
-plot(t(block_max_i), r(block_max_i), 'xr');
+plot(years(t(1:n)), r / 10^6);
+plot(years(t(block_max_i)), r(block_max_i) / 10^6, 'xr');
 ylabel(moment_label)
-xlabel('Time (s)');
-ylim([0 5*10^8])
+xlabel('Time (years)');
+ylim([0 500])
 
 axs(3) = nexttile([2 1]);
 hold on
 ms_am = 25;
 scatter(v1hr, hs, 2, [0.5 0.5 0.5])
-scatter(v1hr(block_max_i), hs(block_max_i), ms_am, block_maxima, 'filled');
+scatter(v1hr(block_max_i), hs(block_max_i), ms_am, block_maxima / 10^6, 'filled');
 c = colorbar;
-c.Label.String = [moment_label(1:end-4) 'of annual extreme (Nm)'];
+c.Label.String = [moment_label(1:end-5) 'of annual extreme (MNm)'];
 box off
 set(gca, 'XLim', [0, get(gca, 'XLim') * [0; 1]])
 set(gca, 'YLim', [0, get(gca, 'YLim') * [0; 1]])
@@ -154,15 +155,15 @@ xlabel('1-hour wind speed (m s^{-1})')
 ylabel('Significant wave height (m)')
 
 axs(5) = nexttile([2 1]);
-axs(5) = exceedancePlot(block_maxima, 1, '-k.', axs(5));
+axs(5) = exceedancePlot(block_maxima / 10^6, 1, '-k.', axs(5));
 if DO_10M_WATER
     temp = '50-year extreme, b_{50}';
 else
     temp = '50-year extreme, r_{50}';
 end
-plot(x50_am_emp, 1/50, 'ob','markersize', 10, 'LineWidth',2, 'displayname', temp);
+plot(x50_am_emp / 10^6, 1/50, 'ob','markersize', 10, 'LineWidth',2, 'displayname', temp);
 current_xlims = xlim;
-xlim([min(block_maxima), current_xlims(2)]);
+xlim([min(block_maxima / 10^6), current_xlims(2)]);
 ylim([0.5*10^(-3), 1]);
 xlabel(moment_label);
 ylabel('Annual exceedance probability (-)');
@@ -181,9 +182,9 @@ ax = nexttile();
 hold on
 ms_am = 15;
 scatter(v1hr, hs, 2, [0.5 0.5 0.5])
-scatter(v1hr(block_max_i), hs(block_max_i), ms_am, block_maxima, 'filled');
+scatter(v1hr(block_max_i), hs(block_max_i), ms_am, block_maxima / 10^6, 'filled');
 c = colorbar;
-c.Label.String = [moment_label(1:end-5) ' of annual maxima (Nm)'];
+c.Label.String = [moment_label(1:end-6) ' of annual maxima (MNm)'];
 box off
 set(gca, 'XLim', [0, get(gca, 'XLim') * [0; 1]])
 set(gca, 'YLim', [0, get(gca, 'YLim') * [0; 1]])
@@ -193,10 +194,10 @@ exportgraphics(ax, ['gfx/ResponseTimeSeries' suffix '_axs3.jpg'], 'Resolution', 
 
 figure('Position', [100 100 300 300])
 ax = nexttile();
-ax = exceedancePlot(block_maxima, 1, '-k.', ax);
-plot(x50_am_emp, 1/50, 'ob','markersize', 8, 'LineWidth',2, 'displayname', temp);
+ax = exceedancePlot(block_maxima / 10^6, 1, '-k.', ax);
+plot(x50_am_emp / 10^6, 1/50, 'ob','markersize', 8, 'LineWidth',2, 'displayname', temp);
 current_xlims = xlim;
-xlim([min(block_maxima), current_xlims(2)]);
+xlim([min(block_maxima / 10^6), current_xlims(2)]);
 ylim([0.5*10^(-3), 1]);
 xlabel(moment_label);
 ylabel('Annual exceedance probability (-)');
@@ -315,9 +316,9 @@ for i = 1 : length(response_quantiles)
     end
     set(gca, 'Layer', 'top')    
     if DO_10M_WATER
-        title('10-m moment');
+        title('10 m moment');
     else
-        title('30-m moment');
+        title('30 m moment');
     end
 
     axs(length(response_quantiles) + i) = nexttile(length(response_quantiles) + i);
@@ -352,7 +353,7 @@ for i = 1 : length(response_quantiles)
     if i == length(response_quantiles)
         cb = colorbar;
         cb.Layout.Tile = 'east';
-        cb.Label.String = [moment_label(12:end-5) ' / ' num2str(x50_am_emp, '%.3G') ' Nm'];
+        cb.Label.String = [moment_label(12:end-6) ' / ' num2str(x50_am_emp / 10^6, '%.0f') ' MNm'];
     end
     
     [max_iform, maxi] = max(IFORM_maxsteep.r / x50_am_emp);

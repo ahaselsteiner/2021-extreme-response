@@ -154,19 +154,20 @@ layout = tiledlayout(4,3);
 axs = gobjects(5,1); 
 axs(1) = nexttile([1 3]);
 yyaxis left 
-plot(t(1:n_short), r_short / 10^6);
+plot(days(t(1:n_short)), r_short / 10^6);
 ylabel(moment_label)
 ylim([0 200])
 yyaxis right 
-plot(t(1:n_short), v1hr(1:n_short));
+plot(days(t(1:n_short)), v1hr(1:n_short));
+xlabel('Time (days)');
 ylabel('1-hour wind speed (m s^{-1})')
-xlim([t(1) t(n_short)]);
+xlim([days(t(1)) days(t(n_short))]);
 box off
 
 axs(2) = nexttile([1 3]);
 hold on
-plot(t(1:n), r / 10^6);
-plot(t(block_max_i), r(block_max_i) / 10^6, 'xr');
+plot(years(t(1:n)), r / 10^6);
+plot(years(t(block_max_i)), r(block_max_i) / 10^6, 'xr');
 ylabel(moment_label)
 xlabel('Time (years)');
 ylim([0 500])
