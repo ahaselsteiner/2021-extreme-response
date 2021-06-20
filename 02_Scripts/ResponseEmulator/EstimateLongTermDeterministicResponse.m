@@ -4,22 +4,12 @@ DO_10M_WATER = true;
 suffix = '_artificial1000';
 load('ArtificialTimeSeries5039years.mat');
 n = 365.25 * 24 * 1000;
-%n = length(A.t);
 t = A.t(1:n);
 v1hr = A.V(1:n);
 hs = A.Hs(1:n);
 s = A.S(1:n);
 tz = sqrt((2 .* pi .* hs) ./ (9.81 .* s));
 tp = 1.2796 * tz; % Assuming a JONSWAP spectrum with gamma = 3.3
-
-% suffix = '_coastDat2';
-% D = importDatasetDFromCSV();
-% half_year = 365/2 * 24;
-% t = D.t(half_year : end);
-% v1hr = D.V(half_year : end);
-% hs = D.Hs(half_year : end);
-% tz = D.Tz(half_year : end);
-% tp = 1.2796 * tz; % Assuming a JONSWAP spectrum with gamma = 3.3
 
 if DO_10M_WATER
     R = ResponseEmulator10mWaterDepth;
