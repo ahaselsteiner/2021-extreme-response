@@ -114,7 +114,7 @@ plot(days(t(1:n_short)), r_short / 10^6);
 ylabel(moment_label)
 ylim([0 200])
 yyaxis right 
-plot(days(t(1:n_short)), v1hr(1:n_short) / 10^6);
+plot(days(t(1:n_short)), v1hr(1:n_short));
 xlabel('Time (days)');
 ylabel('1-hour wind speed (m s^{-1})')
 xlim(days([t(1) t(n_short)]));
@@ -156,11 +156,7 @@ ylabel('Significant wave height (m)')
 
 axs(5) = nexttile([2 1]);
 axs(5) = exceedancePlot(block_maxima / 10^6, 1, '-k.', axs(5));
-if DO_10M_WATER
-    temp = '50-year extreme, b_{50}';
-else
-    temp = '50-year extreme, r_{50}';
-end
+temp = '50-year extreme';
 plot(x50_am_emp / 10^6, 1/50, 'ob','markersize', 10, 'LineWidth',2, 'displayname', temp);
 current_xlims = xlim;
 xlim([min(block_maxima / 10^6), current_xlims(2)]);
