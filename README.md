@@ -13,7 +13,7 @@ It contains
 Due to GitHub's file size restriction two datasets are available at a dedicated 
 data repository: openfast's results and time series of environmental conditions.
 The data repository is available at XXX.
-These files must be placed into the two data folders of this repo that the scripts can run sucessfully. They be placed
+These files must be placed into the two data folders of this repo that the scripts can run sucessfully:
 * here: https://github.com/ahaselsteiner/2021-extreme-response/tree/master/02-scripts/EnvironmentalModel/Data and 
 * here: https://github.com/ahaselsteiner/2021-extreme-response/tree/master/02-scripts/ResponseEmulator/Data
 
