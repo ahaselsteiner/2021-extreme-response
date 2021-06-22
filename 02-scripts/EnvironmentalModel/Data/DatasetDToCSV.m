@@ -29,8 +29,6 @@ exportgraphics(fig, 'gfx/WESC_dataset_raw.jpg')
 
 vHsTzStruct2Csv(Dc, 'DForNREL.txt');
 
-
-
 function vHsTzStruct2Csv(Data, fileName)
     time = Data.t;
     for iTime = 1:length(time)
