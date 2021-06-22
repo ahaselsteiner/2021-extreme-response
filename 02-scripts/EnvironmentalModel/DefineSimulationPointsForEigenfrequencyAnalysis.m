@@ -35,8 +35,6 @@ for i = 1 : length(intervalWidthHs)
     idx = (Hs > intervalLowerHs(i)) & (Hs < intervalUpperHs(i));
     HsInBin{i} = Hs(idx);
     TzInBin{i} = Tz(idx);
-    %scatter(TzInBin{i}, HsInBin{i}, 'ok', 'MarkerFaceColor', [0.5 0.5 0.5], ...
-    %'MarkerFaceAlpha', 0.5, 'MarkerEdgeAlpha', 0.5)
 end
 scatter([2:1:9], zeros(8,1) + 1,  'xr', 'linewidth', 2);
 scatter([5:1:11], zeros(7,1) + 5,  'xr', 'linewidth', 2);
