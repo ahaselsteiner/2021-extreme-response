@@ -2,7 +2,7 @@
 *.zip
 artificial_time_series_*
 ArtificialTimeSeries*
-overturning-moment-?.txt
+overturning-moment-windspeed*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

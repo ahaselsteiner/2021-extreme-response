@@ -30,14 +30,14 @@ t.Tp = cellfun(@(x)sprintf('%.2f',x), num2cell(t.Tp), 'UniformOutput', false);
 t.R = cellfun(@(x)sprintf('%10.3E;',x), num2cell(t.R, 2), 'uni', 0);
 t.R = cellfun(@(x)['[' x ']'], t.R, 'UniformOutput', false);
 
-rows_per_file = 100;
-for i = 0 : floor(nrows / rows_per_file)
+rows_per_file = 36;
+for i = 0 : floor((nrows + 1) / rows_per_file)
     rowStart = i * rows_per_file + 1;
     rowEnd = i * rows_per_file + rows_per_file;
     if rowEnd > nrows
         rowEnd = nrows;
     end
-    writetable(t(rowStart:rowEnd, :), ['data/overturning-moment-' num2str(i + 1) '.txt'])
+    writetable(t(rowStart:rowEnd, :), ['data/overturning-moment-windspeed' num2str(v(i + 1)) '.txt'])
 end
  
  
