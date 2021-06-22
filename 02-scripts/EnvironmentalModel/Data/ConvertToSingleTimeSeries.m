@@ -47,4 +47,4 @@ plot(A.t, A.S);
 ylabel('Steepness (-)');
 xlabel(layout, 'Time');
 
-artificialSerimesToCsv(A, ['artificial_time_series_' num2str(year(A.t(end))) 'years.txt']);
+artificialSeriesToCsv(A, ['artificial_time_series_' num2str(year(A.t(end))) 'years.txt']);

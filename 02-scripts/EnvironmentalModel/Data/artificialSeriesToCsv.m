@@ -1,4 +1,4 @@
-function artificialSerimesToCsv(Data, fileName)
+function artificialSeriesToCsv(Data, fileName)
     time = Data.t;
     %%Write CSV file
     fullPath = ['' fileName];
