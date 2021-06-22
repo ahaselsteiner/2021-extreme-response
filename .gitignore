@@ -1,4 +1,6 @@
 *.mat
+!*ount.mat # Is only 40kb
+
 *.zip
 artificial_time_series_*
 ArtificialTimeSeries*
