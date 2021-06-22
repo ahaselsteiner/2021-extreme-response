@@ -3,7 +3,6 @@ V = D.V; % 1-hour mean value at hub height (90 m)
 Hs = D.Hs;
 Tz = D.Tz;
 
-
 fig1 = figure('Position', [100 100 800 400]);
 subplot(1, 2, 1)
 scatter(V, Hs, 'ok', 'MarkerFaceColor', [0.5 0.5 0.5], ...
@@ -43,6 +42,3 @@ xlim([0 14]);
 ylim([0 12]);
 xlabel('Zero-up-crossing period (s)');
 ylabel('Significant wave height (m)');
-
-
-
