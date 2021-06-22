@@ -11,7 +11,7 @@ It contains
  * figures (folders "02-scripts" and "04-handmade-figures"). 
 
 Due to GitHub's file size restriction two datasets are available at a dedicated 
-data repository: openfast's results and time series of environmental conditions.
+data repository: time series of environmental conditions and openFAST simulation results.
 The data repository is available at https://doi.org/10.5281/zenodo.5013306.
 
 These files must be placed into the two data folders of this repo that the scripts can run sucessfully:
