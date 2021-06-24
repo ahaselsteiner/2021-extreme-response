@@ -1,6 +1,8 @@
 classdef ResponseEmulator10mWaterDepth
-    %RESPONSEEMULATOR Emulates the overturning moment of a wind turbine
-    %   Detailed explanation goes here
+    %RESPONSEEMULATOR Emulates the 10 m bending moment of a wind turbine
+    %   The distribution describes 1-min maxima. 1-hour maxima are also
+    %   available as 1-min maxima were converted. This is the bending 
+    %   moment at 10 m water depth.
     
     properties
         % Prameters of a GEV that describes 1-minute maxima of the over

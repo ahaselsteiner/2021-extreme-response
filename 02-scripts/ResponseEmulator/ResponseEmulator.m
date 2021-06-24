@@ -1,6 +1,8 @@
 classdef ResponseEmulator
     %RESPONSEEMULATOR Emulates the overturning moment of a wind turbine
-    %   Detailed explanation goes here
+    %   The distribution describes 1-min maxima. 1-hour maxima are also
+    %   available as 1-min maxima were converted. This is the mudline 
+    %   overturning moment at 30 m water depth.
     
     properties
         % Prameters of a GEV that describes 1-minute maxima of the over
