@@ -1,7 +1,13 @@
-*.mat
 *.zip
 artificial_time_series_*
 ArtificialTimeSeries*
+overturning-moment-windspeed*
+
+# Ignore all .mat files, but "count.mat"
+01-simulations/**/*.mat
+02-scripts/ResponseEmulator/**/*.mat
+02-scripts/EnvironmentalModel/Data/STORMS_RANDOM.mat
+02-scripts/EnvironmentalModel/Data/datasets-complete-DEF-3-variables.mat
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
