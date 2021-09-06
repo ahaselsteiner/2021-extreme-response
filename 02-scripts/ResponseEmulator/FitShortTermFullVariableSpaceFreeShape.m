@@ -579,13 +579,14 @@ exportgraphics(gcf, 'gfx/EmulatorFitKFree_response_all_panels.jpg')
 exportgraphics(gcf, 'gfx/EmulatorFitKFree_response_all_panels.pdf') 
 
 % Plot response comparision as scatter
-fig = figure('position', [100, 100, 1400, 700]);
+fig = figure('position', [100, 100, 1000, 500]);
 tOut = tiledlayout(fig,2,1, 'TileSpacing','compact','Padding','compact');
 hAx = nexttile(tOut, 1); hAx.Visible = 'off';
 hP = uipanel(fig, 'Position', hAx.OuterPosition, 'BorderWidth', 0);
 tupper = tiledlayout(hP, 1, 5, 'TileSpacing','compact','Padding','compact');
 robserved_all = [];
 ms = 5;
+fs = 8;
 axs = gobjects(2, 5);
 for tpid = 1 : 4
     robserved  = squeeze(max(Ovr(:, :, tpid, :), [], 4))';
@@ -602,8 +603,8 @@ axs(1, 1) = nexttile(tupper, 1);
 scatter(robserved_all / 10^6, rGlobalGEV(:) / 10^6, ms, 'ok');
 hold on
 plot([0, max(rGlobalGEV(:)) / 10^6], [0, max(rGlobalGEV(:)) / 10^6], '--r');
-xlabel(tupper, '1-hour maximum in multiphysics simulation (MNm)');
-ylabel(tupper, 'Emulator median 1-hour max (MNm)');
+xlabel(tupper, '1-hour maximum in multiphysics simulation (MNm)', 'fontsize', fs);
+ylabel(tupper, 'Emulator median 1-hour max (MNm)', 'fontsize', fs);
 title('All simulated conditions');
 linkaxes(axs, 'xy');
 exportgraphics(tupper, 'gfx/CompareResponseScatter_Realization.jpg') 
@@ -625,8 +626,8 @@ axs(2, 1) = nexttile(tlower, 1);
 scatter(rLocalGEV(:) / 10^6, rGlobalGEV(:) / 10^6, ms, 'ok');
 hold on
 plot([0, max(rGlobalGEV(:)) / 10^6], [0, max(rGlobalGEV(:)) / 10^6], '--r'); 
-xlabel(tlower, 'Local GEV median 1-hour maximum (MNm)');
-ylabel(tlower, 'Emulator median 1-hour max (MNm)');
+xlabel(tlower, 'Local GEV median 1-hour maximum (MNm)', 'fontsize', fs);
+ylabel(tlower, 'Emulator median 1-hour max (MNm)', 'fontsize', fs);
 title('All simulated conditions');
 linkaxes(axs, 'xy');
 
