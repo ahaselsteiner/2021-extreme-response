@@ -6,10 +6,6 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 import csv, math
 
-from viroconcom.fitting import Fit
-from viroconcom.plot import plot_marginal_fit, plot_dependence_functions
-from viroconcom.contours import HighestDensityContour, sort_points_to_form_continous_line
-
 
 dpi_for_printing_figures = 300
 
@@ -72,6 +68,7 @@ for path, suffix in zip(paths, suffixes):
     axs[1].text(18.9, 11.1, '1/50', fontsize=8, horizontalalignment='center', 
         c='k')
     axs[1].set_xlabel(tp_label)
+    axs[1].set_ylabel(hs_label)
     axs[1].spines['right'].set_visible(False)
     axs[1].spines['top'].set_visible(False)
     h0.set_clim(1/60, 1/17)
@@ -126,6 +123,7 @@ for i in range(2):
     plt.text(tp_splus[-1], hs_s[-1] + 0.6, r'$t_{p' + tpid + r'}$', horizontalalignment='center')
 
 axs[1].set_xlabel(tp_label)
+axs[1].set_ylabel(hs_label)
 axs[1].spines['right'].set_visible(False)
 axs[1].spines['top'].set_visible(False)
 fig_sim_points.savefig('gfx/SimulationPoints.pdf', bbox_inches='tight')
