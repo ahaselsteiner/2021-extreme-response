@@ -2,7 +2,7 @@
 
 This GitHub repository belongs to the publication "Long-term extreme response of an 
 offshore turbine: How accurate are contour-based estimates?" by Haselsteiner, Mackay, 
-Frieling, Sander and Thoben.
+Frieling, Sander and Thoben. https://doi.org/10.1016/j.renene.2021.09.077
 
 It contains 
  * openFast input files (folder "01-simulations"), 
